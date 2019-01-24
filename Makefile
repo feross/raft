@@ -1,17 +1,52 @@
+# CC = clang++
+
+# # compiler flags:
+# #  -Wall       turns on most, but not all, compiler warnings
+# #  -std=c++17  use C++17 dialect
+# CFLAGS = -Wall -std=c++17
+
+# INCLUDES = -I./
+
+# # the build target executable:
+# TARGET = raft
+
+# all: $(TARGET)
+
+# $(TARGET): $(TARGET).cpp
+# 	$(CC) $(CFLAGS) $(INCLUDES) -o $(TARGET) $(TARGET).cpp
+
+# clean:
+# 	$(RM) $(TARGET)
+
+
 # use the C++ compiler
 CC = clang++
 
+# Program name
+TARGET ?= raft
+
+# Source code folder
+SRC_DIRS ?= ./src
+
+SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+OBJS := $(addsuffix .o,$(basename $(SRCS)))
+DEPS := $(OBJS:.o=.d)
+
+INC_DIRS := $(shell find $(SRC_DIRS) -type d)
+INC_FLAGS := $(addprefix -I,$(INC_DIRS))
+
 # compiler flags:
-#  -Wall turns on most, but not all, compiler warnings
-CFLAGS  = -Wall
+#   -MMD        lists user header files used by the source program
+#   -MP         emits dummy dependency rules (use with -MMD)
+#   -Wall       turns on most, but not all, compiler warnings
+#   -std=c++17  use C++17 dialect
+CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -Wall -std=c++17
 
-# the build target executable:
-TARGET = raft
+$(TARGET): $(OBJS)
+	$(CC) $(LDFLAGS) $(OBJS) -o $@ $(LOADLIBES) $(LDLIBS)
 
-all: $(TARGET)
-
-$(TARGET): $(TARGET).cpp
-	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).cpp
-
+.PHONY: clean
 clean:
-	$(RM) $(TARGET)
+	$(RM) $(TARGET) $(OBJS) $(DEPS)
+
+-include $(DEPS)
