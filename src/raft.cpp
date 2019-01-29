@@ -1,7 +1,10 @@
 #include <exception>
 #include <iostream>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include "arguments.h"
+#include "peer.h"
 
 using namespace std;
 
@@ -25,7 +28,7 @@ localhost:4000 or e.g. 12.34.56.67:4000.
 int main(int argc, char* argv[]) {
     Arguments args(INTRO_TEXT);
     args.register_bool("help", "Print help message");
-    args.register_int("port", "Set listening port");
+    args.register_int("port", "Listening port");
     args.register_bool("clear", "Clear stored state");
 
     try {
@@ -50,7 +53,28 @@ int main(int argc, char* argv[]) {
         cerr << "Missing required --port argument" << endl;
         return EXIT_FAILURE;
     }
-    cout << "Using port " << port << endl;
+    vector<string> unnamed_args = args.get_unnamed();
+    if (unnamed_args.size() == 0) {
+        cerr << "Specify at least peer to connect to" << endl;
+        return EXIT_FAILURE;
+    }
+    int connect_port = stoi(unnamed_args[0]);
+
+    cout << "Listening on " << port << endl;
+    cout << "Connecting to " << connect_port << endl;
+
+    // TODO: hack for now, b/c we're on localhost & no other way to distinguish connections
+    assert(port != connect_port);
+
+    const char* dest_addr = "127.0.0.1";
+    Peer* associate = new Peer(port, dest_addr, connect_port);
+
+    const char* msg = "wow !    ";
+    while (true) {
+        associate->SendMessage(msg);
+        sleep(1);
+    }
+    delete(associate);
 
     return EXIT_SUCCESS;
 }
