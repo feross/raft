@@ -1,6 +1,7 @@
 #ifndef _arguments_
 #define _arguments_
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -149,5 +150,15 @@ class Arguments {
          */
         string get_help_text();
 
+    private:
+        map<string, string> descriptions;
+
+        map<string, bool> bool_args;
+        map<string, int> int_args;
+        map<string, string> string_args;
+        vector<string> unnamed_args;
+
+        string intro;
+};
 
 #endif
