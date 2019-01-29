@@ -5,8 +5,6 @@
 
 using namespace std;
 
-static int ERROR_INVALID_ARGUMENT = 1;
-
 static string INTRO_TEXT =
 R"(Raft - An understandable consensus algorithm
 
@@ -34,26 +32,26 @@ int main(int argc, char* argv[]) {
         args.parse(argc, argv);
     } catch (exception& err) {
         cerr << "Error: " << err.what() << endl;
-        return ERROR_INVALID_ARGUMENT;
+        return EXIT_FAILURE;
     }
 
     if (args.get_bool("help")) {
         cout << args.get_help_text() << endl;
-        return 0;
+        return EXIT_SUCCESS;
     }
 
     if (args.get_bool("clear")) {
         cout << "TODO: Clear stored state!" << endl;
-        return 0;
+        return EXIT_SUCCESS;
     }
 
     int port = args.get_int("port");
     if (port == 0) {
         cerr << "Missing required --port argument" << endl;
-        return ERROR_INVALID_ARGUMENT;
+        return EXIT_FAILURE;
     }
     cout << "Using port " << port << endl;
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
