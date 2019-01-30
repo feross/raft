@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
 
     // Create a peer
     const char* dest_addr = "127.0.0.1";
-    Peer* associate = new Peer(port, dest_addr, connect_port);
+    Peer* associate = new Peer(port, dest_addr, connect_port, [](char* message) -> void {});
 
     const char* msg = "wow !    ";
     while (true) {
