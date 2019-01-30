@@ -1,7 +1,5 @@
 #include "storage.h"
 
-using namespace std;
-
 Storage::Storage(string storage_path) : storage_path(storage_path) {
     fstream input(storage_path, ios::in | ios::binary);
     if (!storage_message.ParseFromIstream(&input)) {
