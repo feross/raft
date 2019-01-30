@@ -9,6 +9,8 @@
 
 using namespace std;
 
+static string STORAGE_PATH = "storage.dat";
+
 static string INTRO_TEXT =
 R"(Raft - An understandable consensus algorithm
 
@@ -48,8 +50,10 @@ int main(int argc, char* argv[]) {
         return EXIT_SUCCESS;
     }
 
-        cout << "TODO: Clear stored state!" << endl;
+    Storage storage(STORAGE_PATH);
+
     if (args.get_bool("reset")) {
+        storage.Reset();
         return EXIT_SUCCESS;
     }
 
@@ -71,8 +75,6 @@ int main(int argc, char* argv[]) {
     // TODO: hack for now, b/c we're on localhost & no other way to distinguish connections
     assert(port != connect_port);
 
-    Storage storage;
-
     // Create a peer
     const char* dest_addr = "127.0.0.1";
     Peer* associate = new Peer(port, dest_addr, connect_port);
@@ -88,4 +90,3 @@ int main(int argc, char* argv[]) {
 
     return EXIT_SUCCESS;
 }
-

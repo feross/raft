@@ -1,5 +1,7 @@
 # Built files
 raft
+
+# Protocol Buffers generated files
 *.pb.cc
 *.pb.h
 

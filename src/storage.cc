@@ -61,7 +61,7 @@ void Storage::add_log(const string& value) {
 void Storage::Init() {
     storage_message.set_current_term(0);
     storage_message.set_voted_for(0);
-    storage.message.clear_log();
+    storage_message.clear_log();
 }
 
 void Storage::Save() {
