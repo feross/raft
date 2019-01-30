@@ -6,6 +6,7 @@
 #include "arguments.h"
 #include "peer.h"
 #include "storage.h"
+#include "timer.h"
 
 using namespace std;
 
@@ -51,6 +52,9 @@ int main(int argc, char* argv[]) {
     }
 
     Storage storage(STORAGE_PATH);
+    Timer timer(5'000, 10'000, []() {
+        cout << "Timer fired!" << endl;
+    });
 
     if (args.get_bool("reset")) {
         storage.Reset();

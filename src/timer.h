@@ -1,6 +1,13 @@
 #ifndef _RAFT_TIMER_H_
 #define _RAFT_TIMER_H_
 
+#include <chrono>
+#include <cstdlib>
+#include <iostream>
+#include <thread>
+
+using namespace std;
+
 class Timer {
     public:
         /**
@@ -27,6 +34,12 @@ class Timer {
          * (between min_duration and max_duration).
          */
         void Reset();
+    private:
+        int min_duration; // In milliseconds
+        int max_duration; // In milliseconds
+        int remaining_time; // In milliseconds
+        thread timer_thread;
+        bool destroyed = false;
 };
 
 #endif
