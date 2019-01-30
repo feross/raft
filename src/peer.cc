@@ -25,7 +25,7 @@
 #include "peer.h"
 
 #define RECEIVE_BUFFER_SIZE 100000
-#define DEBUG true
+#define DEBUG false
 
 
 Peer::Peer(unsigned short listening_port, const char* destination_ip_address, unsigned short destination_port, void callback(char* message, int message_len)) {
@@ -124,7 +124,7 @@ void Peer::SendMessage(const char* message, int message_len) {
         if (DEBUG) printf("send_socket x: %d\n", send_socket);
 
         char* formatted_message = stream_parser->CreateMessageToSend(message, message_len);
-        int success = send(send_socket, formatted_message, strlen(message)+sizeof(int), 0);
+        int success = send(send_socket, formatted_message, message_len+sizeof(int), 0);
         if (success == -1) fprintf(stderr, "error send: %s (%d)\n", strerror(errno), errno);
         delete(formatted_message);
     }

@@ -30,7 +30,7 @@ class Peer {
     // May go back and change implementation in future, which shouldn't require modifications to the interface
 
     int my_port;
-    int dest_port;
+    int dest_port; 
     const char* dest_ip_addr;
     std::thread in_listener;
     std::thread out_listener;

@@ -23,7 +23,7 @@
 
 #include "stream_parser.h"
 
-#define DEBUG true
+#define DEBUG false
 
 StreamParser::StreamParser(void callback(char* message, int message_len)) {
     partial_number_bytes = 0;
@@ -67,6 +67,7 @@ void StreamParser::HandleRecievedChunk(char* buffer, int valid_bytes) {
             if(current_message_length == target_message_length) {
                 if (DEBUG) printf("\nfound full message! : %s, buffer: %s\n\n", message_under_construction, buffer);
                 message_received_callback(message_under_construction, target_message_length);
+                message_under_construction = NULL; // we are no longer owner of this data, client's job to manage (e.g. like strdup)
                 // printf("complete message received: %s", message_under_construction); //TODO: should use callback
                 ResetIncomingMessage();
             }
@@ -87,6 +88,6 @@ char* StreamParser::CreateMessageToSend(const char* raw_message, int message_len
     char* send_buffer = new char[message_len + sizeof(int)];
     *(int*)send_buffer = message_len;
     memcpy(send_buffer + sizeof(int), raw_message, message_len);
-    printf("raw: %s, created: %s\n", raw_message, send_buffer);
+    if (DEBUG) printf("raw: %s, created: %s\n", raw_message, send_buffer);
     return send_buffer;   // Should really return a struct, or similar.  Because that would allow stack usage & be more explicit
 }
