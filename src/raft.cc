@@ -32,12 +32,12 @@ int main(int argc, char* argv[]) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     Arguments args(INTRO_TEXT);
-    args.register_bool("help", "Print help message");
-    args.register_int("port", "Listening port");
-    args.register_bool("clear", "Clear stored state");
+    args.RegisterBool("help", "Print help message");
+    args.RegisterInt("port", "Listening port");
+    args.RegisterBool("clear", "Clear stored state");
 
     try {
-        args.parse(argc, argv);
+        args.Parse(argc, argv);
     } catch (exception& err) {
         cerr << "Error: " << err.what() << endl;
         return EXIT_FAILURE;

@@ -2,22 +2,22 @@
 
 using namespace std;
 
-void Arguments::register_bool(string name, string description) {
+void Arguments::RegisterBool(string name, string description) {
     bool_args[name] = false;
     descriptions[name] = description;
 }
 
-void Arguments::register_int(string name, string description) {
+void Arguments::RegisterInt(string name, string description) {
     int_args[name] = 0;
     descriptions[name] = description;
 }
 
-void Arguments::register_string(string name, string description) {
+void Arguments::RegisterString(string name, string description) {
     string_args[name] = "";
     descriptions[name] = description;
 }
 
-void Arguments::parse(int argc, char* argv[]) {
+void Arguments::Parse(int argc, char* argv[]) {
     vector<string> arguments(argv + 1, argv + argc);
     for (int i = 0; i < arguments.size(); i++) {
         string arg = arguments[i];

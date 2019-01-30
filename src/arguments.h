@@ -61,11 +61,11 @@ class Arguments {
          * @param name        The full name (e.g. --mybool) of the argument
          * @param description Friendly description of the argument's purpose
          */
-        void register_bool(string name, string description);
+        void RegisterBool(string name, string description);
 
         /**
          * Register a named integer command line argument with the given name
-         * and description. Defaults to 0.
+         * and description. Dsefaults to 0.
          *
          * Integer argument flags must be followed immediately by a space and
          * number (e.g. "--myint 42").
@@ -73,7 +73,7 @@ class Arguments {
          * @param name        The full name (e.g. --myint) of the argument
          * @param description Friendly description of the argument's purpose
          */
-        void register_int(string name, string description);
+        void RegisterInt(string name, string description);
 
         /**
          * Register a named string command line argument with the given name
@@ -85,7 +85,7 @@ class Arguments {
          * @param name        The full name (e.g. --mystring) of the argument
          * @param description Friendly description of the argument's purpose
          */
-        void register_string(string name, string description);
+        void RegisterString(string name, string description);
 
         /**
          * Parse the user-provided command line argument string, usually
@@ -101,7 +101,7 @@ class Arguments {
          * @param argc Number of command line arguments
          * @param argv Array of command line argument strings
          */
-        void parse(int argc, char* argv[]);
+        void Parse(int argc, char* argv[]);
 
         /**
          * Return the value of the boolean argument with the given name.
