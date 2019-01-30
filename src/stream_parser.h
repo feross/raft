@@ -6,19 +6,16 @@
 #include <atomic>
 #include <functional>
 
-
 #pragma once
-
 
 class StreamParser {
   public:
-    StreamParser(void callback(char* message, int message_len));
+    StreamParser(std::function<void(char*, int)> callback);
     void HandleRecievedChunk(char* buffer, int valid_bytes); //accumulates from stream & parses into individual messages
 
     //Heap allocates a wrapped set of bytes to send to other machines
     char* CreateMessageToSend(const char* raw_message, int message_len); //prepends with an integer to indicate length
     void ResetIncomingMessage();
-
 
   private:
     std::function<void(char*, int)> message_received_callback;
@@ -29,5 +26,4 @@ class StreamParser {
 
     int partial_number_bytes;
     char incomplete_number_buffer[sizeof(int)];
-
 };
