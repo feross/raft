@@ -14,7 +14,9 @@ class StreamParser {
   public:
     StreamParser(void callback(char* message, int message_len));
     void HandleRecievedChunk(char* buffer, int valid_bytes); //accumulates from stream & parses into individual messages
-    char* CreateMessageToSend(const char* raw_message, int message_len); //prepends with an integer to indicate length and sends
+
+    //Heap allocates a wrapped set of bytes to send to other machines
+    char* CreateMessageToSend(const char* raw_message, int message_len); //prepends with an integer to indicate length
     void ResetIncomingMessage();
 
 
@@ -24,4 +26,8 @@ class StreamParser {
     int target_message_length;
     // char incomplete_number[4] - case to handle where the integer delimiting message lengths was split... ignore for now
     char* message_under_construction; //heap allocated buffer to fill into message to return to client
+
+    int partial_number_bytes;
+    char incomplete_number_buffer[sizeof(int)];
+
 };

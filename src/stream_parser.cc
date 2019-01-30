@@ -26,6 +26,7 @@
 #define DEBUG true
 
 StreamParser::StreamParser(void callback(char* message, int message_len)) {
+    partial_number_bytes = 0;
     current_message_length = 0;
     target_message_length = -1;
     message_under_construction = NULL;
@@ -33,38 +34,49 @@ StreamParser::StreamParser(void callback(char* message, int message_len)) {
 }
 
 void StreamParser::HandleRecievedChunk(char* buffer, int valid_bytes) {
-    if (DEBUG) printf("\n the raw buffer: %s\n\n", buffer + 4);
+    if (DEBUG) printf("\n the buffer, assuming leading int: %s\n\n", buffer + sizeof(int));
     while(valid_bytes > 0) {
         if (target_message_length == -1) {
-            assert(valid_bytes >= sizeof(int));
-            target_message_length = *(int*)buffer; // TODO: assumes that buffer contains the full integer, should really handle the split case though
-            current_message_length = 0;
+            int bytes_needed = sizeof(int) - partial_number_bytes;
+            if(valid_bytes < bytes_needed) {
+                memcpy(incomplete_number_buffer + partial_number_bytes, buffer, valid_bytes);
+                partial_number_bytes += valid_bytes;
+                valid_bytes -= valid_bytes; //0, but to follow pattern
+                break;
+            } else {
+                memcpy(incomplete_number_buffer + partial_number_bytes, buffer, bytes_needed);
+                partial_number_bytes += bytes_needed; //completed
+                valid_bytes -= bytes_needed;
 
-            buffer = buffer + sizeof(int);
-            valid_bytes -= sizeof(int);
-            message_under_construction = new char[target_message_length + 1];
-            message_under_construction[target_message_length] = '\0'; //null-terminate b/c it's low-cost to do so
-        }
+                target_message_length = *(int*)incomplete_number_buffer; // TODO: assumes that buffer contains the full integer, should really handle the split case though
+                current_message_length = 0;
 
-        int bytes_to_copy = target_message_length;
-        if (valid_bytes < target_message_length) bytes_to_copy = valid_bytes;
-        memcpy(message_under_construction + current_message_length, buffer, bytes_to_copy);
-        buffer = buffer + bytes_to_copy;
-        current_message_length += bytes_to_copy;
-        if (DEBUG) printf("current message len: %d, target: %d, valid: %d, to_copy: %d\n", current_message_length, target_message_length, valid_bytes, bytes_to_copy);
-        valid_bytes -= bytes_to_copy;
+                buffer = buffer + bytes_needed;
+                message_under_construction = new char[target_message_length + 1];
+                message_under_construction[target_message_length] = '\0'; //null-terminate b/c it's low-cost to do so
+            }
+        } else {
+            int bytes_to_copy = target_message_length;
+            if (valid_bytes < target_message_length) bytes_to_copy = valid_bytes;
+            memcpy(message_under_construction + current_message_length, buffer, bytes_to_copy);
+            buffer = buffer + bytes_to_copy;
+            current_message_length += bytes_to_copy;
+            if (DEBUG) printf("current message len: %d, target: %d, valid: %d, to_copy: %d\n", current_message_length, target_message_length, valid_bytes, bytes_to_copy);
+            valid_bytes -= bytes_to_copy;
 
-        if(current_message_length == target_message_length) {
-            if (DEBUG) printf("\nfound full message! : %s, buffer: %s\n\n", message_under_construction, buffer);
-            message_received_callback(message_under_construction, target_message_length);
-            // printf("complete message received: %s", message_under_construction); //TODO: should use callback
-            ResetIncomingMessage();
+            if(current_message_length == target_message_length) {
+                if (DEBUG) printf("\nfound full message! : %s, buffer: %s\n\n", message_under_construction, buffer);
+                message_received_callback(message_under_construction, target_message_length);
+                // printf("complete message received: %s", message_under_construction); //TODO: should use callback
+                ResetIncomingMessage();
+            }
         }
     }
 }
 
 //side-effect: deletes existing accumulation
 void StreamParser::ResetIncomingMessage() {
+    partial_number_bytes = 0;
     current_message_length = 0;
     target_message_length = -1;
     if (message_under_construction != NULL) delete(message_under_construction);
