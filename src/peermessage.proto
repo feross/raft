@@ -6,8 +6,8 @@ message PeerMessage {
     enum MessageType {
         APPENDENTRIES_REQUEST = 0;
         APPENDENTRIES_RESPONSE = 1;
-        REQUEST_VOTE_REQUEST = 2;
-        REQUEST_VOTE_RESPONSE = 3;
+        REQUESTVOTE_REQUEST = 2;
+        REQUESTVOTE_RESPONSE = 3;
     }
 
     required MessageType type = 1;

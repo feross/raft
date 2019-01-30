@@ -61,12 +61,12 @@ namespace proto {
 enum PeerMessage_MessageType {
   PeerMessage_MessageType_APPENDENTRIES_REQUEST = 0,
   PeerMessage_MessageType_APPENDENTRIES_RESPONSE = 1,
-  PeerMessage_MessageType_REQUEST_VOTE_REQUEST = 2,
-  PeerMessage_MessageType_REQUEST_VOTE_RESPONSE = 3
+  PeerMessage_MessageType_REQUESTVOTE_REQUEST = 2,
+  PeerMessage_MessageType_REQUESTVOTE_RESPONSE = 3
 };
 bool PeerMessage_MessageType_IsValid(int value);
 const PeerMessage_MessageType PeerMessage_MessageType_MessageType_MIN = PeerMessage_MessageType_APPENDENTRIES_REQUEST;
-const PeerMessage_MessageType PeerMessage_MessageType_MessageType_MAX = PeerMessage_MessageType_REQUEST_VOTE_RESPONSE;
+const PeerMessage_MessageType PeerMessage_MessageType_MessageType_MAX = PeerMessage_MessageType_REQUESTVOTE_RESPONSE;
 const int PeerMessage_MessageType_MessageType_ARRAYSIZE = PeerMessage_MessageType_MessageType_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* PeerMessage_MessageType_descriptor();
@@ -178,10 +178,10 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
     PeerMessage_MessageType_APPENDENTRIES_REQUEST;
   static const MessageType APPENDENTRIES_RESPONSE =
     PeerMessage_MessageType_APPENDENTRIES_RESPONSE;
-  static const MessageType REQUEST_VOTE_REQUEST =
-    PeerMessage_MessageType_REQUEST_VOTE_REQUEST;
-  static const MessageType REQUEST_VOTE_RESPONSE =
-    PeerMessage_MessageType_REQUEST_VOTE_RESPONSE;
+  static const MessageType REQUESTVOTE_REQUEST =
+    PeerMessage_MessageType_REQUESTVOTE_REQUEST;
+  static const MessageType REQUESTVOTE_RESPONSE =
+    PeerMessage_MessageType_REQUESTVOTE_RESPONSE;
   static inline bool MessageType_IsValid(int value) {
     return PeerMessage_MessageType_IsValid(value);
   }

@@ -94,17 +94,16 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\021peermessage.proto\022\005proto\"\375\001\n\013PeerMessa"
+      "\n\021peermessage.proto\022\005proto\"\373\001\n\013PeerMessa"
       "ge\022,\n\004type\030\001 \002(\0162\036.proto.PeerMessage.Mes"
       "sageType\022\014\n\004term\030\002 \002(\005\022\021\n\tsender_id\030\003 \002("
       "\t\022\017\n\007success\030\004 \001(\010\022\023\n\013voteGranted\030\005 \001(\010\""
-      "y\n\013MessageType\022\031\n\025APPENDENTRIES_REQUEST\020"
-      "\000\022\032\n\026APPENDENTRIES_RESPONSE\020\001\022\030\n\024REQUEST"
-      "_VOTE_REQUEST\020\002\022\031\n\025REQUEST_VOTE_RESPONSE"
-      "\020\003"
+      "w\n\013MessageType\022\031\n\025APPENDENTRIES_REQUEST\020"
+      "\000\022\032\n\026APPENDENTRIES_RESPONSE\020\001\022\027\n\023REQUEST"
+      "VOTE_REQUEST\020\002\022\030\n\024REQUESTVOTE_RESPONSE\020\003"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 282);
+      descriptor, 280);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "peermessage.proto", &protobuf_RegisterTypes);
 }
@@ -140,8 +139,8 @@ bool PeerMessage_MessageType_IsValid(int value) {
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const PeerMessage_MessageType PeerMessage::APPENDENTRIES_REQUEST;
 const PeerMessage_MessageType PeerMessage::APPENDENTRIES_RESPONSE;
-const PeerMessage_MessageType PeerMessage::REQUEST_VOTE_REQUEST;
-const PeerMessage_MessageType PeerMessage::REQUEST_VOTE_RESPONSE;
+const PeerMessage_MessageType PeerMessage::REQUESTVOTE_REQUEST;
+const PeerMessage_MessageType PeerMessage::REQUESTVOTE_RESPONSE;
 const PeerMessage_MessageType PeerMessage::MessageType_MIN;
 const PeerMessage_MessageType PeerMessage::MessageType_MAX;
 const int PeerMessage::MessageType_ARRAYSIZE;
