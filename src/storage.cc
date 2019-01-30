@@ -15,7 +15,7 @@ void Storage::Reset() {
     }
 }
 
-int Storage::get_current_term() const {
+int Storage::current_term() const {
     return storage_message.current_term();
 }
 
@@ -24,7 +24,7 @@ void Storage::set_current_term(int value) {
     Save();
 }
 
-int Storage::get_voted_for() const {
+int Storage::voted_for() const {
     return storage_message.voted_for();
 }
 
@@ -33,12 +33,12 @@ void Storage::set_voted_for(int value) {
     Save();
 }
 
-vector<string> Storage::get_log () const {
+vector<string> Storage::log () const {
     google::protobuf::RepeatedPtrField repeatedPtr = storage_message.log();
     return vector<string>(repeatedPtr.begin(), repeatedPtr.end());
 }
 
-const string& Storage::get_log (int index) const {
+const string& Storage::log (int index) const {
     return storage_message.log(index);
 }
 
