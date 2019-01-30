@@ -24,7 +24,6 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -Wall -std=c++17
 LDLIBS ?= $(shell pkg-config --cflags --libs protobuf)
 
 $(TARGET): proto $(OBJS)
-	pkg-config --cflags protobuf  # fails if protobuf is not installed
 	$(CC) $(LDFLAGS) $(OBJS) -o $@ $(LOADLIBES) $(LDLIBS)
 
 PROTOS := $(shell find $(SRC_DIR) -name *.proto)
