@@ -1,6 +1,7 @@
 #ifndef _arguments_
 #define _arguments_
 
+#include <exception>
 #include <map>
 #include <string>
 #include <vector>

@@ -1,5 +1,3 @@
-#include <exception>
-
 #include "arguments.h"
 
 using namespace std;

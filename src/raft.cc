@@ -71,7 +71,6 @@ int main(int argc, char* argv[]) {
     // TODO: hack for now, b/c we're on localhost & no other way to distinguish connections
     assert(port != connect_port);
 
-    // Create storage
     Storage storage;
 
     // Create a peer
