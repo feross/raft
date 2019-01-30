@@ -1,7 +1,5 @@
 #include "arguments.h"
 
-using namespace std;
-
 void Arguments::RegisterBool(string name, string description) {
     bool_args[name] = false;
     descriptions[name] = description;
