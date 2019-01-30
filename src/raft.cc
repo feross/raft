@@ -77,11 +77,11 @@ int main(int argc, char* argv[]) {
 
     // Create a peer
     const char* dest_addr = "127.0.0.1";
-    Peer* associate = new Peer(port, dest_addr, connect_port, [](char* message) -> void {});
+    Peer* associate = new Peer(port, dest_addr, connect_port, [](char* message, int message_len) -> void {printf("full message received: %s\n", message);});
 
     const char* msg = "wow !    ";
     while (true) {
-        associate->SendMessage(msg);
+        associate->SendMessage(msg, strlen(msg));
         sleep(1);
     }
     delete(associate);

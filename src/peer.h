@@ -5,11 +5,12 @@
 #include <vector>
 #include <atomic>
 #include <functional>
+#include "stream_parser.h"
 
 class Peer {
   public:
-    Peer(unsigned short listening_port, const char* destination_ip_address, unsigned short destination_port, void f(char* message));
-    void SendMessage(const char* message);
+    Peer(unsigned short listening_port, const char* destination_ip_address, unsigned short destination_port, void callback(char* message, int message_len));
+    void SendMessage(const char* message, int message_len);
     // ~Peer();
 
     //unclear how to recieve message, should maybe interrupt main line of execution... or at least, the main program needs to become aware of what this message was
@@ -34,14 +35,8 @@ class Peer {
     std::thread in_listener;
     std::thread out_listener;
     bool connection_reset;
-    void message_received_callback(char* message);
+    std::function<void(char*, int)> message_received_callback;
 
 
-    //perhaps turn into "stream parser" class, or something
-    int current_message_length;
-    int target_message_length;
-    // char incomplete_number[4] - case to handle where the integer delimiting message lengths was split... ignore for now
-    char* message_under_construction; //heap allocated buffer to fill into message to return to client
-    void HandleRecievedChunk(char* buffer, int valid_bytes); //accumulates from stream & parses into individual messages
-    void CreateMessageToSend(char* raw_message); //prepends with an integer to indicate length and sends
+    StreamParser *stream_parser;
 };

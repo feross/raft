@@ -20,6 +20,7 @@
 #include <thread>
 #include <cassert>
 // clean this up ^
+#include "stream_parser.h"
 
 #include "peer.h"
 
@@ -27,7 +28,7 @@
 #define DEBUG true
 
 
-Peer::Peer(unsigned short listening_port, const char* destination_ip_address, unsigned short destination_port, void message_received_callback(char* message)) {
+Peer::Peer(unsigned short listening_port, const char* destination_ip_address, unsigned short destination_port, void callback(char* message, int message_len)) {
     assert(listening_port != destination_port);
 
     my_port = listening_port;
@@ -39,11 +40,12 @@ Peer::Peer(unsigned short listening_port, const char* destination_ip_address, un
     
     if (DEBUG) printf("constructing Peer Instance\n");
 
+    message_received_callback = callback;
+
     ListenForInboundMessages();
 
     //"Stream Parser Class" initialization
-    target_message_length = -1;
-    message_under_construction = NULL;
+    stream_parser = new StreamParser(callback);
 }
 
 
@@ -62,6 +64,7 @@ void Peer::ListenForInboundMessages() {
             if (DEBUG) printf("receive socket: %d\n", receive_socket);
             ReceiveMessages(receive_socket);
             close(receive_socket);
+            stream_parser->ResetIncomingMessage(); //dump anything we haven't used
             sleep(1);
         }
     });
@@ -80,35 +83,7 @@ void Peer::ListenForClose() {
     });
 }
 
-void Peer::HandleRecievedChunk(char* buffer, int valid_bytes) {
-    while(valid_bytes > 0) {
-        if (target_message_length == -1) {
-            assert(valid_bytes >= sizeof(int));
-            target_message_length = *(int*)buffer; // TODO: assumes that buffer contains the full integer, should really handle the split case though
-            current_message_length = 0;
 
-            buffer = buffer + sizeof(int);
-            valid_bytes -= sizeof(int);
-            message_under_construction = new char[target_message_length];
-        }
-
-        int bytes_to_copy = target_message_length;
-        if (valid_bytes < target_message_length) bytes_to_copy = valid_bytes;
-        // if(memcpy(&message_under_construction[current_message_length], buffer, bytes_to_copy) < 0) printf("\nmemcpy error\n");
-        current_message_length += bytes_to_copy;
-        valid_bytes -= bytes_to_copy;
-
-        if(current_message_length == target_message_length) {
-
-        }
-    }
-
-
-}
-
-void Peer::CreateMessageToSend(char* raw_message) {
-
-}
 
 // ^^^ shiould be able to re-use for listening on other socket too
 void Peer::ReceiveMessages(int socket) {
@@ -123,7 +98,7 @@ void Peer::ReceiveMessages(int socket) {
             if (DEBUG) printf("\nPeer Disconnected\n\n");
             break;
         }
-
+        stream_parser->HandleRecievedChunk(buffer, len);
         /* We have to null terminate the received data ourselves */  //NOTE: this is where we should be handling the protocol buffers stuff...
         //data won't normally come in this nice
         buffer[len] = '\0';
@@ -133,7 +108,7 @@ void Peer::ReceiveMessages(int socket) {
 
 
 //user is not told whether succeeded or not, doesn't need to know
-void Peer::SendMessage(const char* message) {
+void Peer::SendMessage(const char* message, int message_len) {
     //might even want to do in thread, to return immediately to client of peer...
     if (send_socket == -1) {
         if (DEBUG) printf("attempted reconnection\n");
@@ -147,8 +122,11 @@ void Peer::SendMessage(const char* message) {
     // technically, send_socket could get closed right here, but we don't care (send will just fail, and that's fine)
     if (send_socket > 0) {
         if (DEBUG) printf("send_socket x: %d\n", send_socket);
-        int success = send(send_socket, message, strlen(message), 0);
+
+        char* formatted_message = stream_parser->CreateMessageToSend(message, message_len);
+        int success = send(send_socket, formatted_message, strlen(message)+sizeof(int), 0);
         if (success == -1) fprintf(stderr, "error send: %s (%d)\n", strerror(errno), errno);
+        delete(formatted_message);
     }
     // user doesn't know if message got through, and that's fine
 }
