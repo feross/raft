@@ -9,9 +9,9 @@
 
 using namespace std;
 
-static string STORAGE_PATH = "storage.dat";
+static const string STORAGE_PATH = "storage.dat";
 
-static string INTRO_TEXT =
+static const string INTRO_TEXT =
 R"(Raft - An understandable consensus algorithm
 
 Usage:
