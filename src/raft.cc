@@ -84,6 +84,8 @@ int main(int argc, char* argv[]) {
     }
     delete(associate);
 
+    google::protobuf::ShutdownProtobufLibrary();
+
     return EXIT_SUCCESS;
 }
 
