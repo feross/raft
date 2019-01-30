@@ -69,5 +69,4 @@ void Storage::Save() {
     if (!storage_message.SerializeToOstream(&output)) {
         throw StorageFileException();
     }
-    cout << "Saved storage to " << storage_path << endl;
 }

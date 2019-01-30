@@ -1,7 +1,6 @@
 #ifndef _RAFT_STORAGE_H_
 #define _RAFT_STORAGE_H_
 
-#include <iostream>
 #include <fstream>
 #include <cstdio>
 #include <google/protobuf/repeated_field.h>
