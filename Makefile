@@ -34,6 +34,7 @@ PROTOS_CC := $(PROTOS_H:.pb.h=.pb.cc)
 proto: $(PROTOS)
 	protoc -I=$(SRC_DIR) --cpp_out=$(SRC_DIR) $(PROTOS)
 
+.PHONY: install-deps
 install-deps:
 	brew install pkg-config protobuf
 
