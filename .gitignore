@@ -1,5 +1,7 @@
-# Built file
+# Built files
 raft
+*.pb.cc
+*.pb.h
 
 # Prerequisites
 *.d

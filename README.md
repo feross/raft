@@ -17,17 +17,18 @@ available today.
 
 ## Dependencies
 
+### Install on macOS
+
+macOS users with the [Homebrew](https://brew.sh/) package manager installed can
+install all system dependencies in one step.
+
+```bash
+make install-deps
+```
+
 ### Protocol Buffers
 
 Protocol buffers are a language-neutral, platform-neutral, extensible way of serializing structured data for use in communications protocols and data storage.
-
-#### macOS
-
-Install the Protocol Buffers compiler (`protoc`) on macOS with the [Homebrew](https://brew.sh/) package manager:
-
-```bash
-brew install protobuf
-```
 
 #### Other platforms
 

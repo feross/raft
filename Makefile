@@ -5,13 +5,14 @@ CC = clang++
 TARGET ?= raft
 
 # Source code folder
-SRC_DIRS ?= ./src
+SRC_DIR ?= ./src
 
-SRCS := $(shell find $(SRC_DIRS) -name *.cc -or -name *.c -or -name *.s)
+SRCS := $(shell find $(SRC_DIR) -name *.cc -or -name *.c -or -name *.s)
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
 DEPS := $(OBJS:.o=.d)
+PROTOS := $(shell find $(SRC_DIR) -name *.proto)
 
-INC_DIRS := $(shell find $(SRC_DIRS) -type d)
+INC_DIRS := $(shell find $(SRC_DIR) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 # compiler flags:
@@ -21,11 +22,21 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 #   -std=c++17  use C++17 dialect
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -Wall -std=c++17
 
-$(TARGET): $(OBJS)
+LDLIBS ?= $(shell pkg-config --cflags --libs protobuf)
+
+$(TARGET): proto $(OBJS)
+	pkg-config --cflags protobuf  # fails if protobuf is not installed
 	$(CC) $(LDFLAGS) $(OBJS) -o $@ $(LOADLIBES) $(LDLIBS)
+
+proto: $(PROTOS)
+	protoc -I=$(SRC_DIR) --cpp_out=$(SRC_DIR) $(PROTOS)
+
+install-deps:
+	brew install pkg-config protobuf
 
 .PHONY: clean
 clean:
 	$(RM) $(TARGET) $(OBJS) $(DEPS)
+	$(RM) $(SRC_DIR)/*.pb.h $(SRC_DIR)/*.pb.cc
 
 -include $(DEPS)
