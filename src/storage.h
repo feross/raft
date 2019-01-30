@@ -1,6 +1,21 @@
 #ifndef _RAFT_STORAGE_H_
 #define _RAFT_STORAGE_H_
 
+#include <iostream>
+#include <fstream>
+#include <cstdio>
+#include <google/protobuf/repeated_field.h>
+
+#include "storage.pb.h"
+
+using namespace std;
+
+class StorageFileException : public exception {
+    const char* what() const noexcept {
+        return "Storage file IO error";
+    }
+};
+
 class Storage {
     public:
         /**
