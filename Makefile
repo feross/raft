@@ -31,7 +31,9 @@ PROTOS := $(shell find $(SRC_DIR) -name *.proto)
 PROTOS_H := $(addsuffix .pb.h,$(basename $(PROTOS)))
 PROTOS_CC := $(PROTOS_H:.pb.h=.pb.cc)
 
-proto: $(PROTOS)
+proto: $(PROTOS_H)
+
+$(PROTOS_H): $(PROTOS)
 	protoc -I=$(SRC_DIR) --cpp_out=$(SRC_DIR) $(PROTOS)
 
 .PHONY: install-deps
