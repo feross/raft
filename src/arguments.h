@@ -1,5 +1,5 @@
-#ifndef _arguments_
-#define _arguments_
+#ifndef _RAFT_ARGUMENTS_H_
+#define _RAFT_ARGUMENTS_H_
 
 #include <exception>
 #include <map>
