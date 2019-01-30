@@ -7,6 +7,18 @@
 
 using namespace std;
 
+class InvalidArgumentException : public exception {
+    const char* what() const noexcept {
+        return "Invalid argument name";
+    }
+};
+
+class MissingArgumentException : public exception {
+    const char* what() const noexcept {
+        return "Missing required argument value";
+    }
+};
+
 class Arguments {
     public:
         /**
