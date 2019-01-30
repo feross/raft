@@ -10,7 +10,6 @@ SRC_DIR ?= ./src
 SRCS := $(shell find $(SRC_DIR) -name *.cc -or -name *.c -or -name *.s)
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
 DEPS := $(OBJS:.o=.d)
-PROTOS := $(shell find $(SRC_DIR) -name *.proto)
 
 INC_DIRS := $(shell find $(SRC_DIR) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
@@ -28,6 +27,10 @@ $(TARGET): proto $(OBJS)
 	pkg-config --cflags protobuf  # fails if protobuf is not installed
 	$(CC) $(LDFLAGS) $(OBJS) -o $@ $(LOADLIBES) $(LDLIBS)
 
+PROTOS := $(shell find $(SRC_DIR) -name *.proto)
+PROTOS_H := $(addsuffix .pb.h,$(basename $(PROTOS)))
+PROTOS_CC := $(PROTOS_H:.pb.h=.pb.cc)
+
 proto: $(PROTOS)
 	protoc -I=$(SRC_DIR) --cpp_out=$(SRC_DIR) $(PROTOS)
 
@@ -37,6 +40,6 @@ install-deps:
 .PHONY: clean
 clean:
 	$(RM) $(TARGET) $(OBJS) $(DEPS)
-	$(RM) $(SRC_DIR)/*.pb.h $(SRC_DIR)/*.pb.cc
+	$(RM) $(PROTOS_H) $(PROTOS_CC)
 
 -include $(DEPS)
