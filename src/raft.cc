@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     Arguments args(INTRO_TEXT);
     args.RegisterBool("help", "Print help message");
     args.RegisterInt("port", "Listening port");
-    args.RegisterBool("clear", "Clear stored state");
+    args.RegisterBool("reset", "Reset storage file");
 
     try {
         args.Parse(argc, argv);
@@ -48,8 +48,8 @@ int main(int argc, char* argv[]) {
         return EXIT_SUCCESS;
     }
 
-    if (args.get_bool("clear")) {
         cout << "TODO: Clear stored state!" << endl;
+    if (args.get_bool("reset")) {
         return EXIT_SUCCESS;
     }
 
