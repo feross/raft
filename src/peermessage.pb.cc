@@ -58,7 +58,7 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, term_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, sender_id_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, success_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, votegranted_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, vote_granted_),
   1,
   2,
   0,
@@ -94,16 +94,17 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\021peermessage.proto\022\005proto\"\373\001\n\013PeerMessa"
+      "\n\021peermessage.proto\022\005proto\"\374\001\n\013PeerMessa"
       "ge\022,\n\004type\030\001 \002(\0162\036.proto.PeerMessage.Mes"
       "sageType\022\014\n\004term\030\002 \002(\005\022\021\n\tsender_id\030\003 \002("
-      "\t\022\017\n\007success\030\004 \001(\010\022\023\n\013voteGranted\030\005 \001(\010\""
-      "w\n\013MessageType\022\031\n\025APPENDENTRIES_REQUEST\020"
-      "\000\022\032\n\026APPENDENTRIES_RESPONSE\020\001\022\027\n\023REQUEST"
-      "VOTE_REQUEST\020\002\022\030\n\024REQUESTVOTE_RESPONSE\020\003"
+      "\t\022\017\n\007success\030\004 \001(\010\022\024\n\014vote_granted\030\005 \001(\010"
+      "\"w\n\013MessageType\022\031\n\025APPENDENTRIES_REQUEST"
+      "\020\000\022\032\n\026APPENDENTRIES_RESPONSE\020\001\022\027\n\023REQUES"
+      "TVOTE_REQUEST\020\002\022\030\n\024REQUESTVOTE_RESPONSE\020"
+      "\003"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 280);
+      descriptor, 281);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "peermessage.proto", &protobuf_RegisterTypes);
 }
@@ -175,16 +176,16 @@ PeerMessage::PeerMessage(const PeerMessage& from)
     sender_id_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.sender_id_);
   }
   ::memcpy(&type_, &from.type_,
-    static_cast<size_t>(reinterpret_cast<char*>(&votegranted_) -
-    reinterpret_cast<char*>(&type_)) + sizeof(votegranted_));
+    static_cast<size_t>(reinterpret_cast<char*>(&vote_granted_) -
+    reinterpret_cast<char*>(&type_)) + sizeof(vote_granted_));
   // @@protoc_insertion_point(copy_constructor:proto.PeerMessage)
 }
 
 void PeerMessage::SharedCtor() {
   sender_id_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(&type_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&votegranted_) -
-      reinterpret_cast<char*>(&type_)) + sizeof(votegranted_));
+      reinterpret_cast<char*>(&vote_granted_) -
+      reinterpret_cast<char*>(&type_)) + sizeof(vote_granted_));
 }
 
 PeerMessage::~PeerMessage() {
@@ -222,8 +223,8 @@ void PeerMessage::Clear() {
   }
   if (cached_has_bits & 30u) {
     ::memset(&type_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&votegranted_) -
-        reinterpret_cast<char*>(&type_)) + sizeof(votegranted_));
+        reinterpret_cast<char*>(&vote_granted_) -
+        reinterpret_cast<char*>(&type_)) + sizeof(vote_granted_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear();
@@ -303,14 +304,14 @@ bool PeerMessage::MergePartialFromCodedStream(
         break;
       }
 
-      // optional bool voteGranted = 5;
+      // optional bool vote_granted = 5;
       case 5: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
             static_cast< ::google::protobuf::uint8>(40u /* 40 & 0xFF */)) {
-          set_has_votegranted();
+          set_has_vote_granted();
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &votegranted_)));
+                 input, &vote_granted_)));
         } else {
           goto handle_unusual;
         }
@@ -370,9 +371,9 @@ void PeerMessage::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(4, this->success(), output);
   }
 
-  // optional bool voteGranted = 5;
+  // optional bool vote_granted = 5;
   if (cached_has_bits & 0x00000010u) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(5, this->votegranted(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(5, this->vote_granted(), output);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
@@ -417,9 +418,9 @@ void PeerMessage::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(4, this->success(), target);
   }
 
-  // optional bool voteGranted = 5;
+  // optional bool vote_granted = 5;
   if (cached_has_bits & 0x00000010u) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(5, this->votegranted(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(5, this->vote_granted(), target);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
@@ -489,8 +490,8 @@ size_t PeerMessage::ByteSizeLong() const {
       total_size += 1 + 1;
     }
 
-    // optional bool voteGranted = 5;
-    if (has_votegranted()) {
+    // optional bool vote_granted = 5;
+    if (has_vote_granted()) {
       total_size += 1 + 1;
     }
 
@@ -538,7 +539,7 @@ void PeerMessage::MergeFrom(const PeerMessage& from) {
       success_ = from.success_;
     }
     if (cached_has_bits & 0x00000010u) {
-      votegranted_ = from.votegranted_;
+      vote_granted_ = from.vote_granted_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
@@ -574,7 +575,7 @@ void PeerMessage::InternalSwap(PeerMessage* other) {
   swap(type_, other->type_);
   swap(term_, other->term_);
   swap(success_, other->success_);
-  swap(votegranted_, other->votegranted_);
+  swap(vote_granted_, other->vote_granted_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   _internal_metadata_.Swap(&other->_internal_metadata_);
 }

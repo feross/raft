@@ -241,12 +241,12 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   bool success() const;
   void set_success(bool value);
 
-  // optional bool voteGranted = 5;
-  bool has_votegranted() const;
-  void clear_votegranted();
+  // optional bool vote_granted = 5;
+  bool has_vote_granted() const;
+  void clear_vote_granted();
   static const int kVoteGrantedFieldNumber = 5;
-  bool votegranted() const;
-  void set_votegranted(bool value);
+  bool vote_granted() const;
+  void set_vote_granted(bool value);
 
   // @@protoc_insertion_point(class_scope:proto.PeerMessage)
  private:
@@ -258,8 +258,8 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   void clear_has_sender_id();
   void set_has_success();
   void clear_has_success();
-  void set_has_votegranted();
-  void clear_has_votegranted();
+  void set_has_vote_granted();
+  void clear_has_vote_granted();
 
   // helper for ByteSizeLong()
   size_t RequiredFieldsByteSizeFallback() const;
@@ -271,7 +271,7 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   int type_;
   ::google::protobuf::int32 term_;
   bool success_;
-  bool votegranted_;
+  bool vote_granted_;
   friend struct ::protobuf_peermessage_2eproto::TableStruct;
 };
 // ===================================================================
@@ -424,28 +424,28 @@ inline void PeerMessage::set_success(bool value) {
   // @@protoc_insertion_point(field_set:proto.PeerMessage.success)
 }
 
-// optional bool voteGranted = 5;
-inline bool PeerMessage::has_votegranted() const {
+// optional bool vote_granted = 5;
+inline bool PeerMessage::has_vote_granted() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void PeerMessage::set_has_votegranted() {
+inline void PeerMessage::set_has_vote_granted() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void PeerMessage::clear_has_votegranted() {
+inline void PeerMessage::clear_has_vote_granted() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void PeerMessage::clear_votegranted() {
-  votegranted_ = false;
-  clear_has_votegranted();
+inline void PeerMessage::clear_vote_granted() {
+  vote_granted_ = false;
+  clear_has_vote_granted();
 }
-inline bool PeerMessage::votegranted() const {
-  // @@protoc_insertion_point(field_get:proto.PeerMessage.voteGranted)
-  return votegranted_;
+inline bool PeerMessage::vote_granted() const {
+  // @@protoc_insertion_point(field_get:proto.PeerMessage.vote_granted)
+  return vote_granted_;
 }
-inline void PeerMessage::set_votegranted(bool value) {
-  set_has_votegranted();
-  votegranted_ = value;
-  // @@protoc_insertion_point(field_set:proto.PeerMessage.voteGranted)
+inline void PeerMessage::set_vote_granted(bool value) {
+  set_has_vote_granted();
+  vote_granted_ = value;
+  // @@protoc_insertion_point(field_set:proto.PeerMessage.vote_granted)
 }
 
 #ifdef __GNUC__

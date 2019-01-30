@@ -10,13 +10,14 @@ message PeerMessage {
         REQUESTVOTE_RESPONSE = 3;
     }
 
+    // Fields used in all messages
     required MessageType type = 1;
     required int32 term = 2;
     required string sender_id = 3;
 
-    // AppendEntries response
+    // Fields used in AppendEntries response
     optional bool success = 4;
 
-    // RequestVote response
-    optional bool voteGranted = 5;
+    // Fields used in RequestVote response
+    optional bool vote_granted = 5;
 }
