@@ -42,6 +42,9 @@ int main(int argc, char* argv[]) {
     // compatible with the version of the headers we compiled against.
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
+    // Seed the pseudo-random number generator used by rand()
+    srand(time(0));
+
     Arguments args(INTRO_TEXT);
     args.RegisterBool("help", "Print help message");
     args.RegisterInt("port", "Listening port");
