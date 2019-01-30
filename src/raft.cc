@@ -5,6 +5,7 @@
 
 #include "arguments.h"
 #include "peer.h"
+#include "peermessage.pb.h"
 #include "storage.h"
 #include "timer.h"
 
@@ -81,14 +82,31 @@ int main(int argc, char* argv[]) {
 
     // Create a peer
     const char* dest_addr = "127.0.0.1";
-    Peer* associate = new Peer(port, dest_addr, connect_port, [](char* message, int message_len) -> void {printf("full message received: %s\n", message);});
+    Peer* associate = new Peer(port, dest_addr, connect_port,
+        [](char* message, int message_len) -> void {
+            cout << "Received message of length " << message_len << endl;
+            proto::PeerMessage peer_message;
+            peer_message.ParseFromString(string(message, message_len));
+            printf("message received: %s\n", peer_message.DebugString().c_str());
+        });
 
     const char* msg = "wow !    ";
     while (true) {
-        associate->SendMessage(msg, strlen(msg));
+        proto::PeerMessage peer_message;
+        peer_message.set_type(proto::PeerMessage::APPENDENTRIES_REQUEST);
+        peer_message.set_term(999);
+        peer_message.set_sender_id("the sender");
+        cout << "Sending " << peer_message.DebugString() << endl;
+
+        string peer_message_string;
+        peer_message.SerializeToString(&peer_message_string);
+        const char* peer_message_cstr = peer_message_string.c_str();
+
+        associate->SendMessage(peer_message_cstr, peer_message_string.size());
         sleep(1);
     }
     delete(associate);
+
 
     google::protobuf::ShutdownProtobufLibrary();
 
