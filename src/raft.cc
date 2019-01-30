@@ -30,6 +30,13 @@ These arguments should be hostname:port pairs in the format e.g.
 localhost:4000 or e.g. 12.34.56.67:4000.
 )";
 
+void send(Peer* peer, proto::PeerMessage &message) {
+    string message_string;
+    message.SerializeToString(&message_string);
+    const char* message_cstr = message_string.c_str();
+    peer->SendMessage(message_cstr, message_string.size());
+}
+
 int main(int argc, char* argv[]) {
     // Verify that the version of the library that we linked against is
     // compatible with the version of the headers we compiled against.
@@ -38,6 +45,7 @@ int main(int argc, char* argv[]) {
     Arguments args(INTRO_TEXT);
     args.RegisterBool("help", "Print help message");
     args.RegisterInt("port", "Listening port");
+    args.RegisterString("name", "Server name");
     args.RegisterBool("reset", "Reset storage file");
 
     try {
@@ -53,13 +61,16 @@ int main(int argc, char* argv[]) {
     }
 
     Storage storage(STORAGE_PATH);
-    Timer timer(5'000, 10'000, []() {
-        cout << "Timer fired!" << endl;
-    });
 
     if (args.get_bool("reset")) {
         storage.Reset();
         return EXIT_SUCCESS;
+    }
+
+    string server_name = args.get_string("name");
+    if (server_name.size() == 0) {
+        cerr << "Server name is required" << endl;
+        return EXIT_FAILURE;
     }
 
     int port = args.get_int("port");
@@ -80,6 +91,10 @@ int main(int argc, char* argv[]) {
     // TODO: hack for now, b/c we're on localhost & no other way to distinguish connections
     assert(port != connect_port);
 
+    // Start the server
+
+    int term = 0;
+
     // Create a peer
     const char* dest_addr = "127.0.0.1";
     Peer* associate = new Peer(port, dest_addr, connect_port,
@@ -90,23 +105,31 @@ int main(int argc, char* argv[]) {
             printf("message received: %s\n", peer_message.DebugString().c_str());
         });
 
-    const char* msg = "wow !    ";
+    Timer timer(5'000, 10'000, [&]() -> void {
+        // Start an election!
+        term += 1;
+        proto::PeerMessage message;
+        message.set_type(proto::PeerMessage::REQUESTVOTE_REQUEST);
+        message.set_term(term);
+        message.set_sender_id(server_name);
+        send(associate, message);
+    });
+
+    // while (true) {
+    //     proto::PeerMessage peer_message;
+    //     peer_message.set_type(proto::PeerMessage::APPENDENTRIES_REQUEST);
+    //     peer_message.set_term(999);
+    //     peer_message.set_sender_id(server_name);
+    //     cout << "Sending " << peer_message.DebugString() << endl;
+
+    //     send(associate, peer_message);
+    //     sleep(1);
+    // }
+    // delete(associate);
+
     while (true) {
-        proto::PeerMessage peer_message;
-        peer_message.set_type(proto::PeerMessage::APPENDENTRIES_REQUEST);
-        peer_message.set_term(999);
-        peer_message.set_sender_id("the sender");
-        cout << "Sending " << peer_message.DebugString() << endl;
-
-        string peer_message_string;
-        peer_message.SerializeToString(&peer_message_string);
-        const char* peer_message_cstr = peer_message_string.c_str();
-
-        associate->SendMessage(peer_message_cstr, peer_message_string.size());
-        sleep(1);
+        sleep(10);
     }
-    delete(associate);
-
 
     google::protobuf::ShutdownProtobufLibrary();
 

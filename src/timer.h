@@ -22,7 +22,7 @@ class Timer {
          * @param max_duration Maximum amount of time to wait (in milliseconds)
          * @param timer_callback The function to call when time is up
          */
-        Timer(int min_duration, int max_duration, void timer_callback());
+        Timer(int min_duration, int max_duration, function<void()> timer_callback);
 
         /**
          * Destroy the timer and cleanup all resources.
