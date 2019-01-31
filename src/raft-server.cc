@@ -165,7 +165,11 @@ void RaftServer::TransitionServerState(ServerState new_state) {
 
         case Candidate:
             TransitionCurrentTerm(storage.current_term() + 1);
+
+            // Candidate server votes for itself
+            storage.set_voted_for(server_id);
             ReceiveVote(server_id);
+
             for (Peer* peer: peers) {
                 SendRequestvoteRequest(peer);
             }
