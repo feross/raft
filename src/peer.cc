@@ -27,7 +27,7 @@
 #define RECEIVE_BUFFER_SIZE 100000
 #define DEBUG false
 
-Peer::Peer(unsigned short listening_port, const char* destination_ip_address,
+Peer::Peer(unsigned short listening_port, std::string destination_ip_address,
         unsigned short destination_port, std::function<void(Peer*, char*, int)> callback) {
     assert(listening_port != destination_port);
 
@@ -59,7 +59,7 @@ void Peer::ListenForInboundMessages() {
     if (DEBUG) printf("creating a new inbound listening thread\n");
     in_listener = std::thread([this] () {
         while(true) {
-            int receive_socket = AcceptConnection(dest_ip_addr, my_port);
+            int receive_socket = AcceptConnection(dest_ip_addr.c_str(), my_port);
             if (DEBUG) printf("receive socket: %d\n", receive_socket);
             ReceiveMessages(receive_socket);
             close(receive_socket);
@@ -116,7 +116,7 @@ void Peer::SendMessage(const char* message, int message_len) {
             connection_reset = false;
             if (DEBUG) printf("joining old thread\n");
         }
-        InitiateConnection(dest_ip_addr, dest_port);
+        InitiateConnection(dest_ip_addr.c_str(), dest_port);
     }
     // technically, send_socket could get closed right here, but we don't care (send will just fail, and that's fine)
     if (send_socket > 0) {

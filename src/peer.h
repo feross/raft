@@ -9,7 +9,7 @@
 
 class Peer {
   public:
-    Peer(unsigned short listening_port, const char* destination_ip_address, unsigned short destination_port, std::function<void(Peer*, char*, int)> callback);
+    Peer(unsigned short listening_port, std::string destination_ip_address, unsigned short destination_port, std::function<void(Peer*, char*, int)> callback);
     void SendMessage(const char* message, int message_len);
     // ~Peer();
 
@@ -30,7 +30,7 @@ class Peer {
 
     int my_port;
     int dest_port;
-    const char* dest_ip_addr;
+    std::string dest_ip_addr;
     std::thread in_listener;
     std::thread out_listener;
     bool connection_reset;

@@ -58,7 +58,7 @@ class RaftServer {
 struct PeerInfo {
     unsigned short my_listen_port;
     unsigned short destination_port;
-    const char* destination_ip_addr;
+    string destination_ip_addr;
 };
 
 #endif

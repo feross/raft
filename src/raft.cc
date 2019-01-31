@@ -20,12 +20,12 @@ Usage:
 Example:
     Start a three server Raft cluster.
 
-        ./raft localhost:4000:4010 localhost:4001:4020
-        ./raft localhost:4010:4000 localhost:4011:4021
-        ./raft localhost:4020:4001 localhost:4021:4011
+        ./raft --id alice 127.0.0.1:4000:4010 127.0.0.1:4001:4020
+        ./raft --id bob 127.0.0.1:4010:4000 127.0.0.1:4011:4021
+        ./raft --id carol 127.0.0.1:4020:4001 127.0.0.1:4021:4011
 
         TODO:
-        ./raft --port 4000 localhost:4001 localhost:4002
+        ./raft --port 4000 127.0.0.1:4001 127.0.0.1:4002
 
 Start a Raft server that listens on the given *port*. The server will treat
 each operand in *peers* as a peer Raft server part of the same cluster.
@@ -87,9 +87,9 @@ int main(int argc, char* argv[]) {
     for (string arg: unnamed_args) {
         auto vec = Util::StringSplit(arg, ":");
         struct PeerInfo peer_info;
+        peer_info.destination_ip_addr = vec[0];
         peer_info.my_listen_port = stoi(vec[1]);
         peer_info.destination_port = stoi(vec[2]);
-        peer_info.destination_ip_addr = vec[0].c_str();
         peer_info_vector.push_back(peer_info);
     }
 
