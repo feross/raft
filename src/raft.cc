@@ -13,6 +13,10 @@
 
 using namespace std;
 
+static const int STATE_FOLLOWER = 1;
+static const int STATE_CANDIDATE = 2;
+static const int STATE_LEADER = 3;
+
 static const string STORAGE_NAME_SUFFIX = "storage.dat";
 
 static const string INTRO_TEXT =
@@ -77,13 +81,12 @@ int main(int argc, char* argv[]) {
 
     Storage storage(server_name + "-" + STORAGE_NAME_SUFFIX);
     storage.set_current_term(0);
-    storage.set_voted_for(0);
+    storage.set_voted_for("");
 
     if (args.get_bool("reset")) {
         storage.Reset();
         return EXIT_SUCCESS;
     }
-
 
     // TODO: Remove once Arguments supports required args
     if (port == 0) {
@@ -105,6 +108,7 @@ int main(int argc, char* argv[]) {
     assert(port != connect_port);
 
     Peer *peer;
+    int server_state = STATE_FOLLOWER;
 
     auto make_message = [&]() {
         proto::PeerMessage message;
@@ -147,34 +151,65 @@ int main(int argc, char* argv[]) {
         switch (message.type()) {
             case proto::PeerMessage::APPENDENTRIES_REQUEST:
                 if (message.term() < storage.current_term()) {
+                    send_appendentries_response(peer, false);
+                } else {
                     send_appendentries_response(peer, true);
                 }
-                break;
+                return;
             case proto::PeerMessage::APPENDENTRIES_RESPONSE:
-                break;
+                return;
             case proto::PeerMessage::REQUESTVOTE_REQUEST:
                 if (message.term() < storage.current_term()) {
                     send_requestvote_response(peer, false);
+                    return;
                 }
-                // if (storage.)
-                break;
+                if (storage.voted_for() == "" ||
+                    storage.voted_for() == message.sender_id()) {
+                    send_requestvote_response(peer, true);
+                } else {
+                    send_requestvote_response(peer, false);
+                }
+                return;
             case proto::PeerMessage::REQUESTVOTE_RESPONSE:
-                break;
+                return;
             default:
                 cerr << "Unexpected message: " << message.DebugString() << endl;
-                break;
+                return;
         }
     };
 
     peer = new Peer(port, "127.0.0.1", connect_port, handleMessage);
 
-    auto handle_timeout = [&]() -> void {
-        // Start an election!
-        storage.set_current_term(storage.current_term() + 1);
-        send_requestvote_request(peer);
+    auto set_current_term = [&](int term) -> void {
+        storage.set_current_term(term);
+        storage.set_voted_for("");
     };
 
-    Timer timer(5'000, 10'000, handle_timeout);
+    auto set_server_state = [&](int new_state) -> void {
+        int prev_state = server_state;
+        server_state = new_state;
+        cout << "State change: " << prev_state << " -> " << new_state << endl;
+
+        switch (new_state) {
+            case STATE_FOLLOWER:
+                return;
+            case STATE_CANDIDATE:
+                set_current_term(storage.current_term() + 1);
+                // TODO: Vote for self
+                // TODO: timer.Reset();
+                send_requestvote_request(peer);
+                return;
+            case STATE_LEADER:
+                return;
+            default:
+                cerr << "Bad state transition to " << new_state << endl;
+                exit(EXIT_FAILURE);
+        }
+    };
+
+    Timer timer(5'000, 10'000, [&]() -> void {
+        set_server_state(STATE_CANDIDATE);
+    });
 
     while (true) {
         sleep(10);
