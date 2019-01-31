@@ -46,37 +46,37 @@ struct TableStruct {
 void AddDescriptors();
 }  // namespace protobuf_storage_2eproto
 namespace proto {
-class Storage;
-class StorageDefaultTypeInternal;
-extern StorageDefaultTypeInternal _Storage_default_instance_;
+class StorageMessage;
+class StorageMessageDefaultTypeInternal;
+extern StorageMessageDefaultTypeInternal _StorageMessage_default_instance_;
 }  // namespace proto
 namespace google {
 namespace protobuf {
-template<> ::proto::Storage* Arena::CreateMaybeMessage<::proto::Storage>(Arena*);
+template<> ::proto::StorageMessage* Arena::CreateMaybeMessage<::proto::StorageMessage>(Arena*);
 }  // namespace protobuf
 }  // namespace google
 namespace proto {
 
 // ===================================================================
 
-class Storage : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:proto.Storage) */ {
+class StorageMessage : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:proto.StorageMessage) */ {
  public:
-  Storage();
-  virtual ~Storage();
+  StorageMessage();
+  virtual ~StorageMessage();
 
-  Storage(const Storage& from);
+  StorageMessage(const StorageMessage& from);
 
-  inline Storage& operator=(const Storage& from) {
+  inline StorageMessage& operator=(const StorageMessage& from) {
     CopyFrom(from);
     return *this;
   }
   #if LANG_CXX11
-  Storage(Storage&& from) noexcept
-    : Storage() {
+  StorageMessage(StorageMessage&& from) noexcept
+    : StorageMessage() {
     *this = ::std::move(from);
   }
 
-  inline Storage& operator=(Storage&& from) noexcept {
+  inline StorageMessage& operator=(StorageMessage&& from) noexcept {
     if (GetArenaNoVirtual() == from.GetArenaNoVirtual()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -93,34 +93,34 @@ class Storage : public ::google::protobuf::Message /* @@protoc_insertion_point(c
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const Storage& default_instance();
+  static const StorageMessage& default_instance();
 
   static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const Storage* internal_default_instance() {
-    return reinterpret_cast<const Storage*>(
-               &_Storage_default_instance_);
+  static inline const StorageMessage* internal_default_instance() {
+    return reinterpret_cast<const StorageMessage*>(
+               &_StorageMessage_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     0;
 
-  void Swap(Storage* other);
-  friend void swap(Storage& a, Storage& b) {
+  void Swap(StorageMessage* other);
+  friend void swap(StorageMessage& a, StorageMessage& b) {
     a.Swap(&b);
   }
 
   // implements Message ----------------------------------------------
 
-  inline Storage* New() const final {
-    return CreateMaybeMessage<Storage>(NULL);
+  inline StorageMessage* New() const final {
+    return CreateMaybeMessage<StorageMessage>(NULL);
   }
 
-  Storage* New(::google::protobuf::Arena* arena) const final {
-    return CreateMaybeMessage<Storage>(arena);
+  StorageMessage* New(::google::protobuf::Arena* arena) const final {
+    return CreateMaybeMessage<StorageMessage>(arena);
   }
   void CopyFrom(const ::google::protobuf::Message& from) final;
   void MergeFrom(const ::google::protobuf::Message& from) final;
-  void CopyFrom(const Storage& from);
-  void MergeFrom(const Storage& from);
+  void CopyFrom(const StorageMessage& from);
+  void MergeFrom(const StorageMessage& from);
   void Clear() final;
   bool IsInitialized() const final;
 
@@ -137,7 +137,7 @@ class Storage : public ::google::protobuf::Message /* @@protoc_insertion_point(c
   void SharedCtor();
   void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(Storage* other);
+  void InternalSwap(StorageMessage* other);
   private:
   inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
     return NULL;
@@ -197,7 +197,7 @@ class Storage : public ::google::protobuf::Message /* @@protoc_insertion_point(c
   ::google::protobuf::int32 current_term() const;
   void set_current_term(::google::protobuf::int32 value);
 
-  // @@protoc_insertion_point(class_scope:proto.Storage)
+  // @@protoc_insertion_point(class_scope:proto.StorageMessage)
  private:
   void set_has_current_term();
   void clear_has_current_term();
@@ -224,164 +224,164 @@ class Storage : public ::google::protobuf::Message /* @@protoc_insertion_point(c
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
-// Storage
+// StorageMessage
 
 // required int32 current_term = 1;
-inline bool Storage::has_current_term() const {
+inline bool StorageMessage::has_current_term() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void Storage::set_has_current_term() {
+inline void StorageMessage::set_has_current_term() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void Storage::clear_has_current_term() {
+inline void StorageMessage::clear_has_current_term() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void Storage::clear_current_term() {
+inline void StorageMessage::clear_current_term() {
   current_term_ = 0;
   clear_has_current_term();
 }
-inline ::google::protobuf::int32 Storage::current_term() const {
-  // @@protoc_insertion_point(field_get:proto.Storage.current_term)
+inline ::google::protobuf::int32 StorageMessage::current_term() const {
+  // @@protoc_insertion_point(field_get:proto.StorageMessage.current_term)
   return current_term_;
 }
-inline void Storage::set_current_term(::google::protobuf::int32 value) {
+inline void StorageMessage::set_current_term(::google::protobuf::int32 value) {
   set_has_current_term();
   current_term_ = value;
-  // @@protoc_insertion_point(field_set:proto.Storage.current_term)
+  // @@protoc_insertion_point(field_set:proto.StorageMessage.current_term)
 }
 
 // required string voted_for = 2;
-inline bool Storage::has_voted_for() const {
+inline bool StorageMessage::has_voted_for() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void Storage::set_has_voted_for() {
+inline void StorageMessage::set_has_voted_for() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void Storage::clear_has_voted_for() {
+inline void StorageMessage::clear_has_voted_for() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void Storage::clear_voted_for() {
+inline void StorageMessage::clear_voted_for() {
   voted_for_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   clear_has_voted_for();
 }
-inline const ::std::string& Storage::voted_for() const {
-  // @@protoc_insertion_point(field_get:proto.Storage.voted_for)
+inline const ::std::string& StorageMessage::voted_for() const {
+  // @@protoc_insertion_point(field_get:proto.StorageMessage.voted_for)
   return voted_for_.GetNoArena();
 }
-inline void Storage::set_voted_for(const ::std::string& value) {
+inline void StorageMessage::set_voted_for(const ::std::string& value) {
   set_has_voted_for();
   voted_for_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:proto.Storage.voted_for)
+  // @@protoc_insertion_point(field_set:proto.StorageMessage.voted_for)
 }
 #if LANG_CXX11
-inline void Storage::set_voted_for(::std::string&& value) {
+inline void StorageMessage::set_voted_for(::std::string&& value) {
   set_has_voted_for();
   voted_for_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:proto.Storage.voted_for)
+  // @@protoc_insertion_point(field_set_rvalue:proto.StorageMessage.voted_for)
 }
 #endif
-inline void Storage::set_voted_for(const char* value) {
+inline void StorageMessage::set_voted_for(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   set_has_voted_for();
   voted_for_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:proto.Storage.voted_for)
+  // @@protoc_insertion_point(field_set_char:proto.StorageMessage.voted_for)
 }
-inline void Storage::set_voted_for(const char* value, size_t size) {
+inline void StorageMessage::set_voted_for(const char* value, size_t size) {
   set_has_voted_for();
   voted_for_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:proto.Storage.voted_for)
+  // @@protoc_insertion_point(field_set_pointer:proto.StorageMessage.voted_for)
 }
-inline ::std::string* Storage::mutable_voted_for() {
+inline ::std::string* StorageMessage::mutable_voted_for() {
   set_has_voted_for();
-  // @@protoc_insertion_point(field_mutable:proto.Storage.voted_for)
+  // @@protoc_insertion_point(field_mutable:proto.StorageMessage.voted_for)
   return voted_for_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline ::std::string* Storage::release_voted_for() {
-  // @@protoc_insertion_point(field_release:proto.Storage.voted_for)
+inline ::std::string* StorageMessage::release_voted_for() {
+  // @@protoc_insertion_point(field_release:proto.StorageMessage.voted_for)
   if (!has_voted_for()) {
     return NULL;
   }
   clear_has_voted_for();
   return voted_for_.ReleaseNonDefaultNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void Storage::set_allocated_voted_for(::std::string* voted_for) {
+inline void StorageMessage::set_allocated_voted_for(::std::string* voted_for) {
   if (voted_for != NULL) {
     set_has_voted_for();
   } else {
     clear_has_voted_for();
   }
   voted_for_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), voted_for);
-  // @@protoc_insertion_point(field_set_allocated:proto.Storage.voted_for)
+  // @@protoc_insertion_point(field_set_allocated:proto.StorageMessage.voted_for)
 }
 
 // repeated string log = 3;
-inline int Storage::log_size() const {
+inline int StorageMessage::log_size() const {
   return log_.size();
 }
-inline void Storage::clear_log() {
+inline void StorageMessage::clear_log() {
   log_.Clear();
 }
-inline const ::std::string& Storage::log(int index) const {
-  // @@protoc_insertion_point(field_get:proto.Storage.log)
+inline const ::std::string& StorageMessage::log(int index) const {
+  // @@protoc_insertion_point(field_get:proto.StorageMessage.log)
   return log_.Get(index);
 }
-inline ::std::string* Storage::mutable_log(int index) {
-  // @@protoc_insertion_point(field_mutable:proto.Storage.log)
+inline ::std::string* StorageMessage::mutable_log(int index) {
+  // @@protoc_insertion_point(field_mutable:proto.StorageMessage.log)
   return log_.Mutable(index);
 }
-inline void Storage::set_log(int index, const ::std::string& value) {
-  // @@protoc_insertion_point(field_set:proto.Storage.log)
+inline void StorageMessage::set_log(int index, const ::std::string& value) {
+  // @@protoc_insertion_point(field_set:proto.StorageMessage.log)
   log_.Mutable(index)->assign(value);
 }
 #if LANG_CXX11
-inline void Storage::set_log(int index, ::std::string&& value) {
-  // @@protoc_insertion_point(field_set:proto.Storage.log)
+inline void StorageMessage::set_log(int index, ::std::string&& value) {
+  // @@protoc_insertion_point(field_set:proto.StorageMessage.log)
   log_.Mutable(index)->assign(std::move(value));
 }
 #endif
-inline void Storage::set_log(int index, const char* value) {
+inline void StorageMessage::set_log(int index, const char* value) {
   GOOGLE_DCHECK(value != NULL);
   log_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:proto.Storage.log)
+  // @@protoc_insertion_point(field_set_char:proto.StorageMessage.log)
 }
-inline void Storage::set_log(int index, const char* value, size_t size) {
+inline void StorageMessage::set_log(int index, const char* value, size_t size) {
   log_.Mutable(index)->assign(
     reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:proto.Storage.log)
+  // @@protoc_insertion_point(field_set_pointer:proto.StorageMessage.log)
 }
-inline ::std::string* Storage::add_log() {
-  // @@protoc_insertion_point(field_add_mutable:proto.Storage.log)
+inline ::std::string* StorageMessage::add_log() {
+  // @@protoc_insertion_point(field_add_mutable:proto.StorageMessage.log)
   return log_.Add();
 }
-inline void Storage::add_log(const ::std::string& value) {
+inline void StorageMessage::add_log(const ::std::string& value) {
   log_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:proto.Storage.log)
+  // @@protoc_insertion_point(field_add:proto.StorageMessage.log)
 }
 #if LANG_CXX11
-inline void Storage::add_log(::std::string&& value) {
+inline void StorageMessage::add_log(::std::string&& value) {
   log_.Add(std::move(value));
-  // @@protoc_insertion_point(field_add:proto.Storage.log)
+  // @@protoc_insertion_point(field_add:proto.StorageMessage.log)
 }
 #endif
-inline void Storage::add_log(const char* value) {
+inline void StorageMessage::add_log(const char* value) {
   GOOGLE_DCHECK(value != NULL);
   log_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:proto.Storage.log)
+  // @@protoc_insertion_point(field_add_char:proto.StorageMessage.log)
 }
-inline void Storage::add_log(const char* value, size_t size) {
+inline void StorageMessage::add_log(const char* value, size_t size) {
   log_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:proto.Storage.log)
+  // @@protoc_insertion_point(field_add_pointer:proto.StorageMessage.log)
 }
 inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
-Storage::log() const {
-  // @@protoc_insertion_point(field_list:proto.Storage.log)
+StorageMessage::log() const {
+  // @@protoc_insertion_point(field_list:proto.StorageMessage.log)
   return log_;
 }
 inline ::google::protobuf::RepeatedPtrField< ::std::string>*
-Storage::mutable_log() {
-  // @@protoc_insertion_point(field_mutable_list:proto.Storage.log)
+StorageMessage::mutable_log() {
+  // @@protoc_insertion_point(field_mutable_list:proto.StorageMessage.log)
   return &log_;
 }
 

@@ -2,7 +2,7 @@ syntax = "proto2";
 
 package proto;
 
-message Storage {
+message StorageMessage {
   required int32 current_term = 1;
   required string voted_for = 2;
   repeated string log = 3;

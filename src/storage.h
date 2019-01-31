@@ -7,6 +7,7 @@
 
 #include "storage.pb.h"
 
+using namespace proto;
 using namespace std;
 
 class StorageFileException : public exception {
@@ -117,7 +118,7 @@ class Storage {
         void Save();
 
         string storage_path;
-        proto::Storage storage_message;
+        StorageMessage storage_message;
 };
 
 #endif
