@@ -25,31 +25,37 @@ class Peer {
     Peer(unsigned short listening_port, std::string destination_ip_address, unsigned short destination_port, std::function<void(Peer*, char*, int)> message_received_callback);
 
     /**
+     *
+     */
+    ~Peer();
+
+    /**
      * Attempts to send a message to a peer.  No guarentee that the message will go through, client should handle resending if necessary.
      * 
      * @param message - blob of data to send to the peer
      * @param message_len - size (in bytes) of message blob to send to peer
      */
     void SendMessage(const char* message, int message_len);
-    // ~Peer();
 
   private:
-    int AcceptConnection(const char* ip_addr, unsigned short port_num);
-    int InitiateConnection(const char* ip_addr, unsigned short port_num);
-    void ListenForInboundMessages();
-    void ListenForClose();
-    void ReceiveMessages(int socket);
+    void AcceptConnection(const char* ip_addr, unsigned short port_num);
+    void InitiateConnection(const char* ip_addr, unsigned short port_num);
+    void RegisterReceiveListener();
+    void RegisterCloseListener();
+    void ListenOnSocket(int socket);
 
     // maybe TODO: in theory, we could reduce the number of connections (currently seperate sockets for inbound & outbound connections), introduces (solvable) race conditions
     // maybe TODO: similarly, could change to reuse listening port but would need a "peer manager" that has knowledge of sockets, layered above the peer (that hands-off connections
     // to peers when it needs to send a message to a particular peer, or gets a message & identifies which peer sent it)
 
-    int send_socket; //receive_socket is not needed as private, we just register handler in constuctor
+    int send_socket;
+    int receive_socket;
     unsigned short my_port;
     unsigned short dest_port;
     std::string dest_ip_addr;
     std::thread in_listener;
     std::thread out_listener;
     bool connection_reset;
+    bool running;
     StreamParser *stream_parser;
 };

@@ -24,6 +24,11 @@ class StreamParser {
     StreamParser(std::function<void(char*, int)> callback);
 
     /**
+     * StreamParser destructor  completed message from the stream
+     */
+    ~StreamParser();
+
+    /**
      * Given a chunk of data from the stream of any size:
      *  - parses out any completed messages & calls message_received_callback that was passed in the constructor
      *  - accumulates any partial messages to be completed by future received chunks.

@@ -43,6 +43,10 @@ StreamParser::StreamParser(std::function<void(char*, int)> callback) {
     message_received_callback = callback;
 }
 
+StreamParser::~StreamParser() {
+    
+}
+
 void StreamParser::HandleRecievedChunk(char* buffer, int valid_bytes) {
     if (DEBUG) printf("\n the buffer, assuming leading int: %s\n\n", buffer + sizeof(int));
     while(valid_bytes > 0) {

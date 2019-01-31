@@ -28,6 +28,12 @@
 #define RECEIVE_BUFFER_SIZE 100000
 #define DEBUG false
 
+static void ErrorCheckSysCall(int success, const char* unique_error_message) {
+    if (success == -1) {
+        fprintf(stderr, "Error: %s, %s (%d)\n", unique_error_message, strerror(errno), errno);
+    }
+}
+
 Peer::Peer(unsigned short listening_port, std::string destination_ip_address,
         unsigned short destination_port, std::function<void(Peer*, char*, int)> message_received_callback) {
 
@@ -38,96 +44,93 @@ Peer::Peer(unsigned short listening_port, std::string destination_ip_address,
     dest_port = destination_port;
     dest_ip_addr = destination_ip_address;
     connection_reset = false;
+    running = true;
     send_socket = -1;
+    receive_socket = -1;
 
-
-    if (DEBUG) printf("creating a new inbound listening thread\n");
-    in_listener = std::thread([this] () {
-        ListenForInboundMessages();
-    });
-
+    RegisterReceiveListener();
     stream_parser = new StreamParser([this, message_received_callback](char* raw_message, int raw_message_len) {
         message_received_callback(this, raw_message, raw_message_len);
     });
 }
 
-
-void Peer::ListenForInboundMessages() {
-    while(true) {
-        int receive_socket = AcceptConnection(dest_ip_addr.c_str(), my_port);
-        if (DEBUG) printf("receive socket: %d\n", receive_socket);
-        ReceiveMessages(receive_socket);
-        close(receive_socket);
-        stream_parser->ResetIncomingMessage(); //dump anything we haven't used
-        sleep(1);
+Peer::~Peer() {
+    running = false; 
+    if (receive_socket != -1) {
+        ErrorCheckSysCall(shutdown(receive_socket, SHUT_RDWR), "shudown"); //not safe to close until called this, see: https://stackoverflow.com/a/2489066/6227019
+        //closing should be handled by the thread now
+        in_listener.join();
     }
-    // join in destructor
+    if (connection_reset == true) { //didn't necessarily open a connection to send
+        ErrorCheckSysCall(shutdown(send_socket, SHUT_RDWR), "shutdown");
+        //closing should be handled by the thread now
+        out_listener.join();
+    }
 }
 
+void Peer::SendMessage(const char* message, int message_len) {
+    if (send_socket == -1) { //TODO: maybe this should be done in a thread to go faster, particular when attempting reconnection, though that should be rare
+        if (DEBUG) printf("Attempted reconnection\n");
+        InitiateConnection(dest_ip_addr.c_str(), dest_port);
+    }
+    if (send_socket > 0) {
+        if (DEBUG) printf("Sending over socket: %d\n", send_socket);
+        auto [formatted_message, formatted_message_len] = stream_parser->CreateMessageToSend(message, message_len);
+        ErrorCheckSysCall(send(send_socket, formatted_message, formatted_message_len, 0), "send");
+        delete(formatted_message);
+    }
+}
 
-void Peer::ListenForClose() {
-    if (DEBUG) printf("creating a new outbound-close listening thread\n");
-    out_listener = std::thread([this] () {
-        ReceiveMessages(send_socket);
-        connection_reset = true;
-        close(send_socket);
-        send_socket = -1;
-        if (DEBUG) printf("\nOutbound Connection Closed\n\n");
+void Peer::RegisterReceiveListener() {
+    if (DEBUG) printf("creating a new inbound listening thread\n");
+    in_listener = std::thread([this] () {
+        while(running) {
+            AcceptConnection(dest_ip_addr.c_str(), my_port);
+            if (DEBUG) printf("receive socket: %d\n", receive_socket);
+            ListenOnSocket(receive_socket);
+            ErrorCheckSysCall(close(receive_socket), "close receive_socket");
+            receive_socket = -1;
+            stream_parser->ResetIncomingMessage(); //dump anything we haven't used from this previous connection
+        }
     });
 }
 
+void Peer::RegisterCloseListener() {
+    if (connection_reset) {
+        out_listener.join();
+        connection_reset = false;
+        if (DEBUG) printf("Joined old listening-for-close-on-outbound thread\n");
+    }
+    if (DEBUG) printf("Creating a new outbound-close listening thread\n");
+    out_listener = std::thread([this] () {
+        ListenOnSocket(send_socket);
+        connection_reset = true;
+        close(send_socket);
+        send_socket = -1;
+        if (DEBUG) printf("Outbound Connection Closed\n");
+    });
+}
 
-
-// ^^^ shiould be able to re-use for listening on other socket too
-void Peer::ReceiveMessages(int socket) {
-    char buffer[RECEIVE_BUFFER_SIZE + 1]; /* +1 so we can add null terminator */
-    while(socket > 0) {
+void Peer::ListenOnSocket(int socket) {
+    char buffer[RECEIVE_BUFFER_SIZE + 1]; //+1 so we can add null terminator if debugging
+    while(socket > 0 && running) {
         int len = recv(socket, buffer, RECEIVE_BUFFER_SIZE, 0);
-
         if (len == -1) {
             if (DEBUG) fprintf(stderr, "recv: %s (%d)\n", strerror(errno), errno);
             break;
         } else if (len == 0) {
-            if (DEBUG) printf("\nPeer Disconnected\n\n");
+            if (DEBUG) printf("Peer Disconnected\n");
             break;
         }
         stream_parser->HandleRecievedChunk(buffer, len);
-
-        /* We have to null terminate the received data ourselves */  //NOTE: this is where we should be handling the protocol buffers stuff...
-        //data won't normally come in this nice
-        buffer[len] = '\0';
-        if (DEBUG) printf("Received %s (%d bytes).\n", buffer, len);
-    }
-}
-
-
-//user is not told whether succeeded or not, doesn't need to know
-void Peer::SendMessage(const char* message, int message_len) {
-    //might even want to do in thread, to return immediately to client of peer...
-    if (send_socket == -1) {
-        if (DEBUG) printf("attempted reconnection\n");
-        if (connection_reset) {
-            out_listener.join();
-            connection_reset = false;
-            if (DEBUG) printf("joining old thread\n");
+        if (DEBUG) {
+            buffer[len] = '\0'; //if printing, we must null terminate buffer
+            printf("Received %s (%d bytes).\n", buffer, len);
         }
-        InitiateConnection(dest_ip_addr.c_str(), dest_port);
     }
-    // technically, send_socket could get closed right here, but we don't care (send will just fail, and that's fine)
-    if (send_socket > 0) {
-        if (DEBUG) printf("send_socket x: %d\n", send_socket);
-
-        auto [formatted_message, formatted_message_len] = stream_parser->CreateMessageToSend(message, message_len); //TODO change return type to include size somehow
-        int success = send(send_socket, formatted_message, formatted_message_len, 0); //See above TODO re: message_len+sizeof(int)
-        if (success == -1) fprintf(stderr, "error send: %s (%d)\n", strerror(errno), errno);
-        delete(formatted_message);
-    }
-    // user doesn't know if message got through, and that's fine
 }
-//unclear how to receive message, should maybe interrupt main line of execution... or at least, the main program needs to become aware of what this message was
-//for now just have a thread that prints incoming, created in the constructor
 
-int Peer::AcceptConnection(const char* ip_addr, unsigned short listening_port) {
+void Peer::AcceptConnection(const char* ip_addr, unsigned short listening_port) {
     struct sockaddr_in dest; /* socket info about the machine connecting to us */
     struct sockaddr_in serv; /* socket info about our server */
     int mysocket;            /* socket used to listen for incoming connections */
@@ -136,51 +139,47 @@ int Peer::AcceptConnection(const char* ip_addr, unsigned short listening_port) {
     memset(&serv, 0, sizeof(serv));             /* zero the struct before filling the fields */
     serv.sin_family = AF_INET;                  /* set the type of connection to TCP/IP */
     dest.sin_addr.s_addr = inet_addr(ip_addr);  /* set destination IP number - test with localhost, 127.0.0.1*/
-    serv.sin_port = htons(listening_port);            /* set the server port number */
+    serv.sin_port = htons(listening_port);      /* set the server port number */
 
     mysocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (mysocket == -1) fprintf(stderr, "socket error: %s (%d)\n", strerror(errno), errno);
+    ErrorCheckSysCall(mysocket, "socket");
     if (DEBUG) printf("listen_port: %d, mysocket: %d\n", listening_port, mysocket);
 
-    int val = 1; //setsockopt why
-    int success = setsockopt(mysocket, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(int));
-    if (success == -1) fprintf(stderr, "setsockopt error: %s (%d)\n", strerror(errno), errno);
+    int val = 1; //required for setsockopt
+    ErrorCheckSysCall(setsockopt(mysocket, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(int)), "setsockopt");
 
     /* bind serv information to mysocket */
-    success = bind(mysocket, (struct sockaddr *)&serv, sizeof(struct sockaddr));
-    if (success == -1) fprintf(stderr, "bind error: %s (%d) socket: %d\n", strerror(errno), errno, mysocket);
+    ErrorCheckSysCall(bind(mysocket, (struct sockaddr *)&serv, sizeof(struct sockaddr)), "bind");
 
     /* start listening, allowing a queue of up to 1 pending connection */
-    success = listen(mysocket, 1);
-    if (success == -1) fprintf(stderr, "listen error: %s (%d)\n", strerror(errno), errno);
+    ErrorCheckSysCall(listen(mysocket, 1), "listen");
 
-    int connected_socket = accept(mysocket, (struct sockaddr *)&dest, &socksize);  //could just have one server here, and use the sockets returned by this to form peers
-    if (connected_socket == -1) fprintf(stderr, "accept error: %s (%d)\n", strerror(errno), errno);
+    // TODO: could just have one server here, and use the sockets returned by this to form peers.
+    // However, this would require peers to identify each other, and the class doing this handoff to be simultaneously aware of multiple peers and sockets/networking details.
+    receive_socket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
+    ErrorCheckSysCall(receive_socket, "accept"); //receive_socket
 
-    success = close(mysocket);
-    if (success == -1) fprintf(stderr, "close mysocket error: %s (%d)\n", strerror(errno), errno);
-
-    if (DEBUG) printf("accepted connection, my: %d con: %d", mysocket, connected_socket);
-    return connected_socket;
+    ErrorCheckSysCall(close(mysocket), "close mysocket");
 }
 
-
-int Peer::InitiateConnection(const char* ip_addr, unsigned short destination_port) {
+void Peer::InitiateConnection(const char* ip_addr, unsigned short destination_port) {
     struct sockaddr_in dest;
-
     send_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (send_socket == -1) fprintf(stderr, "socket error: %s (%d)\n", strerror(errno), errno);
+    ErrorCheckSysCall(send_socket, "send_socket");
 
     memset(&dest, 0, sizeof(dest));                 /* zero the struct */
     dest.sin_family = AF_INET;
     dest.sin_addr.s_addr = inet_addr(ip_addr);      /* set destination IP number - test with localhost, 127.0.0.1*/
-    dest.sin_port = htons(destination_port);                /* set destination port number */
+    dest.sin_port = htons(destination_port);        /* set destination port number */
+
     int success = connect(send_socket, (struct sockaddr *)&dest, sizeof(struct sockaddr_in));
     if (success == 0) {
-        ListenForClose();
+        RegisterCloseListener();
     } else {
         send_socket = -1;
         if (success == -1) fprintf(stderr, "connect error: %s (%d)\n", strerror(errno), errno);
     }
-    return send_socket;
 }
+
+
+
