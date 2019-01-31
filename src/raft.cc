@@ -28,43 +28,39 @@ int main(int argc, char* argv[]) {
     }
 
     string server_id = args.get_string("id");
-
-    // TODO: Remove once Arguments supports required args
     if (server_id.size() == 0) {
-        cerr << "Server id is required" << endl;
+        cerr << "Error: Server identifier is required (use --id)" << endl;
         return EXIT_FAILURE;
     }
 
     Storage storage(server_id + STORAGE_NAME_SUFFIX);
-    storage.set_current_term(0);
-    storage.set_voted_for("");
 
     if (args.get_bool("reset")) {
         storage.Reset();
         return EXIT_SUCCESS;
     }
 
-    vector<string> unnamed_args = args.get_unnamed();
-    if (unnamed_args.size() == 0) {
-        cerr << "Specify at least peer to connect to" << endl;
+    vector<string> peer_info_strs = args.get_unnamed();
+    if (peer_info_strs.size() == 0) {
+        cerr << "Error: Specify at least one peer to connect to" << endl;
         return EXIT_FAILURE;
     }
 
-    vector<struct PeerInfo> peer_info_vector;
-
-    for (string arg: unnamed_args) {
-        auto vec = Util::StringSplit(arg, ":");
+    vector<struct PeerInfo> peer_infos;
+    for (string peer_info_str: peer_info_strs) {
+        auto parts = Util::StringSplit(peer_info_str, ":");
         struct PeerInfo peer_info;
-        peer_info.destination_ip_addr = vec[0];
-        peer_info.my_listen_port = stoi(vec[1]);
-        peer_info.destination_port = stoi(vec[2]);
-        peer_info_vector.push_back(peer_info);
+        peer_info.destination_ip_addr = parts[0];
+        peer_info.my_listen_port = stoi(parts[1]);
+        peer_info.destination_port = stoi(parts[2]);
+        peer_infos.push_back(peer_info);
     }
 
-    RaftServer raft_server(server_id, storage, peer_info_vector);
+    RaftServer raft_server(server_id, storage, peer_infos);
 
+    // Keep the main thread alive until a SIGINT or SIGTERM is received
     while (true) {
-        sleep(10);
+        this_thread::sleep_for(chrono::seconds(1));
     }
 
     google::protobuf::ShutdownProtobufLibrary();
