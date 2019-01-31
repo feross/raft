@@ -9,7 +9,7 @@
 
 class Peer {
   public:
-    Peer(unsigned short listening_port, const char* destination_ip_address, unsigned short destination_port, std::function<void(char*, int)> callback);
+    Peer(unsigned short listening_port, const char* destination_ip_address, unsigned short destination_port, std::function<void(Peer*, char*, int)> callback);
     void SendMessage(const char* message, int message_len);
     // ~Peer();
 
@@ -34,7 +34,6 @@ class Peer {
     std::thread in_listener;
     std::thread out_listener;
     bool connection_reset;
-    std::function<void(char*, int)> message_received_callback;
 
     StreamParser *stream_parser;
 };
