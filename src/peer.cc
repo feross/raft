@@ -27,9 +27,8 @@
 #define RECEIVE_BUFFER_SIZE 100000
 #define DEBUG false
 
-
 Peer::Peer(unsigned short listening_port, const char* destination_ip_address,
-        unsigned short destination_port, std::function<void(char*, int)> callback) {
+        unsigned short destination_port, std::function<void(Peer*, char*, int)> callback) {
     assert(listening_port != destination_port);
 
     my_port = listening_port;
@@ -41,12 +40,11 @@ Peer::Peer(unsigned short listening_port, const char* destination_ip_address,
 
     if (DEBUG) printf("constructing Peer Instance\n");
 
-    message_received_callback = callback;
-
     ListenForInboundMessages();
 
-    //"Stream Parser Class" initialization
-    stream_parser = new StreamParser(callback);
+    stream_parser = new StreamParser([this, callback](char* raw_message, int raw_message_len) {
+        callback(this, raw_message, raw_message_len);
+    });
 }
 
 

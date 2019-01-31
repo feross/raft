@@ -24,11 +24,11 @@ void Storage::set_current_term(int value) {
     Save();
 }
 
-int Storage::voted_for() const {
+const string& Storage::voted_for() const {
     return storage_message.voted_for();
 }
 
-void Storage::set_voted_for(int value) {
+void Storage::set_voted_for(const string& value) {
     storage_message.set_voted_for(value);
     Save();
 }
@@ -58,7 +58,7 @@ void Storage::add_log(const string& value) {
 
 void Storage::Init() {
     storage_message.set_current_term(0);
-    storage_message.set_voted_for(0);
+    storage_message.set_voted_for("");
     storage_message.clear_log();
 }
 

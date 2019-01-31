@@ -13,7 +13,7 @@ message PeerMessage {
     // Fields used in all messages
     required MessageType type = 1;
     required int32 term = 2;
-    required string sender_id = 3;
+    required string server_id = 3;
 
     // Fields used in AppendEntries response
     optional bool success = 4;

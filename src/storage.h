@@ -7,6 +7,7 @@
 
 #include "storage.pb.h"
 
+using namespace proto;
 using namespace std;
 
 class StorageFileException : public exception {
@@ -52,20 +53,20 @@ class Storage {
 
         /**
          * Returns the candidate id that received a vote in the current term
-         * (or 0 if none).
+         * (or "" if none).
          *
          * @return the candidate id that received a vote
          */
-        int voted_for() const;
+        const string& voted_for() const;
 
         /**
          * Sets the candidate id that received a vote in the current term to the
-         * given value, and persists it to stable storage. Set to 0 to indicate
+         * given value, and persists it to stable storage. Set to "" to indicate
          * that no candidate has been voted for in the current term.
          *
          * @param value the new candidate id that received a vote
          */
-        void set_voted_for(int value);
+        void set_voted_for(const string& value);
 
         /**
          * Returns all log entries in a vector. Each log entry contains a command
@@ -117,7 +118,7 @@ class Storage {
         void Save();
 
         string storage_path;
-        proto::Storage storage_message;
+        StorageMessage storage_message;
 };
 
 #endif

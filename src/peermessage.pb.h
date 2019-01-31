@@ -205,20 +205,20 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
 
   // accessors -------------------------------------------------------
 
-  // required string sender_id = 3;
-  bool has_sender_id() const;
-  void clear_sender_id();
-  static const int kSenderIdFieldNumber = 3;
-  const ::std::string& sender_id() const;
-  void set_sender_id(const ::std::string& value);
+  // required string server_id = 3;
+  bool has_server_id() const;
+  void clear_server_id();
+  static const int kServerIdFieldNumber = 3;
+  const ::std::string& server_id() const;
+  void set_server_id(const ::std::string& value);
   #if LANG_CXX11
-  void set_sender_id(::std::string&& value);
+  void set_server_id(::std::string&& value);
   #endif
-  void set_sender_id(const char* value);
-  void set_sender_id(const char* value, size_t size);
-  ::std::string* mutable_sender_id();
-  ::std::string* release_sender_id();
-  void set_allocated_sender_id(::std::string* sender_id);
+  void set_server_id(const char* value);
+  void set_server_id(const char* value, size_t size);
+  ::std::string* mutable_server_id();
+  ::std::string* release_server_id();
+  void set_allocated_server_id(::std::string* server_id);
 
   // required .proto.PeerMessage.MessageType type = 1;
   bool has_type() const;
@@ -254,8 +254,8 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   void clear_has_type();
   void set_has_term();
   void clear_has_term();
-  void set_has_sender_id();
-  void clear_has_sender_id();
+  void set_has_server_id();
+  void clear_has_server_id();
   void set_has_success();
   void clear_has_success();
   void set_has_vote_granted();
@@ -267,7 +267,7 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::internal::HasBits<1> _has_bits_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
-  ::google::protobuf::internal::ArenaStringPtr sender_id_;
+  ::google::protobuf::internal::ArenaStringPtr server_id_;
   int type_;
   ::google::protobuf::int32 term_;
   bool success_;
@@ -334,70 +334,70 @@ inline void PeerMessage::set_term(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:proto.PeerMessage.term)
 }
 
-// required string sender_id = 3;
-inline bool PeerMessage::has_sender_id() const {
+// required string server_id = 3;
+inline bool PeerMessage::has_server_id() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void PeerMessage::set_has_sender_id() {
+inline void PeerMessage::set_has_server_id() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void PeerMessage::clear_has_sender_id() {
+inline void PeerMessage::clear_has_server_id() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void PeerMessage::clear_sender_id() {
-  sender_id_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  clear_has_sender_id();
+inline void PeerMessage::clear_server_id() {
+  server_id_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  clear_has_server_id();
 }
-inline const ::std::string& PeerMessage::sender_id() const {
-  // @@protoc_insertion_point(field_get:proto.PeerMessage.sender_id)
-  return sender_id_.GetNoArena();
+inline const ::std::string& PeerMessage::server_id() const {
+  // @@protoc_insertion_point(field_get:proto.PeerMessage.server_id)
+  return server_id_.GetNoArena();
 }
-inline void PeerMessage::set_sender_id(const ::std::string& value) {
-  set_has_sender_id();
-  sender_id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:proto.PeerMessage.sender_id)
+inline void PeerMessage::set_server_id(const ::std::string& value) {
+  set_has_server_id();
+  server_id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:proto.PeerMessage.server_id)
 }
 #if LANG_CXX11
-inline void PeerMessage::set_sender_id(::std::string&& value) {
-  set_has_sender_id();
-  sender_id_.SetNoArena(
+inline void PeerMessage::set_server_id(::std::string&& value) {
+  set_has_server_id();
+  server_id_.SetNoArena(
     &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:proto.PeerMessage.sender_id)
+  // @@protoc_insertion_point(field_set_rvalue:proto.PeerMessage.server_id)
 }
 #endif
-inline void PeerMessage::set_sender_id(const char* value) {
+inline void PeerMessage::set_server_id(const char* value) {
   GOOGLE_DCHECK(value != NULL);
-  set_has_sender_id();
-  sender_id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:proto.PeerMessage.sender_id)
+  set_has_server_id();
+  server_id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:proto.PeerMessage.server_id)
 }
-inline void PeerMessage::set_sender_id(const char* value, size_t size) {
-  set_has_sender_id();
-  sender_id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+inline void PeerMessage::set_server_id(const char* value, size_t size) {
+  set_has_server_id();
+  server_id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:proto.PeerMessage.sender_id)
+  // @@protoc_insertion_point(field_set_pointer:proto.PeerMessage.server_id)
 }
-inline ::std::string* PeerMessage::mutable_sender_id() {
-  set_has_sender_id();
-  // @@protoc_insertion_point(field_mutable:proto.PeerMessage.sender_id)
-  return sender_id_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+inline ::std::string* PeerMessage::mutable_server_id() {
+  set_has_server_id();
+  // @@protoc_insertion_point(field_mutable:proto.PeerMessage.server_id)
+  return server_id_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline ::std::string* PeerMessage::release_sender_id() {
-  // @@protoc_insertion_point(field_release:proto.PeerMessage.sender_id)
-  if (!has_sender_id()) {
+inline ::std::string* PeerMessage::release_server_id() {
+  // @@protoc_insertion_point(field_release:proto.PeerMessage.server_id)
+  if (!has_server_id()) {
     return NULL;
   }
-  clear_has_sender_id();
-  return sender_id_.ReleaseNonDefaultNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  clear_has_server_id();
+  return server_id_.ReleaseNonDefaultNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void PeerMessage::set_allocated_sender_id(::std::string* sender_id) {
-  if (sender_id != NULL) {
-    set_has_sender_id();
+inline void PeerMessage::set_allocated_server_id(::std::string* server_id) {
+  if (server_id != NULL) {
+    set_has_server_id();
   } else {
-    clear_has_sender_id();
+    clear_has_server_id();
   }
-  sender_id_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), sender_id);
-  // @@protoc_insertion_point(field_set_allocated:proto.PeerMessage.sender_id)
+  server_id_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), server_id);
+  // @@protoc_insertion_point(field_set_allocated:proto.PeerMessage.server_id)
 }
 
 // optional bool success = 4;
