@@ -24,7 +24,7 @@ class StreamParser {
     StreamParser(std::function<void(char*, int)> callback);
 
     /**
-     * StreamParser destructor  completed message from the stream
+     * Destroy the StreamParser & clean up all resources
      */
     ~StreamParser();
 

@@ -25,7 +25,7 @@ class Peer {
     Peer(unsigned short listening_port, std::string destination_ip_address, unsigned short destination_port, std::function<void(Peer*, char*, int)> message_received_callback);
 
     /**
-     *
+     *  Destroy the Peer Connection & clean up all resources
      */
     ~Peer();
 
