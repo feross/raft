@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "peer.h"
-#include "peermessage.pb.h"
+#include "peer.pb.h"
 #include "storage.h"
 #include "timer.h"
 #include "util.h"

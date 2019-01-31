@@ -43,11 +43,15 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             }
             SendAppendentriesResponse(peer, true);
             return;
+
         case PeerMessage::APPENDENTRIES_RESPONSE:
             if (message.term() < storage.current_term()) {
+                // Drop responses with an outdated term; they indicate this
+                // response is for a request from a previous term.
                 return;
             }
             return;
+
         case PeerMessage::REQUESTVOTE_REQUEST:
             if (message.term() < storage.current_term()) {
                 SendRequestvoteResponse(peer, false);
@@ -62,15 +66,22 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             SendRequestvoteResponse(peer, true);
             timer->Reset();
             return;
+
         case PeerMessage::REQUESTVOTE_RESPONSE:
             if (message.term() < storage.current_term()) {
+                // Drop responses with an outdated term; they indicate this
+                // response is for a request from a previous term.
                 return;
             }
-            if (message.voted_for())
+            if (message.vote_granted()) {
+                ReceiveVote(message.server_id());
+            }
             return;
+
         default:
-            cerr << "Unexpected message: " << Util::ProtoDebugString(message) << endl;
-            return;
+            cerr << "Unexpected message type: " <<
+                Util::ProtoDebugString(message) << endl;
+            throw RaftServerException();
     }
 }
 
@@ -84,8 +95,8 @@ PeerMessage RaftServer::CreateMessage() {
 void RaftServer::SendMessage(Peer *peer, PeerMessage &message) {
     string message_string;
     message.SerializeToString(&message_string);
-    const char* message_cstr = message_string.c_str();
     cout << "SEND: " << Util::ProtoDebugString(message) << endl;
+    const char* message_cstr = message_string.c_str();
     peer->SendMessage(message_cstr, message_string.size());
 }
 
@@ -116,21 +127,22 @@ void RaftServer::SendRequestvoteResponse(Peer *peer, bool vote_granted) {
 }
 
 void RaftServer::TransitionCurrentTerm(int term) {
+    cout << "TERM: " << storage.current_term() << " -> " << term << endl;
     storage.set_current_term(term);
-
     // When updating the term, reset who we voted for
     storage.set_voted_for("");
 }
 
 void RaftServer::TransitionServerState(ServerState new_state) {
-    ServerState prev_state = server_state;
-    server_state = new_state;
-    cout << "STATE: " << getServerStateString(prev_state) << " -> " <<
+    cout << "STATE: " << getServerStateString(server_state) << " -> " <<
         getServerStateString(new_state) << endl;
+
+    server_state = new_state;
 
     switch (new_state) {
         case Follower:
             return;
+
         case Candidate:
             TransitionCurrentTerm(storage.current_term() + 1);
             ReceiveVote(server_id);
@@ -139,8 +151,10 @@ void RaftServer::TransitionServerState(ServerState new_state) {
             }
             timer->Reset();
             return;
+
         case Leader:
             return;
+
         default:
             cerr << "Bad state transition to " << new_state << endl;
             throw RaftServerException();
