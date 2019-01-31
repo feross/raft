@@ -24,14 +24,14 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -Wall -std=c++17
 LDLIBS ?= $(shell pkg-config --cflags --libs protobuf)
 
 $(TARGET): proto $(OBJS)
-	pkg-config --cflags protobuf  # fails if protobuf is not installed
 	$(CC) $(LDFLAGS) $(OBJS) -o $@ $(LOADLIBES) $(LDLIBS)
 
 PROTOS := $(shell find $(SRC_DIR) -name *.proto)
 PROTOS_H := $(addsuffix .pb.h,$(basename $(PROTOS)))
-PROTOS_CC := $(PROTOS_H:.pb.h=.pb.cc)
 
-proto: $(PROTOS)
+proto: $(PROTOS_H)
+
+$(PROTOS_H): $(PROTOS)
 	protoc -I=$(SRC_DIR) --cpp_out=$(SRC_DIR) $(PROTOS)
 
 .PHONY: install-deps
@@ -41,6 +41,5 @@ install-deps:
 .PHONY: clean
 clean:
 	$(RM) $(TARGET) $(OBJS) $(DEPS)
-	$(RM) $(PROTOS_H) $(PROTOS_CC)
 
 -include $(DEPS)

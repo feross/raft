@@ -25,7 +25,7 @@
 
 #define DEBUG false
 
-StreamParser::StreamParser(void callback(char* message, int message_len)) {
+StreamParser::StreamParser(std::function<void(char*, int)> callback) {
     partial_number_bytes = 0;
     current_message_length = 0;
     target_message_length = -1;

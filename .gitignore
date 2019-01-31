@@ -1,10 +1,6 @@
 # Built files
 raft
 
-# Protocol Buffers generated files
-*.pb.cc
-*.pb.h
-
 # Prerequisites
 *.d
 
@@ -37,3 +33,6 @@ raft
 *.exe
 *.out
 *.app
+
+# OS files
+.DS_Store

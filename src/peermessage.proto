@@ -1,0 +1,23 @@
+syntax = "proto2";
+
+package proto;
+
+message PeerMessage {
+    enum MessageType {
+        APPENDENTRIES_REQUEST = 0;
+        APPENDENTRIES_RESPONSE = 1;
+        REQUESTVOTE_REQUEST = 2;
+        REQUESTVOTE_RESPONSE = 3;
+    }
+
+    // Fields used in all messages
+    required MessageType type = 1;
+    required int32 term = 2;
+    required string sender_id = 3;
+
+    // Fields used in AppendEntries response
+    optional bool success = 4;
+
+    // Fields used in RequestVote response
+    optional bool vote_granted = 5;
+}

@@ -1,7 +1,6 @@
 #ifndef _RAFT_STORAGE_H_
 #define _RAFT_STORAGE_H_
 
-#include <iostream>
 #include <fstream>
 #include <cstdio>
 #include <google/protobuf/repeated_field.h>
@@ -41,7 +40,7 @@ class Storage {
          *
          * @return the current term
          */
-        int get_current_term() const;
+        int current_term() const;
 
         /**
          * Sets the current term to the given value, and persists it to stable
@@ -57,7 +56,7 @@ class Storage {
          *
          * @return the candidate id that received a vote
          */
-        int get_voted_for() const;
+        int voted_for() const;
 
         /**
          * Sets the candidate id that received a vote in the current term to the
@@ -77,7 +76,7 @@ class Storage {
          *
          * @return vector of log entries
          */
-        vector<string> get_log () const;
+        vector<string> log () const;
 
         /**
          * Returns the log entry element at the given zero-based index. Calling
@@ -87,7 +86,7 @@ class Storage {
          * @param  index the index of the log entry to return
          * @return the log entry
          */
-        const string& get_log (int index) const;
+        const string& log (int index) const;
 
         /**
          * Returns the number of log entries currently in the log.

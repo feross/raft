@@ -28,7 +28,8 @@
 #define DEBUG false
 
 
-Peer::Peer(unsigned short listening_port, const char* destination_ip_address, unsigned short destination_port, void callback(char* message, int message_len)) {
+Peer::Peer(unsigned short listening_port, const char* destination_ip_address,
+        unsigned short destination_port, std::function<void(char*, int)> callback) {
     assert(listening_port != destination_port);
 
     my_port = listening_port;
@@ -37,7 +38,7 @@ Peer::Peer(unsigned short listening_port, const char* destination_ip_address, un
     connection_reset = false;
 
     send_socket = -1;
-    
+
     if (DEBUG) printf("constructing Peer Instance\n");
 
     message_received_callback = callback;
@@ -117,7 +118,7 @@ void Peer::SendMessage(const char* message, int message_len) {
             connection_reset = false;
             if (DEBUG) printf("joining old thread\n");
         }
-        InitiateConnection(dest_ip_addr, dest_port); 
+        InitiateConnection(dest_ip_addr, dest_port);
     }
     // technically, send_socket could get closed right here, but we don't care (send will just fail, and that's fine)
     if (send_socket > 0) {
@@ -141,8 +142,8 @@ int Peer::AcceptConnection(const char* ip_addr, int listening_port) {
 
     memset(&serv, 0, sizeof(serv));             /* zero the struct before filling the fields */
     serv.sin_family = AF_INET;                  /* set the type of connection to TCP/IP */
-    dest.sin_addr.s_addr = inet_addr(ip_addr);  /* set destination IP number - test with localhost, 127.0.0.1*/ 
-    serv.sin_port = htons(listening_port);            /* set the server port number */    
+    dest.sin_addr.s_addr = inet_addr(ip_addr);  /* set destination IP number - test with localhost, 127.0.0.1*/
+    serv.sin_port = htons(listening_port);            /* set the server port number */
 
     mysocket = socket(AF_INET, SOCK_STREAM, 0);
     if (mysocket == -1) fprintf(stderr, "socket error: %s (%d)\n", strerror(errno), errno);
@@ -172,14 +173,14 @@ int Peer::AcceptConnection(const char* ip_addr, int listening_port) {
 
 
 int Peer::InitiateConnection(const char* ip_addr, int destination_port) {
-    struct sockaddr_in dest; 
+    struct sockaddr_in dest;
 
     send_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (send_socket == -1) fprintf(stderr, "socket error: %s (%d)\n", strerror(errno), errno);
 
     memset(&dest, 0, sizeof(dest));                 /* zero the struct */
     dest.sin_family = AF_INET;
-    dest.sin_addr.s_addr = inet_addr(ip_addr);      /* set destination IP number - test with localhost, 127.0.0.1*/ 
+    dest.sin_addr.s_addr = inet_addr(ip_addr);      /* set destination IP number - test with localhost, 127.0.0.1*/
     dest.sin_port = htons(destination_port);                /* set destination port number */
     int success = connect(send_socket, (struct sockaddr *)&dest, sizeof(struct sockaddr_in));
     if (success == 0) {

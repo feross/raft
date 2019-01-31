@@ -9,7 +9,7 @@
 
 class Peer {
   public:
-    Peer(unsigned short listening_port, const char* destination_ip_address, unsigned short destination_port, void callback(char* message, int message_len));
+    Peer(unsigned short listening_port, const char* destination_ip_address, unsigned short destination_port, std::function<void(char*, int)> callback);
     void SendMessage(const char* message, int message_len);
     // ~Peer();
 
@@ -23,20 +23,18 @@ class Peer {
     void ListenForClose();
     void ReceiveMessages(int socket);
 
-    std::mutex modify_socket_lock;
     int send_socket;
     // int receive_socket;
     //in theory could unify, but complicates implementation & creates opportunity for more race conditions, so for now avoid.
     // May go back and change implementation in future, which shouldn't require modifications to the interface
 
     int my_port;
-    int dest_port; 
+    int dest_port;
     const char* dest_ip_addr;
     std::thread in_listener;
     std::thread out_listener;
     bool connection_reset;
     std::function<void(char*, int)> message_received_callback;
-
 
     StreamParser *stream_parser;
 };
