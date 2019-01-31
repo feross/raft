@@ -56,8 +56,8 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::Storage, current_term_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::Storage, voted_for_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::Storage, log_),
-  0,
   1,
+  0,
   ~0u,
 };
 static const ::google::protobuf::internal::MigrationSchema schemas[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
@@ -90,7 +90,7 @@ void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
       "\n\rstorage.proto\022\005proto\"\?\n\007Storage\022\024\n\014cur"
-      "rent_term\030\001 \002(\005\022\021\n\tvoted_for\030\002 \002(\005\022\013\n\003lo"
+      "rent_term\030\001 \002(\005\022\021\n\tvoted_for\030\002 \002(\t\022\013\n\003lo"
       "g\030\003 \003(\t"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
@@ -135,16 +135,17 @@ Storage::Storage(const Storage& from)
       _has_bits_(from._has_bits_),
       log_(from.log_) {
   _internal_metadata_.MergeFrom(from._internal_metadata_);
-  ::memcpy(&current_term_, &from.current_term_,
-    static_cast<size_t>(reinterpret_cast<char*>(&voted_for_) -
-    reinterpret_cast<char*>(&current_term_)) + sizeof(voted_for_));
+  voted_for_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  if (from.has_voted_for()) {
+    voted_for_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.voted_for_);
+  }
+  current_term_ = from.current_term_;
   // @@protoc_insertion_point(copy_constructor:proto.Storage)
 }
 
 void Storage::SharedCtor() {
-  ::memset(&current_term_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&voted_for_) -
-      reinterpret_cast<char*>(&current_term_)) + sizeof(voted_for_));
+  voted_for_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  current_term_ = 0;
 }
 
 Storage::~Storage() {
@@ -153,6 +154,7 @@ Storage::~Storage() {
 }
 
 void Storage::SharedDtor() {
+  voted_for_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
 void Storage::SetCachedSize(int size) const {
@@ -177,11 +179,10 @@ void Storage::Clear() {
 
   log_.Clear();
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 3u) {
-    ::memset(&current_term_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&voted_for_) -
-        reinterpret_cast<char*>(&current_term_)) + sizeof(voted_for_));
+  if (cached_has_bits & 0x00000001u) {
+    voted_for_.ClearNonDefaultToEmptyNoArena();
   }
+  current_term_ = 0;
   _has_bits_.Clear();
   _internal_metadata_.Clear();
 }
@@ -210,14 +211,16 @@ bool Storage::MergePartialFromCodedStream(
         break;
       }
 
-      // required int32 voted_for = 2;
+      // required string voted_for = 2;
       case 2: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(16u /* 16 & 0xFF */)) {
-          set_has_voted_for();
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &voted_for_)));
+            static_cast< ::google::protobuf::uint8>(18u /* 18 & 0xFF */)) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_voted_for()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->voted_for().data(), static_cast<int>(this->voted_for().length()),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "proto.Storage.voted_for");
         } else {
           goto handle_unusual;
         }
@@ -269,13 +272,18 @@ void Storage::SerializeWithCachedSizes(
 
   cached_has_bits = _has_bits_[0];
   // required int32 current_term = 1;
-  if (cached_has_bits & 0x00000001u) {
+  if (cached_has_bits & 0x00000002u) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->current_term(), output);
   }
 
-  // required int32 voted_for = 2;
-  if (cached_has_bits & 0x00000002u) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->voted_for(), output);
+  // required string voted_for = 2;
+  if (cached_has_bits & 0x00000001u) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->voted_for().data(), static_cast<int>(this->voted_for().length()),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "proto.Storage.voted_for");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      2, this->voted_for(), output);
   }
 
   // repeated string log = 3;
@@ -304,13 +312,19 @@ void Storage::SerializeWithCachedSizes(
 
   cached_has_bits = _has_bits_[0];
   // required int32 current_term = 1;
-  if (cached_has_bits & 0x00000001u) {
+  if (cached_has_bits & 0x00000002u) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->current_term(), target);
   }
 
-  // required int32 voted_for = 2;
-  if (cached_has_bits & 0x00000002u) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->voted_for(), target);
+  // required string voted_for = 2;
+  if (cached_has_bits & 0x00000001u) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->voted_for().data(), static_cast<int>(this->voted_for().length()),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "proto.Storage.voted_for");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        2, this->voted_for(), target);
   }
 
   // repeated string log = 3;
@@ -335,18 +349,18 @@ size_t Storage::RequiredFieldsByteSizeFallback() const {
 // @@protoc_insertion_point(required_fields_byte_size_fallback_start:proto.Storage)
   size_t total_size = 0;
 
+  if (has_voted_for()) {
+    // required string voted_for = 2;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->voted_for());
+  }
+
   if (has_current_term()) {
     // required int32 current_term = 1;
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->current_term());
-  }
-
-  if (has_voted_for()) {
-    // required int32 voted_for = 2;
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::Int32Size(
-        this->voted_for());
   }
 
   return total_size;
@@ -361,15 +375,15 @@ size_t Storage::ByteSizeLong() const {
         _internal_metadata_.unknown_fields());
   }
   if (((_has_bits_[0] & 0x00000003) ^ 0x00000003) == 0) {  // All required fields are present.
+    // required string voted_for = 2;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->voted_for());
+
     // required int32 current_term = 1;
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->current_term());
-
-    // required int32 voted_for = 2;
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::Int32Size(
-        this->voted_for());
 
   } else {
     total_size += RequiredFieldsByteSizeFallback();
@@ -413,10 +427,11 @@ void Storage::MergeFrom(const Storage& from) {
   cached_has_bits = from._has_bits_[0];
   if (cached_has_bits & 3u) {
     if (cached_has_bits & 0x00000001u) {
-      current_term_ = from.current_term_;
+      set_has_voted_for();
+      voted_for_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.voted_for_);
     }
     if (cached_has_bits & 0x00000002u) {
-      voted_for_ = from.voted_for_;
+      current_term_ = from.current_term_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
@@ -448,8 +463,9 @@ void Storage::Swap(Storage* other) {
 void Storage::InternalSwap(Storage* other) {
   using std::swap;
   log_.InternalSwap(CastToBase(&other->log_));
+  voted_for_.Swap(&other->voted_for_, &::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+    GetArenaNoVirtual());
   swap(current_term_, other->current_term_);
-  swap(voted_for_, other->voted_for_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   _internal_metadata_.Swap(&other->_internal_metadata_);
 }
