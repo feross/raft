@@ -1,37 +1,6 @@
-#include <ctime>
-#include <exception>
-#include <iostream>
-#include <unistd.h>
-
-#include "arguments.h"
-#include "raft-server.h"
-#include "storage.h"
+#include "raft.h"
 
 using namespace std;
-
-static const string STORAGE_NAME_SUFFIX = "storage.dat";
-
-static const string INTRO_TEXT =
-R"(Raft - An understandable consensus algorithm
-
-Usage:
-    ./raft [options] [peers ...]
-
-Example:
-    Start a three server Raft cluster.
-
-        ./raft --id alice 127.0.0.1:4000:4010 127.0.0.1:4001:4020
-        ./raft --id bob 127.0.0.1:4010:4000 127.0.0.1:4011:4021
-        ./raft --id carol 127.0.0.1:4020:4001 127.0.0.1:4021:4011
-
-        TODO:
-        ./raft --port 4000 127.0.0.1:4001 127.0.0.1:4002
-
-Start a Raft server that listens on the given *port*. The server will treat
-each operand in *peers* as a peer Raft server part of the same cluster.
-These arguments should be hostname:port pairs in the format e.g.
-localhost:4000 or e.g. 12.34.56.67:4000.
-)";
 
 int main(int argc, char* argv[]) {
     // Verify that the version of the library that we linked against is
@@ -43,9 +12,8 @@ int main(int argc, char* argv[]) {
 
     Arguments args(INTRO_TEXT);
     args.RegisterBool("help", "Print help message");
-    args.RegisterInt("port", "Listening port");
     args.RegisterString("id", "Server identifier");
-    args.RegisterBool("reset", "Reset storage file");
+    args.RegisterBool("reset", "Delete server storage");
 
     try {
         args.Parse(argc, argv);
@@ -67,7 +35,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    Storage storage(server_id + "-" + STORAGE_NAME_SUFFIX);
+    Storage storage(server_id + STORAGE_NAME_SUFFIX);
     storage.set_current_term(0);
     storage.set_voted_for("");
 
