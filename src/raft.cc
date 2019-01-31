@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
     Arguments args(INTRO_TEXT);
     args.RegisterBool("help", "Print help message");
     args.RegisterInt("port", "Listening port");
-    args.RegisterString("name", "Server name");
+    args.RegisterString("id", "Server identifier");
     args.RegisterBool("reset", "Reset storage file");
 
     try {
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    string server_name = args.get_string("name");
+    string server_id = args.get_string("id");
     int port = args.get_int("port");
 
     if (args.get_bool("help")) {
@@ -61,12 +61,12 @@ int main(int argc, char* argv[]) {
     }
 
     // TODO: Remove once Arguments supports required args
-    if (server_name.size() == 0) {
-        cerr << "Server name is required" << endl;
+    if (server_id.size() == 0) {
+        cerr << "Server id is required" << endl;
         return EXIT_FAILURE;
     }
 
-    Storage storage(server_name + "-" + STORAGE_NAME_SUFFIX);
+    Storage storage(server_id + "-" + STORAGE_NAME_SUFFIX);
     storage.set_current_term(0);
     storage.set_voted_for("");
 
@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
 
     int connect_port = stoi(unnamed_args[0]);
 
-    RaftServer raft_server(server_name, storage, port, connect_port);
+    RaftServer raft_server(server_id, storage, port, connect_port);
 
     // TODO: hack for now, b/c we're on localhost & no other way to distinguish connections
     assert(port != connect_port);

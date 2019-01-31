@@ -1,6 +1,7 @@
 #ifndef _RAFT_SERVER_H_
 #define _RAFT_SERVER_H_
 
+#include <map>
 #include <vector>
 
 #include "peer.h"
@@ -8,6 +9,8 @@
 #include "storage.h"
 #include "timer.h"
 #include "util.h"
+
+using namespace proto;
 
 enum ServerState { Follower, Candidate, Leader };
 static const string ServerStateStrings[] = { "Follower", "Candidate", "Leader" };
@@ -23,7 +26,7 @@ class RaftServerException : public exception {
 
 class RaftServer {
     public:
-        RaftServer(const string& server_name, Storage storage, unsigned short port,
+        RaftServer(const string& server_id, Storage storage, unsigned short port,
                 unsigned short connect_port);
     private:
         proto::PeerMessage CreateMessage();
@@ -35,13 +38,15 @@ class RaftServer {
         void HandleMessage(Peer* peer, char* raw_message, int raw_message_len);
         void TransitionCurrentTerm(int term);
         void TransitionServerState(ServerState new_state);
+        void ReceiveVote(string server_id);
 
-        const string& server_name;
+        const string& server_id;
         Storage storage;
 
         ServerState server_state = Follower;
         vector<Peer*> peers;
         Timer *timer;
+        map<string, bool> votes;
 };
 
 #endif

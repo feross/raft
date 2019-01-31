@@ -56,7 +56,7 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   ~0u,  // no _weak_field_map_
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, type_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, term_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, sender_id_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, server_id_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, success_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, vote_granted_),
   1,
@@ -96,7 +96,7 @@ void AddDescriptorsImpl() {
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
       "\n\021peermessage.proto\022\005proto\"\374\001\n\013PeerMessa"
       "ge\022,\n\004type\030\001 \002(\0162\036.proto.PeerMessage.Mes"
-      "sageType\022\014\n\004term\030\002 \002(\005\022\021\n\tsender_id\030\003 \002("
+      "sageType\022\014\n\004term\030\002 \002(\005\022\021\n\tserver_id\030\003 \002("
       "\t\022\017\n\007success\030\004 \001(\010\022\024\n\014vote_granted\030\005 \001(\010"
       "\"w\n\013MessageType\022\031\n\025APPENDENTRIES_REQUEST"
       "\020\000\022\032\n\026APPENDENTRIES_RESPONSE\020\001\022\027\n\023REQUES"
@@ -154,7 +154,7 @@ void PeerMessage::InitAsDefaultInstance() {
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int PeerMessage::kTypeFieldNumber;
 const int PeerMessage::kTermFieldNumber;
-const int PeerMessage::kSenderIdFieldNumber;
+const int PeerMessage::kServerIdFieldNumber;
 const int PeerMessage::kSuccessFieldNumber;
 const int PeerMessage::kVoteGrantedFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
@@ -171,9 +171,9 @@ PeerMessage::PeerMessage(const PeerMessage& from)
       _internal_metadata_(NULL),
       _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom(from._internal_metadata_);
-  sender_id_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  if (from.has_sender_id()) {
-    sender_id_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.sender_id_);
+  server_id_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  if (from.has_server_id()) {
+    server_id_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.server_id_);
   }
   ::memcpy(&type_, &from.type_,
     static_cast<size_t>(reinterpret_cast<char*>(&vote_granted_) -
@@ -182,7 +182,7 @@ PeerMessage::PeerMessage(const PeerMessage& from)
 }
 
 void PeerMessage::SharedCtor() {
-  sender_id_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  server_id_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(&type_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&vote_granted_) -
       reinterpret_cast<char*>(&type_)) + sizeof(vote_granted_));
@@ -194,7 +194,7 @@ PeerMessage::~PeerMessage() {
 }
 
 void PeerMessage::SharedDtor() {
-  sender_id_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  server_id_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
 void PeerMessage::SetCachedSize(int size) const {
@@ -219,7 +219,7 @@ void PeerMessage::Clear() {
 
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 0x00000001u) {
-    sender_id_.ClearNonDefaultToEmptyNoArena();
+    server_id_.ClearNonDefaultToEmptyNoArena();
   }
   if (cached_has_bits & 30u) {
     ::memset(&type_, 0, static_cast<size_t>(
@@ -274,16 +274,16 @@ bool PeerMessage::MergePartialFromCodedStream(
         break;
       }
 
-      // required string sender_id = 3;
+      // required string server_id = 3;
       case 3: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
             static_cast< ::google::protobuf::uint8>(26u /* 26 & 0xFF */)) {
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_sender_id()));
+                input, this->mutable_server_id()));
           ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-            this->sender_id().data(), static_cast<int>(this->sender_id().length()),
+            this->server_id().data(), static_cast<int>(this->server_id().length()),
             ::google::protobuf::internal::WireFormat::PARSE,
-            "proto.PeerMessage.sender_id");
+            "proto.PeerMessage.server_id");
         } else {
           goto handle_unusual;
         }
@@ -356,14 +356,14 @@ void PeerMessage::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->term(), output);
   }
 
-  // required string sender_id = 3;
+  // required string server_id = 3;
   if (cached_has_bits & 0x00000001u) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->sender_id().data(), static_cast<int>(this->sender_id().length()),
+      this->server_id().data(), static_cast<int>(this->server_id().length()),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "proto.PeerMessage.sender_id");
+      "proto.PeerMessage.server_id");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      3, this->sender_id(), output);
+      3, this->server_id(), output);
   }
 
   // optional bool success = 4;
@@ -402,15 +402,15 @@ void PeerMessage::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->term(), target);
   }
 
-  // required string sender_id = 3;
+  // required string server_id = 3;
   if (cached_has_bits & 0x00000001u) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->sender_id().data(), static_cast<int>(this->sender_id().length()),
+      this->server_id().data(), static_cast<int>(this->server_id().length()),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "proto.PeerMessage.sender_id");
+      "proto.PeerMessage.server_id");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->sender_id(), target);
+        3, this->server_id(), target);
   }
 
   // optional bool success = 4;
@@ -435,11 +435,11 @@ size_t PeerMessage::RequiredFieldsByteSizeFallback() const {
 // @@protoc_insertion_point(required_fields_byte_size_fallback_start:proto.PeerMessage)
   size_t total_size = 0;
 
-  if (has_sender_id()) {
-    // required string sender_id = 3;
+  if (has_server_id()) {
+    // required string server_id = 3;
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
-        this->sender_id());
+        this->server_id());
   }
 
   if (has_type()) {
@@ -467,10 +467,10 @@ size_t PeerMessage::ByteSizeLong() const {
         _internal_metadata_.unknown_fields());
   }
   if (((_has_bits_[0] & 0x00000007) ^ 0x00000007) == 0) {  // All required fields are present.
-    // required string sender_id = 3;
+    // required string server_id = 3;
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
-        this->sender_id());
+        this->server_id());
 
     // required .proto.PeerMessage.MessageType type = 1;
     total_size += 1 +
@@ -526,8 +526,8 @@ void PeerMessage::MergeFrom(const PeerMessage& from) {
   cached_has_bits = from._has_bits_[0];
   if (cached_has_bits & 31u) {
     if (cached_has_bits & 0x00000001u) {
-      set_has_sender_id();
-      sender_id_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.sender_id_);
+      set_has_server_id();
+      server_id_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.server_id_);
     }
     if (cached_has_bits & 0x00000002u) {
       type_ = from.type_;
@@ -570,7 +570,7 @@ void PeerMessage::Swap(PeerMessage* other) {
 }
 void PeerMessage::InternalSwap(PeerMessage* other) {
   using std::swap;
-  sender_id_.Swap(&other->sender_id_, &::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+  server_id_.Swap(&other->server_id_, &::google::protobuf::internal::GetEmptyStringAlreadyInited(),
     GetArenaNoVirtual());
   swap(type_, other->type_);
   swap(term_, other->term_);
