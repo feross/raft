@@ -27,8 +27,7 @@ class RaftServerException : public exception {
 
 class RaftServer {
     public:
-        RaftServer(const string& server_id, Storage storage, unsigned short port,
-                unsigned short connect_port);
+        RaftServer(const string& server_id, Storage storage, vector<struct PeerInfo>);
     private:
         void HandleElectionTimer();
         void HandleLeaderTimer();
@@ -54,6 +53,12 @@ class RaftServer {
 
         map<string, bool> votes;
         mutex stateMutex;
+};
+
+struct PeerInfo {
+    unsigned short my_listen_port;
+    unsigned short destination_port;
+    const char* destination_ip_addr;
 };
 
 #endif

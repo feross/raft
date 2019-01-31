@@ -86,7 +86,14 @@ int main(int argc, char* argv[]) {
 
     int connect_port = stoi(unnamed_args[0]);
 
-    RaftServer raft_server(server_id, storage, port, connect_port);
+    struct PeerInfo peer_info;
+    peer_info.my_listen_port = port;
+    peer_info.destination_port = connect_port;
+    peer_info.destination_ip_addr = "127.0.0.1";
+    vector<struct PeerInfo> peer_info_vector;
+    peer_info_vector.push_back(peer_info);
+
+    RaftServer raft_server(server_id, storage, peer_info_vector);
 
     // TODO: hack for now, b/c we're on localhost & no other way to distinguish connections
     assert(port != connect_port);
