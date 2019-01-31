@@ -26,6 +26,7 @@ class Timer {
          * @param callback The function to call when the timer fires
          */
         Timer(int min_duration, int max_duration, function<void()> callback);
+        Timer(int duration, function<void()> callback) : Timer(duration, duration, callback) {}
 
         /**
          * Destroy the timer and cleanup all resources.

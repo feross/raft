@@ -14,14 +14,32 @@ RaftServer::RaftServer(const string& server_id, Storage storage, unsigned short 
         });
     peers.push_back(peer);
 
-    timer = new Timer(ELECTION_MIN_TIMEOUT, ELECTION_MAX_TIMEOUT, [this]() {
-        HandleElectionTimeout();
+    electionTimer = new Timer(ELECTION_MIN_TIMEOUT, ELECTION_MAX_TIMEOUT, [this]() {
+        HandleElectionTimer();
+    });
+
+    leaderTimer = new Timer(LEADER_HEARTBEAT_INTERVAL, [this]() {
+        HandleLeaderTimer();
     });
 }
 
-void RaftServer::HandleElectionTimeout() {
+void RaftServer::HandleElectionTimer() {
     lock_guard<mutex> lock(stateMutex);
+    if (server_state == Leader) {
+        return;
+    }
     TransitionServerState(Candidate);
+}
+
+void RaftServer::HandleLeaderTimer() {
+    lock_guard<mutex> lock(stateMutex);
+    leaderTimer->Reset();
+    if (server_state != Leader) {
+        return;
+    }
+    for (Peer* peer: peers) {
+        SendAppendentriesRequest(peer);
+    }
 }
 
 void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_message_len) {
@@ -42,6 +60,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 return;
             }
             SendAppendentriesResponse(peer, true);
+            electionTimer->Reset();
             return;
 
         case PeerMessage::APPENDENTRIES_RESPONSE:
@@ -64,7 +83,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             }
             storage.set_voted_for(message.server_id());
             SendRequestvoteResponse(peer, true);
-            timer->Reset();
+            electionTimer->Reset();
             return;
 
         case PeerMessage::REQUESTVOTE_RESPONSE:
@@ -149,7 +168,7 @@ void RaftServer::TransitionServerState(ServerState new_state) {
             for (Peer* peer: peers) {
                 SendRequestvoteRequest(peer);
             }
-            timer->Reset();
+            electionTimer->Reset();
             return;
 
         case Leader:

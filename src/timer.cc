@@ -2,6 +2,7 @@
 
 static const int SLEEP_DURATION = 100; // In milliseconds
 
+
 Timer::Timer(int min_duration, int max_duration, function<void()> callback) :
         min_duration(min_duration), max_duration(max_duration) {
     Reset();
@@ -11,8 +12,8 @@ Timer::Timer(int min_duration, int max_duration, function<void()> callback) :
             if (active) {
                 remaining_time -= SLEEP_DURATION;
                 if (remaining_time <= 0) {
-                    callback();
                     active = false;
+                    callback();
                 }
             }
         }

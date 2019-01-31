@@ -17,6 +17,7 @@ static const string ServerStateStrings[] = { "Follower", "Candidate", "Leader" }
 
 static const int ELECTION_MIN_TIMEOUT = 5'000;
 static const int ELECTION_MAX_TIMEOUT = 10'000;
+static const int LEADER_HEARTBEAT_INTERVAL = 2'000;
 
 class RaftServerException : public exception {
     const char* what() const noexcept {
@@ -29,9 +30,10 @@ class RaftServer {
         RaftServer(const string& server_id, Storage storage, unsigned short port,
                 unsigned short connect_port);
     private:
-        proto::PeerMessage CreateMessage();
-        void HandleElectionTimeout();
+        void HandleElectionTimer();
+        void HandleLeaderTimer();
         void HandlePeerMessage(Peer* peer, char* raw_message, int raw_message_len);
+        PeerMessage CreateMessage();
         void SendMessage(Peer *peer, proto::PeerMessage &message);
         void SendAppendentriesRequest(Peer *peer);
         void SendAppendentriesResponse(Peer *peer, bool success);
@@ -46,7 +48,10 @@ class RaftServer {
 
         ServerState server_state = Follower;
         vector<Peer*> peers;
-        Timer *timer;
+
+        Timer *electionTimer;
+        Timer *leaderTimer;
+
         map<string, bool> votes;
         mutex stateMutex;
 };
