@@ -30,12 +30,13 @@ class RaftServer {
                 unsigned short connect_port);
     private:
         proto::PeerMessage CreateMessage();
+        void HandleElectionTimeout();
+        void HandlePeerMessage(Peer* peer, char* raw_message, int raw_message_len);
         void SendMessage(Peer *peer, proto::PeerMessage &message);
         void SendAppendentriesRequest(Peer *peer);
         void SendAppendentriesResponse(Peer *peer, bool success);
         void SendRequestvoteRequest(Peer *peer);
         void SendRequestvoteResponse(Peer *peer, bool vote_granted);
-        void HandleMessage(Peer* peer, char* raw_message, int raw_message_len);
         void TransitionCurrentTerm(int term);
         void TransitionServerState(ServerState new_state);
         void ReceiveVote(string server_id);
@@ -47,6 +48,7 @@ class RaftServer {
         vector<Peer*> peers;
         Timer *timer;
         map<string, bool> votes;
+        mutex stateMutex;
 };
 
 #endif

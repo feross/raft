@@ -10,13 +10,68 @@ RaftServer::RaftServer(const string& server_id, Storage storage, unsigned short 
 
     Peer *peer = new Peer(port, "127.0.0.1", connect_port,
         [this](Peer* peer, char* raw_message, int raw_message_len) {
-            HandleMessage(peer, raw_message, raw_message_len);
+            HandlePeerMessage(peer, raw_message, raw_message_len);
         });
     peers.push_back(peer);
 
     timer = new Timer(ELECTION_MIN_TIMEOUT, ELECTION_MAX_TIMEOUT, [this]() {
-        TransitionServerState(Candidate);
+        HandleElectionTimeout();
     });
+}
+
+void RaftServer::HandleElectionTimeout() {
+    lock_guard<mutex> lock(stateMutex);
+    TransitionServerState(Candidate);
+}
+
+void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_message_len) {
+    lock_guard<mutex> lock(stateMutex);
+    PeerMessage message;
+    message.ParseFromString(string(raw_message, raw_message_len));
+    cout << "RECEIVE: " << Util::ProtoDebugString(message) << endl;
+
+    if (message.term() > storage.current_term()) {
+        TransitionCurrentTerm(message.term());
+        TransitionServerState(Follower);
+    }
+
+    switch (message.type()) {
+        case PeerMessage::APPENDENTRIES_REQUEST:
+            if (message.term() < storage.current_term()) {
+                SendAppendentriesResponse(peer, false);
+                return;
+            }
+            SendAppendentriesResponse(peer, true);
+            return;
+        case PeerMessage::APPENDENTRIES_RESPONSE:
+            if (message.term() < storage.current_term()) {
+                return;
+            }
+            return;
+        case PeerMessage::REQUESTVOTE_REQUEST:
+            if (message.term() < storage.current_term()) {
+                SendRequestvoteResponse(peer, false);
+                return;
+            }
+            if (storage.voted_for() != "" &&
+                storage.voted_for() != message.server_id()) {
+                SendRequestvoteResponse(peer, false);
+                return;
+            }
+            storage.set_voted_for(message.server_id());
+            SendRequestvoteResponse(peer, true);
+            timer->Reset();
+            return;
+        case PeerMessage::REQUESTVOTE_RESPONSE:
+            if (message.term() < storage.current_term()) {
+                return;
+            }
+            if (message.voted_for())
+            return;
+        default:
+            cerr << "Unexpected message: " << Util::ProtoDebugString(message) << endl;
+            return;
+    }
 }
 
 PeerMessage RaftServer::CreateMessage() {
@@ -60,52 +115,6 @@ void RaftServer::SendRequestvoteResponse(Peer *peer, bool vote_granted) {
     SendMessage(peer, message);
 }
 
-void RaftServer::HandleMessage(Peer* peer, char* raw_message, int raw_message_len) {
-    PeerMessage message;
-    message.ParseFromString(string(raw_message, raw_message_len));
-    cout << "RECEIVE: " << Util::ProtoDebugString(message) << endl;
-
-    if (message.term() > storage.current_term()) {
-        TransitionCurrentTerm(message.term());
-        TransitionServerState(Follower);
-    }
-
-    switch (message.type()) {
-        case PeerMessage::APPENDENTRIES_REQUEST:
-            if (message.term() < storage.current_term()) {
-                SendAppendentriesResponse(peer, false);
-                return;
-            }
-            SendAppendentriesResponse(peer, true);
-            return;
-        case PeerMessage::APPENDENTRIES_RESPONSE:
-            if (message.term() < storage.current_term()) {
-                return;
-            }
-            return;
-        case PeerMessage::REQUESTVOTE_REQUEST:
-            if (message.term() < storage.current_term()) {
-                SendRequestvoteResponse(peer, false);
-                return;
-            }
-            if (storage.voted_for() == "" ||
-                storage.voted_for() == message.server_id()) {
-                SendRequestvoteResponse(peer, true);
-            } else {
-                SendRequestvoteResponse(peer, false);
-            }
-            return;
-        case PeerMessage::REQUESTVOTE_RESPONSE:
-            if (message.term() < storage.current_term()) {
-                return;
-            }
-            return;
-        default:
-            cerr << "Unexpected message: " << Util::ProtoDebugString(message) << endl;
-            return;
-    }
-}
-
 void RaftServer::TransitionCurrentTerm(int term) {
     storage.set_current_term(term);
 
@@ -146,7 +155,9 @@ void RaftServer::ReceiveVote(string server_id) {
         if (vote_granted) vote_count += 1;
     }
 
-    if (vote_count >= (peers.size() / 2) + 1) {
+    int server_count = peers.size() + 1;
+    int majority_threshold = (server_count / 2) + 1;
+    if (vote_count >= majority_threshold) {
         TransitionServerState(Leader);
     }
 }
