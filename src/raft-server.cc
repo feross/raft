@@ -1,5 +1,9 @@
 #include "raft-server.h"
 
+static const string& getServerStateString(ServerState server_state) {
+    return ServerStateStrings[server_state];
+}
+
 RaftServer::RaftServer(const string& server_name, Storage storage, unsigned short port,
         unsigned short connect_port) : server_name(server_name),
         storage(storage) {
@@ -26,8 +30,8 @@ void RaftServer::SendMessage(Peer *peer, proto::PeerMessage &message) {
     string message_string;
     message.SerializeToString(&message_string);
     const char* message_cstr = message_string.c_str();
+    cout << "SEND: " << Util::ProtoDebugString(message) << endl;
     peer->SendMessage(message_cstr, message_string.size());
-    cout << "SENT: " << Util::ProtoDebugString(message) << endl;
 }
 
 void RaftServer::SendAppendentriesRequest(Peer *peer) {
@@ -59,7 +63,7 @@ void RaftServer::SendRequestvoteResponse(Peer *peer, bool vote_granted) {
 void RaftServer::HandleMessage(Peer* peer, char* raw_message, int raw_message_len) {
     proto::PeerMessage message;
     message.ParseFromString(string(raw_message, raw_message_len));
-    cout << "RECEIVED: " << Util::ProtoDebugString(message) << endl;
+    cout << "RECEIVE: " << Util::ProtoDebugString(message) << endl;
 
     switch (message.type()) {
         case proto::PeerMessage::APPENDENTRIES_REQUEST:
@@ -99,7 +103,8 @@ void RaftServer::TransitionCurrentTerm(int term) {
 void RaftServer::TransitionServerState(ServerState new_state) {
     ServerState prev_state = server_state;
     server_state = new_state;
-    cout << "State change: " << prev_state << " -> " << new_state << endl;
+    cout << "STATE: " << getServerStateString(prev_state) << " -> " <<
+        getServerStateString(new_state) << endl;
 
     switch (new_state) {
         case Follower:
@@ -107,15 +112,15 @@ void RaftServer::TransitionServerState(ServerState new_state) {
         case Candidate:
             TransitionCurrentTerm(storage.current_term() + 1);
             // TODO: Vote for self
-            timer->Reset();
             for (Peer* peer: peers) {
                 SendRequestvoteRequest(peer);
             }
+            timer->Reset();
             return;
         case Leader:
             return;
         default:
             cerr << "Bad state transition to " << new_state << endl;
-            exit(EXIT_FAILURE);
+            throw RaftServerException();
     }
 }
