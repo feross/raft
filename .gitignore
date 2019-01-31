@@ -5,7 +5,7 @@ raft
 *.d
 
 # Storage
-.dat
+*.dat
 
 # OS files
 .DS_Store
