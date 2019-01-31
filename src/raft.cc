@@ -1,13 +1,10 @@
-#include <cstdlib>
 #include <ctime>
 #include <exception>
 #include <iostream>
-#include <stdlib.h>
 #include <unistd.h>
 
 #include "arguments.h"
 #include "raft-server.h"
-#include "peermessage.pb.h"
 #include "storage.h"
 
 using namespace std;
