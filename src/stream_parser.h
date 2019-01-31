@@ -1,3 +1,5 @@
+#pragma once
+
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -7,13 +9,11 @@
 #include <functional>
 #include <tuple>
 
-#pragma once
-
 class StreamParser {
   public:
     /**
      * Tool for parsing objects to be passed into a stream, or pulled out of a stream of bytes.
-     * 
+     *
      * Must be used by both ends of the stream to work properly, due to encoding scheme
      *
      * @param callback - callback function to be called whenever we receive a message
@@ -44,10 +44,10 @@ class StreamParser {
     /**
      * Given a message to send and its size, generates the buffer to be sent to the other end of the stream.
      * This buffer is heap-allocated & returned to the client, who is responsible for freeing it.
-     * 
+     *
      * @param raw_message - buffer containing data we wish to send
      * @param message_len - length (in bytes) of the message in the raw_message buffer
-     * 
+     *
      * @return - a tuple containing:
      *                  char* - a heap-allocated, formatted buffer to send, which the client is responsible for freeing
      *                  int - the size of the data in that buffer

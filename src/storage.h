@@ -1,5 +1,4 @@
-#ifndef _RAFT_STORAGE_H_
-#define _RAFT_STORAGE_H_
+#pragma once
 
 #include <fstream>
 #include <cstdio>
@@ -122,5 +121,3 @@ class Storage {
         string storage_path;
         StorageMessage storage_message;
 };
-
-#endif

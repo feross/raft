@@ -1,5 +1,4 @@
-#ifndef _RAFT_OSTREAMLOCK_H_
-#define _RAFT_OSTREAMLOCK_H_
+#pragma once
 
 /**
  * Implementation from CS110
@@ -28,5 +27,3 @@
  */
 std::ostream& oslock(std::ostream& os);
 std::ostream& osunlock(std::ostream& os);
-
-#endif

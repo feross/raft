@@ -1,5 +1,4 @@
-#ifndef _RAFT_TIMER_H_
-#define _RAFT_TIMER_H_
+#pragma once
 
 #include <chrono>
 #include <cstdlib>
@@ -53,5 +52,3 @@ class Timer {
         bool destroyed = false;
         bool active = false;
 };
-
-#endif

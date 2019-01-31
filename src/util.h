@@ -1,5 +1,4 @@
-#ifndef _RAFT_UTIL_H_
-#define _RAFT_UTIL_H_
+#pragma once
 
 #include <algorithm>
 #include <google/protobuf/message.h>
@@ -13,5 +12,3 @@ class Util {
         static const string ProtoDebugString(Message& message);
         static const vector<string> StringSplit(string str, string delim);
 };
-
-#endif

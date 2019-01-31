@@ -1,5 +1,4 @@
-#ifndef _RAFT_ARGUMENTS_H_
-#define _RAFT_ARGUMENTS_H_
+#pragma once
 
 #include <exception>
 #include <map>
@@ -173,5 +172,3 @@ class Arguments {
 
         string intro;
 };
-
-#endif

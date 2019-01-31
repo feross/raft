@@ -1,5 +1,4 @@
-#ifndef _RAFT_SERVER_H_
-#define _RAFT_SERVER_H_
+#pragma once
 
 #include <map>
 #include <vector>
@@ -61,5 +60,3 @@ struct PeerInfo {
     unsigned short destination_port;
     string destination_ip_addr;
 };
-
-#endif

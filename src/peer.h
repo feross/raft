@@ -1,3 +1,5 @@
+#pragma once
+
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -31,7 +33,7 @@ class Peer {
 
     /**
      * Attempts to send a message to a peer.  No guarentee that the message will go through, client should handle resending if necessary.
-     * 
+     *
      * @param message - blob of data to send to the peer
      * @param message_len - size (in bytes) of message blob to send to peer
      */
