@@ -19,54 +19,48 @@
 #include <functional>
 #include <thread>
 #include <cassert>
-// clean this up ^
-#include "stream_parser.h"
+#include <tuple>
+// TODO: clean this up ^
 
+#include "stream_parser.h"
 #include "peer.h"
 
 #define RECEIVE_BUFFER_SIZE 100000
 #define DEBUG false
 
 Peer::Peer(unsigned short listening_port, std::string destination_ip_address,
-        unsigned short destination_port, std::function<void(Peer*, char*, int)> callback) {
+        unsigned short destination_port, std::function<void(Peer*, char*, int)> message_received_callback) {
+
     assert(listening_port != destination_port);
+    if (DEBUG) printf("constructing Peer Instance\n");
 
     my_port = listening_port;
     dest_port = destination_port;
     dest_ip_addr = destination_ip_address;
     connection_reset = false;
-
     send_socket = -1;
 
-    if (DEBUG) printf("constructing Peer Instance\n");
 
-    ListenForInboundMessages();
+    if (DEBUG) printf("creating a new inbound listening thread\n");
+    in_listener = std::thread([this] () {
+        ListenForInboundMessages();
+    });
 
-    stream_parser = new StreamParser([this, callback](char* raw_message, int raw_message_len) {
-        callback(this, raw_message, raw_message_len);
+    stream_parser = new StreamParser([this, message_received_callback](char* raw_message, int raw_message_len) {
+        message_received_callback(this, raw_message, raw_message_len);
     });
 }
 
 
-//feels like there is a way to get single-socket version working right, where either party can intiatiate a connection & the other side is always listening if it can
-// (note: that would require separate threads, and therefore also protection over the one shared socket of some kind OR use lexicographical order to decide races consistently)
-
-
-// overall, feels simpler to just separate the two flows & remove this sort of weird race condition case... although it also feels very slightly like it's
-// passing complexity to the client, because the client now has to specify twice as many ports... but really seems worth it on simplifying implementation.
-
 void Peer::ListenForInboundMessages() {
-    if (DEBUG) printf("creating a new inbound listening thread\n");
-    in_listener = std::thread([this] () {
-        while(true) {
-            int receive_socket = AcceptConnection(dest_ip_addr.c_str(), my_port);
-            if (DEBUG) printf("receive socket: %d\n", receive_socket);
-            ReceiveMessages(receive_socket);
-            close(receive_socket);
-            stream_parser->ResetIncomingMessage(); //dump anything we haven't used
-            sleep(1);
-        }
-    });
+    while(true) {
+        int receive_socket = AcceptConnection(dest_ip_addr.c_str(), my_port);
+        if (DEBUG) printf("receive socket: %d\n", receive_socket);
+        ReceiveMessages(receive_socket);
+        close(receive_socket);
+        stream_parser->ResetIncomingMessage(); //dump anything we haven't used
+        sleep(1);
+    }
     // join in destructor
 }
 
@@ -98,6 +92,7 @@ void Peer::ReceiveMessages(int socket) {
             break;
         }
         stream_parser->HandleRecievedChunk(buffer, len);
+
         /* We have to null terminate the received data ourselves */  //NOTE: this is where we should be handling the protocol buffers stuff...
         //data won't normally come in this nice
         buffer[len] = '\0';
@@ -122,8 +117,8 @@ void Peer::SendMessage(const char* message, int message_len) {
     if (send_socket > 0) {
         if (DEBUG) printf("send_socket x: %d\n", send_socket);
 
-        char* formatted_message = stream_parser->CreateMessageToSend(message, message_len); //TODO change return type to include size somehow
-        int success = send(send_socket, formatted_message, message_len+sizeof(int), 0); //See above TODO re: message_len+sizeof(int)
+        auto [formatted_message, formatted_message_len] = stream_parser->CreateMessageToSend(message, message_len); //TODO change return type to include size somehow
+        int success = send(send_socket, formatted_message, formatted_message_len, 0); //See above TODO re: message_len+sizeof(int)
         if (success == -1) fprintf(stderr, "error send: %s (%d)\n", strerror(errno), errno);
         delete(formatted_message);
     }
