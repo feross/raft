@@ -123,8 +123,8 @@ void Peer::SendMessage(const char* message, int message_len) {
     if (send_socket > 0) {
         if (DEBUG) printf("send_socket x: %d\n", send_socket);
 
-        char* formatted_message = stream_parser->CreateMessageToSend(message, message_len);
-        int success = send(send_socket, formatted_message, message_len+sizeof(int), 0);
+        char* formatted_message = stream_parser->CreateMessageToSend(message, message_len); //TODO change return type to include size somehow
+        int success = send(send_socket, formatted_message, message_len+sizeof(int), 0); //See above TODO re: message_len+sizeof(int)
         if (success == -1) fprintf(stderr, "error send: %s (%d)\n", strerror(errno), errno);
         delete(formatted_message);
     }
