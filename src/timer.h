@@ -6,6 +6,8 @@
 #include <iostream>
 #include <thread>
 
+#include "ostreamlock.h"
+
 using namespace std;
 
 class Timer {

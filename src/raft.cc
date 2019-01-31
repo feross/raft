@@ -18,18 +18,19 @@ int main(int argc, char* argv[]) {
     try {
         args.Parse(argc, argv);
     } catch (exception& err) {
-        cerr << "Error: " << err.what() << endl;
+        cerr << oslock << "Error: " << err.what() << endl << osunlock;
         return EXIT_FAILURE;
     }
 
     if (args.get_bool("help")) {
-        cout << args.get_help_text() << endl;
+        cout << oslock << args.get_help_text() << endl << osunlock;
         return EXIT_SUCCESS;
     }
 
     string server_id = args.get_string("id");
     if (server_id.size() == 0) {
-        cerr << "Error: Server identifier is required (use --id)" << endl;
+        cerr << oslock << "Error: Server identifier is required (use --id)" <<
+            endl << osunlock;
         return EXIT_FAILURE;
     }
 
@@ -42,7 +43,8 @@ int main(int argc, char* argv[]) {
 
     vector<string> peer_info_strs = args.get_unnamed();
     if (peer_info_strs.size() == 0) {
-        cerr << "Error: Specify at least one peer to connect to" << endl;
+        cerr << oslock << "Error: Specify at least one peer to connect to" <<
+            endl << osunlock;
         return EXIT_FAILURE;
     }
 

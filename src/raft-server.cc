@@ -47,7 +47,9 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
     lock_guard<mutex> lock(stateMutex);
     PeerMessage message;
     message.ParseFromString(string(raw_message, raw_message_len));
-    cout << "RECEIVE: " << Util::ProtoDebugString(message) << endl;
+
+    cout << oslock << "RECEIVE: " << Util::ProtoDebugString(message) << endl <<
+        osunlock;
 
     if (message.term() > storage.current_term()) {
         TransitionCurrentTerm(message.term());
@@ -99,8 +101,8 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             return;
 
         default:
-            cerr << "Unexpected message type: " <<
-                Util::ProtoDebugString(message) << endl;
+            cerr << oslock << "Unexpected message type: " <<
+                Util::ProtoDebugString(message) << endl << osunlock;
             throw RaftServerException();
     }
 }
@@ -115,7 +117,8 @@ PeerMessage RaftServer::CreateMessage() {
 void RaftServer::SendMessage(Peer *peer, PeerMessage &message) {
     string message_string;
     message.SerializeToString(&message_string);
-    cout << "SEND: " << Util::ProtoDebugString(message) << endl;
+    cout << oslock << "SEND: " << Util::ProtoDebugString(message) << endl <<
+        osunlock;
     const char* message_cstr = message_string.c_str();
     peer->SendMessage(message_cstr, message_string.size());
 }
@@ -147,15 +150,16 @@ void RaftServer::SendRequestvoteResponse(Peer *peer, bool vote_granted) {
 }
 
 void RaftServer::TransitionCurrentTerm(int term) {
-    cout << "TERM: " << storage.current_term() << " -> " << term << endl;
+    cout << oslock << "TERM: " << storage.current_term() << " -> " << term <<
+        endl << osunlock;
     storage.set_current_term(term);
     // When updating the term, reset who we voted for
     storage.set_voted_for("");
 }
 
 void RaftServer::TransitionServerState(ServerState new_state) {
-    cout << "STATE: " << getServerStateString(server_state) << " -> " <<
-        getServerStateString(new_state) << endl;
+    cout << oslock << "STATE: " << getServerStateString(server_state) <<
+        " -> " << getServerStateString(new_state) << endl << osunlock;
 
     server_state = new_state;
 
@@ -180,7 +184,8 @@ void RaftServer::TransitionServerState(ServerState new_state) {
             return;
 
         default:
-            cerr << "Bad state transition to " << new_state << endl;
+            cerr << oslock << "Bad state transition to " << new_state << endl <<
+                osunlock;
             throw RaftServerException();
     }
 }

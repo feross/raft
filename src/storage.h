@@ -5,6 +5,8 @@
 #include <cstdio>
 #include <google/protobuf/repeated_field.h>
 
+#include "util.h"
+#include "ostreamlock.h"
 #include "storage.pb.h"
 
 using namespace proto;

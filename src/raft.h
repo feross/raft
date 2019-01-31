@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 #include "arguments.h"
+#include "ostreamlock.h"
 #include "raft-server.h"
 #include "storage.h"
 

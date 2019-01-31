@@ -3,10 +3,13 @@
 Storage::Storage(string storage_path) : storage_path(storage_path) {
     fstream input(storage_path, ios::in | ios::binary);
     if (!storage_message.ParseFromIstream(&input)) {
-        cerr << "Failed to load storage file. Using empty storage." << endl;
+        cerr << oslock << "Failed to load storage file; using empty storage" <<
+            endl << osunlock;
         Init();
         Save();
     }
+    cout << oslock << "Initial Storage: " <<
+        Util::ProtoDebugString(storage_message) << endl << osunlock;
 }
 
 void Storage::Reset() {
