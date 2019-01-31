@@ -132,7 +132,7 @@ void Peer::SendMessage(const char* message, int message_len) {
 //unclear how to receive message, should maybe interrupt main line of execution... or at least, the main program needs to become aware of what this message was
 //for now just have a thread that prints incoming, created in the constructor
 
-int Peer::AcceptConnection(const char* ip_addr, int listening_port) {
+int Peer::AcceptConnection(const char* ip_addr, unsigned short listening_port) {
     struct sockaddr_in dest; /* socket info about the machine connecting to us */
     struct sockaddr_in serv; /* socket info about our server */
     int mysocket;            /* socket used to listen for incoming connections */
@@ -170,7 +170,7 @@ int Peer::AcceptConnection(const char* ip_addr, int listening_port) {
 }
 
 
-int Peer::InitiateConnection(const char* ip_addr, int destination_port) {
+int Peer::InitiateConnection(const char* ip_addr, unsigned short destination_port) {
     struct sockaddr_in dest;
 
     send_socket = socket(AF_INET, SOCK_STREAM, 0);

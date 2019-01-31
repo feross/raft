@@ -17,8 +17,8 @@ class Peer {
     //for now just have a thread that prints incoming, created in the constructor
 
   private:
-    int AcceptConnection(const char* ip_addr, int port_num);
-    int InitiateConnection(const char* ip_addr, int port_num);
+    int AcceptConnection(const char* ip_addr, unsigned short port_num);
+    int InitiateConnection(const char* ip_addr, unsigned short port_num);
     void ListenForInboundMessages();
     void ListenForClose();
     void ReceiveMessages(int socket);
@@ -28,8 +28,8 @@ class Peer {
     //in theory could unify, but complicates implementation & creates opportunity for more race conditions, so for now avoid.
     // May go back and change implementation in future, which shouldn't require modifications to the interface
 
-    int my_port;
-    int dest_port;
+    unsigned short my_port;
+    unsigned short dest_port;
     std::string dest_ip_addr;
     std::thread in_listener;
     std::thread out_listener;
