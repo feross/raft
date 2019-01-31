@@ -8,3 +8,16 @@ const string Util::ProtoDebugString(::google::protobuf::Message& message) {
     replace(str.begin(), str.end(), '\n', ',');
     return  str;
 }
+
+const vector<string> Util::StringSplit(string str, string delim) {
+    vector<string> result;
+
+    size_t last = 0;
+    size_t next = 0;
+    for (; (next = str.find(delim, last)) != string::npos; last = next + 1) {
+        result.push_back(str.substr(last, next - last));
+    }
+    result.push_back(str.substr(last));
+
+    return result;
+}

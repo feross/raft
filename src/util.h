@@ -6,9 +6,12 @@
 
 using namespace std;
 
+typedef ::google::protobuf::Message Message;
+
 class Util {
     public:
-        static const string ProtoDebugString(::google::protobuf::Message& message);
+        static const string ProtoDebugString(Message& message);
+        static const vector<string> StringSplit(string str, string delim);
 };
 
 #endif

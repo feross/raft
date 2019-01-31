@@ -185,7 +185,7 @@ void RaftServer::ReceiveVote(string server_id) {
     votes[server_id] = true;
 
     int vote_count = 0;
-    for(auto const& [_, vote_granted]: votes) {
+    for (auto const& [_, vote_granted]: votes) {
         if (vote_granted) vote_count += 1;
     }
 

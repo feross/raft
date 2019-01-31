@@ -18,8 +18,13 @@ Usage:
     ./raft [options] [peers ...]
 
 Example:
-    Start a server that is part of a three server Raft cluster.
+    Start a three server Raft cluster.
 
+        ./raft localhost:4000:4010 localhost:4001:4020
+        ./raft localhost:4010:4000 localhost:4011:4021
+        ./raft localhost:4020:4001 localhost:4021:4011
+
+        TODO:
         ./raft --port 4000 localhost:4001 localhost:4002
 
 Start a Raft server that listens on the given *port*. The server will treat
@@ -49,13 +54,12 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    string server_id = args.get_string("id");
-    int port = args.get_int("port");
-
     if (args.get_bool("help")) {
         cout << args.get_help_text() << endl;
         return EXIT_SUCCESS;
     }
+
+    string server_id = args.get_string("id");
 
     // TODO: Remove once Arguments supports required args
     if (server_id.size() == 0) {
@@ -72,31 +76,24 @@ int main(int argc, char* argv[]) {
         return EXIT_SUCCESS;
     }
 
-    // TODO: Remove once Arguments supports required args
-    if (port == 0) {
-        cerr << "Missing required --port argument" << endl;
-        return EXIT_FAILURE;
-    }
-
     vector<string> unnamed_args = args.get_unnamed();
     if (unnamed_args.size() == 0) {
         cerr << "Specify at least peer to connect to" << endl;
         return EXIT_FAILURE;
     }
 
-    int connect_port = stoi(unnamed_args[0]);
-
-    struct PeerInfo peer_info;
-    peer_info.my_listen_port = port;
-    peer_info.destination_port = connect_port;
-    peer_info.destination_ip_addr = "127.0.0.1";
     vector<struct PeerInfo> peer_info_vector;
-    peer_info_vector.push_back(peer_info);
+
+    for (string arg: unnamed_args) {
+        auto vec = Util::StringSplit(arg, ":");
+        struct PeerInfo peer_info;
+        peer_info.my_listen_port = stoi(vec[1]);
+        peer_info.destination_port = stoi(vec[2]);
+        peer_info.destination_ip_addr = vec[0].c_str();
+        peer_info_vector.push_back(peer_info);
+    }
 
     RaftServer raft_server(server_id, storage, peer_info_vector);
-
-    // TODO: hack for now, b/c we're on localhost & no other way to distinguish connections
-    assert(port != connect_port);
 
     while (true) {
         sleep(10);
