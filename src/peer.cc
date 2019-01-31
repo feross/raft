@@ -88,8 +88,10 @@ void Peer::RegisterReceiveListener() {
             AcceptConnection(dest_ip_addr.c_str(), my_port);
             if (DEBUG) printf("receive socket: %d\n", receive_socket);
             ListenOnSocket(receive_socket);
-            ErrorCheckSysCall(close(receive_socket), "close receive_socket");
-            receive_socket = -1;
+            if (receive_socket != -1) {
+                ErrorCheckSysCall(close(receive_socket), "close receive_socket");
+                receive_socket = -1;
+            }
             stream_parser->ResetIncomingMessage(); //dump anything we haven't used from this previous connection
         }
     });
@@ -138,7 +140,6 @@ void Peer::AcceptConnection(const char* ip_addr, unsigned short listening_port) 
 
     memset(&serv, 0, sizeof(serv));             /* zero the struct before filling the fields */
     serv.sin_family = AF_INET;                  /* set the type of connection to TCP/IP */
-    dest.sin_addr.s_addr = inet_addr(ip_addr);  /* set destination IP number - test with localhost, 127.0.0.1*/
     serv.sin_port = htons(listening_port);      /* set the server port number */
 
     mysocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -158,6 +159,12 @@ void Peer::AcceptConnection(const char* ip_addr, unsigned short listening_port) 
     // However, this would require peers to identify each other, and the class doing this handoff to be simultaneously aware of multiple peers and sockets/networking details.
     receive_socket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
     ErrorCheckSysCall(receive_socket, "accept"); //receive_socket
+
+    if (dest.sin_addr.s_addr != inet_addr(ip_addr)) {
+        printf("\nConnection from unspecified IP, closing connection...\n\n");
+        close(receive_socket);
+        receive_socket = -1; 
+    }
 
     ErrorCheckSysCall(close(mysocket), "close mysocket");
 }
