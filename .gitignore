@@ -4,6 +4,12 @@ raft
 # Prerequisites
 *.d
 
+# Storage
+.dat
+
+# OS files
+.DS_Store
+
 # Compiled Object files
 *.slo
 *.lo
@@ -33,6 +39,3 @@ raft
 *.exe
 *.out
 *.app
-
-# OS files
-.DS_Store
