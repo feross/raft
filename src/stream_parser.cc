@@ -24,8 +24,6 @@
 
 #include "stream_parser.h"
 
-#define DEBUG false
-
 /**
  * General implementation idea - we receive chunks of data that any number of bytes formatted in the following way:
  *      Format: (prepended integer length 1) + message 1 + (prepended integer length 2) + message 2 + ...
@@ -44,11 +42,11 @@ StreamParser::StreamParser(std::function<void(char*, int)> callback) {
 }
 
 StreamParser::~StreamParser() {
-    
+
 }
 
 void StreamParser::HandleRecievedChunk(char* buffer, int valid_bytes) {
-    if (DEBUG) printf("\n the buffer, assuming leading int: %s\n\n", buffer + sizeof(int));
+    LOG(DEBUG) << "the buffer, assuming leading int: " << (buffer + sizeof(int));
     while(valid_bytes > 0) {
         if (target_message_length == -1) {
             int bytes_needed = sizeof(int) - partial_number_bytes;
@@ -78,15 +76,20 @@ void StreamParser::HandleRecievedChunk(char* buffer, int valid_bytes) {
             memcpy(message_under_construction + current_message_length, buffer, bytes_to_copy);
             buffer = buffer + bytes_to_copy;
             current_message_length += bytes_to_copy;
-            if (DEBUG) printf("current message len: %d, target: %d, valid: %d, to_copy: %d\n", current_message_length, target_message_length, valid_bytes, bytes_to_copy);
+
+            LOG(DEBUG) << "current message len: " << current_message_length <<
+                ", target: " << target_message_length << ", valid: " <<
+                valid_bytes << ", to_copy: " << bytes_to_copy;
+
             valid_bytes -= bytes_to_copy;
 
             // if accumulated full message, callback & reset internal data
             if(current_message_length == target_message_length) {
-                if (DEBUG) printf("\nfound full message! : %s, buffer: %s\n\n", message_under_construction, buffer);
+                LOG(DEBUG) << "Found full message: " <<
+                    message_under_construction << ", buffer: " << buffer;
+
                 message_received_callback(message_under_construction, target_message_length);
                 message_under_construction = NULL; // we are no longer owner of this data, client's job to manage (e.g. like strdup)
-                // printf("complete message received: %s", message_under_construction); //TODO: should use callback
                 ResetIncomingMessage();
             }
         }
@@ -105,7 +108,7 @@ std::tuple<char*, int> StreamParser::CreateMessageToSend(const char* raw_message
     char* send_buffer = new char[message_len + sizeof(int)];
     *(int*)send_buffer = message_len;
     memcpy(send_buffer + sizeof(int), raw_message, message_len);
-    if (DEBUG) printf("raw: %s, created: %s\n", raw_message, send_buffer);
+    LOG(DEBUG) << "raw: " << raw_message << ", created: " << send_buffer;
     std::tuple<char*, int> formatted_message_info(send_buffer, message_len + sizeof(int));
     return formatted_message_info;   // Should really return a struct, or similar.  Because that would allow stack usage & be more explicit
 }

@@ -2,6 +2,8 @@
 
 #include "log.h"
 
+using namespace std;
+
 LOG::LOG(LogType level) : level(level) {
     operator << (oslock);
     operator << ("[" + getLabel(level) + "] ");

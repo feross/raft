@@ -9,6 +9,8 @@
 #include <functional>
 #include <tuple>
 
+#include "log.h"
+
 class StreamParser {
   public:
     /**

@@ -4,8 +4,6 @@
 
 #include "ostreamlock.h"
 
-using namespace std;
-
 enum LogType {
     DEBUG,
     INFO,
@@ -24,9 +22,9 @@ class LOG {
         LOG& operator<<(const T &msg) {
             if (level >= LOG_LEVEL) {
                 if (level == ERROR) {
-                    cerr << msg;
+                    std::cerr << msg;
                 } else {
-                    cout << msg;
+                    std::cout << msg;
                 }
                 opened = true;
             }
@@ -35,5 +33,5 @@ class LOG {
     private:
         bool opened = false;
         LogType level = DEBUG;
-        inline string getLabel(LogType type);
+        inline std::string getLabel(LogType type);
 };
