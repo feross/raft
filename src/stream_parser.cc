@@ -1,27 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <errno.h>
-
-#include <iostream>
-#include <string>
-
-#include <mutex>
-#include <condition_variable>
-#include <deque>
-#include <vector>
-#include <atomic>
-#include <functional>
-#include <thread>
-#include <cassert>
-#include <tuple>
-// TODO: clean this up ^
-
 #include "stream_parser.h"
 
 /**

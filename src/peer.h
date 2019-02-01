@@ -1,12 +1,10 @@
 #pragma once
 
 #include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <deque>
-#include <vector>
-#include <atomic>
-#include <functional>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+#include "log.h"
 #include "stream_parser.h"
 
 class Peer {

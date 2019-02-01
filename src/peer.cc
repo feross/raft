@@ -1,31 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <errno.h>
-
-#include <iostream>
-#include <string>
-
-#include <mutex>
-#include <condition_variable>
-#include <deque>
-#include <vector>
-#include <atomic>
-#include <functional>
-#include <thread>
-#include <cassert>
-#include <tuple>
-// TODO: clean this up ^
-
-#include "log.h"
 #include "peer.h"
-#include "stream_parser.h"
-
 #define RECEIVE_BUFFER_SIZE 100000
 
 static void ErrorCheckSysCall(int success, const char* unique_error_message) {
@@ -63,12 +36,12 @@ Peer::~Peer() {
         //not safe to close until called this
         //see: https://stackoverflow.com/a/2489066/6227019
 
-        //closing should be handled by the thread now
+        //closing the socket is handled by the thread now
         in_listener.join();
     }
     if (connection_reset == true) { //may not have opened a connection to send
         ErrorCheckSysCall(shutdown(send_socket, SHUT_RDWR), "shutdown");
-        //closing should be handled by the thread now
+        //closing the socket is handled by the thread now
         out_listener.join();
     }
 }

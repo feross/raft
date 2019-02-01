@@ -1,14 +1,5 @@
 #pragma once
 
-#include <thread>
-#include <mutex>
-#include <condition_variable>
-#include <deque>
-#include <vector>
-#include <atomic>
-#include <functional>
-#include <tuple>
-
 #include "log.h"
 
 class StreamParser {
