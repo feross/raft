@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 #include "arguments.h"
-#include "ostreamlock.h"
+#include "log.h"
 #include "raft-server.h"
 #include "storage.h"
 

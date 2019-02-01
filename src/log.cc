@@ -3,10 +3,8 @@
 #include "log.h"
 
 LOG::LOG(LogType level) : level(level) {
-    if (LOGCFG.headers) {
-        operator << (oslock);
-        operator << ("[" + getLabel(level) + "] ");
-    }
+    operator << (oslock);
+    operator << ("[" + getLabel(level) + "] ");
 }
 
 LOG::~LOG() {

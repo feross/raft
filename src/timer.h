@@ -5,7 +5,7 @@
 #include <iostream>
 #include <thread>
 
-#include "ostreamlock.h"
+#include "log.h"
 
 using namespace std;
 

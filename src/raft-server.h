@@ -3,7 +3,7 @@
 #include <map>
 #include <vector>
 
-#include "ostreamlock.h"
+#include "log.h"
 #include "peer.h"
 #include "peer.pb.h"
 #include "storage.h"

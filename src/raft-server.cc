@@ -48,8 +48,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
     PeerMessage message;
     message.ParseFromString(string(raw_message, raw_message_len));
 
-    cout << oslock << "RECEIVE: " << Util::ProtoDebugString(message) << endl <<
-        osunlock;
+    LOG(INFO) << "RECEIVE: " << Util::ProtoDebugString(message);
 
     if (message.term() > storage.current_term()) {
         TransitionCurrentTerm(message.term());
@@ -117,8 +116,7 @@ PeerMessage RaftServer::CreateMessage() {
 void RaftServer::SendMessage(Peer *peer, PeerMessage &message) {
     string message_string;
     message.SerializeToString(&message_string);
-    cout << oslock << "SEND: " << Util::ProtoDebugString(message) << endl <<
-        osunlock;
+    LOG(INFO) << "SEND: " << Util::ProtoDebugString(message);
     const char* message_cstr = message_string.c_str();
     peer->SendMessage(message_cstr, message_string.size());
 }
@@ -150,16 +148,15 @@ void RaftServer::SendRequestvoteResponse(Peer *peer, bool vote_granted) {
 }
 
 void RaftServer::TransitionCurrentTerm(int term) {
-    cout << oslock << "TERM: " << storage.current_term() << " -> " << term <<
-        endl << osunlock;
+    LOG(WARN) << "TERM: " << storage.current_term() << " -> " << term;
     storage.set_current_term(term);
     // When updating the term, reset who we voted for
     storage.set_voted_for("");
 }
 
 void RaftServer::TransitionServerState(ServerState new_state) {
-    cout << oslock << "STATE: " << getServerStateString(server_state) <<
-        " -> " << getServerStateString(new_state) << endl << osunlock;
+    LOG(WARN) << "STATE: " << getServerStateString(server_state) <<
+        " -> " << getServerStateString(new_state);
 
     server_state = new_state;
 

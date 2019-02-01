@@ -13,12 +13,7 @@ enum LogType {
     ERROR
 };
 
-struct LogConfig {
-    bool headers = false;
-    LogType level = WARN;
-};
-
-extern LogConfig LOGCFG;
+extern LogType LOG_LEVEL;
 
 class LOG {
     public:
@@ -27,7 +22,7 @@ class LOG {
 
         template<class T>
         LOG& operator<<(const T &msg) {
-            if (level >= LOGCFG.level) {
+            if (level >= LOG_LEVEL) {
                 if (level == ERROR) {
                     cerr << msg;
                 } else {

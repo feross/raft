@@ -28,6 +28,5 @@ void Timer::Reset() {
     active = true;
     remaining_time = min_duration + rand() % (max_duration - min_duration + 1);
 
-    cout << oslock << "Reset timer (" << remaining_time << "ms)" << endl <<
-        osunlock;
+    LOG(DEBUG) << "Reset timer (" << remaining_time << "ms)";
 }

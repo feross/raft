@@ -2,6 +2,8 @@
 
 using namespace std;
 
+LogType LOG_LEVEL = DEBUG;
+
 int main(int argc, char* argv[]) {
     // Verify that the version of the library that we linked against is
     // compatible with the version of the headers we compiled against.
@@ -14,11 +16,12 @@ int main(int argc, char* argv[]) {
     args.RegisterBool("help", "Print help message");
     args.RegisterString("id", "Server identifier");
     args.RegisterBool("reset", "Delete server storage");
+    args.RegisterBool("debug", "Show debug logs");
 
     try {
         args.Parse(argc, argv);
     } catch (exception& err) {
-        cerr << oslock << "Error: " << err.what() << endl << osunlock;
+        LOG(ERROR) << err.what();
         return EXIT_FAILURE;
     }
 
@@ -27,10 +30,12 @@ int main(int argc, char* argv[]) {
         return EXIT_SUCCESS;
     }
 
+    // Set up the logger
+    LOG_LEVEL = args.get_bool("debug") ? DEBUG : INFO;
+
     string server_id = args.get_string("id");
     if (server_id.size() == 0) {
-        cerr << oslock << "Error: Server identifier is required (use --id)" <<
-            endl << osunlock;
+        LOG(ERROR) << "Server identifier is required (use --id)";
         return EXIT_FAILURE;
     }
 
@@ -43,8 +48,7 @@ int main(int argc, char* argv[]) {
 
     vector<string> peer_info_strs = args.get_unnamed();
     if (peer_info_strs.size() == 0) {
-        cerr << oslock << "Error: Specify at least one peer to connect to" <<
-            endl << osunlock;
+        LOG(ERROR) << "Specify at least one peer to connect to";
         return EXIT_FAILURE;
     }
 
