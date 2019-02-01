@@ -205,6 +205,28 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
 
   // accessors -------------------------------------------------------
 
+  // repeated string entries = 6;
+  int entries_size() const;
+  void clear_entries();
+  static const int kEntriesFieldNumber = 6;
+  const ::std::string& entries(int index) const;
+  ::std::string* mutable_entries(int index);
+  void set_entries(int index, const ::std::string& value);
+  #if LANG_CXX11
+  void set_entries(int index, ::std::string&& value);
+  #endif
+  void set_entries(int index, const char* value);
+  void set_entries(int index, const char* value, size_t size);
+  ::std::string* add_entries();
+  void add_entries(const ::std::string& value);
+  #if LANG_CXX11
+  void add_entries(::std::string&& value);
+  #endif
+  void add_entries(const char* value);
+  void add_entries(const char* value, size_t size);
+  const ::google::protobuf::RepeatedPtrField< ::std::string>& entries() const;
+  ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_entries();
+
   // required string server_id = 3;
   bool has_server_id() const;
   void clear_server_id();
@@ -234,19 +256,54 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   ::google::protobuf::int32 term() const;
   void set_term(::google::protobuf::int32 value);
 
-  // optional bool success = 4;
+  // optional int32 prev_log_index = 4;
+  bool has_prev_log_index() const;
+  void clear_prev_log_index();
+  static const int kPrevLogIndexFieldNumber = 4;
+  ::google::protobuf::int32 prev_log_index() const;
+  void set_prev_log_index(::google::protobuf::int32 value);
+
+  // optional int32 prev_log_term = 5;
+  bool has_prev_log_term() const;
+  void clear_prev_log_term();
+  static const int kPrevLogTermFieldNumber = 5;
+  ::google::protobuf::int32 prev_log_term() const;
+  void set_prev_log_term(::google::protobuf::int32 value);
+
+  // optional int32 leader_commit = 7;
+  bool has_leader_commit() const;
+  void clear_leader_commit();
+  static const int kLeaderCommitFieldNumber = 7;
+  ::google::protobuf::int32 leader_commit() const;
+  void set_leader_commit(::google::protobuf::int32 value);
+
+  // optional int32 last_log_index = 9;
+  bool has_last_log_index() const;
+  void clear_last_log_index();
+  static const int kLastLogIndexFieldNumber = 9;
+  ::google::protobuf::int32 last_log_index() const;
+  void set_last_log_index(::google::protobuf::int32 value);
+
+  // optional bool success = 8;
   bool has_success() const;
   void clear_success();
-  static const int kSuccessFieldNumber = 4;
+  static const int kSuccessFieldNumber = 8;
   bool success() const;
   void set_success(bool value);
 
-  // optional bool vote_granted = 5;
+  // optional bool vote_granted = 11;
   bool has_vote_granted() const;
   void clear_vote_granted();
-  static const int kVoteGrantedFieldNumber = 5;
+  static const int kVoteGrantedFieldNumber = 11;
   bool vote_granted() const;
   void set_vote_granted(bool value);
+
+  // optional int32 last_log_term = 10;
+  bool has_last_log_term() const;
+  void clear_last_log_term();
+  static const int kLastLogTermFieldNumber = 10;
+  ::google::protobuf::int32 last_log_term() const;
+  void set_last_log_term(::google::protobuf::int32 value);
 
   // @@protoc_insertion_point(class_scope:proto.PeerMessage)
  private:
@@ -256,8 +313,18 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   void clear_has_term();
   void set_has_server_id();
   void clear_has_server_id();
+  void set_has_prev_log_index();
+  void clear_has_prev_log_index();
+  void set_has_prev_log_term();
+  void clear_has_prev_log_term();
+  void set_has_leader_commit();
+  void clear_has_leader_commit();
   void set_has_success();
   void clear_has_success();
+  void set_has_last_log_index();
+  void clear_has_last_log_index();
+  void set_has_last_log_term();
+  void clear_has_last_log_term();
   void set_has_vote_granted();
   void clear_has_vote_granted();
 
@@ -267,11 +334,17 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::internal::HasBits<1> _has_bits_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> entries_;
   ::google::protobuf::internal::ArenaStringPtr server_id_;
   int type_;
   ::google::protobuf::int32 term_;
+  ::google::protobuf::int32 prev_log_index_;
+  ::google::protobuf::int32 prev_log_term_;
+  ::google::protobuf::int32 leader_commit_;
+  ::google::protobuf::int32 last_log_index_;
   bool success_;
   bool vote_granted_;
+  ::google::protobuf::int32 last_log_term_;
   friend struct ::protobuf_peer_2eproto::TableStruct;
 };
 // ===================================================================
@@ -400,15 +473,156 @@ inline void PeerMessage::set_allocated_server_id(::std::string* server_id) {
   // @@protoc_insertion_point(field_set_allocated:proto.PeerMessage.server_id)
 }
 
-// optional bool success = 4;
-inline bool PeerMessage::has_success() const {
+// optional int32 prev_log_index = 4;
+inline bool PeerMessage::has_prev_log_index() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
-inline void PeerMessage::set_has_success() {
+inline void PeerMessage::set_has_prev_log_index() {
   _has_bits_[0] |= 0x00000008u;
 }
-inline void PeerMessage::clear_has_success() {
+inline void PeerMessage::clear_has_prev_log_index() {
   _has_bits_[0] &= ~0x00000008u;
+}
+inline void PeerMessage::clear_prev_log_index() {
+  prev_log_index_ = 0;
+  clear_has_prev_log_index();
+}
+inline ::google::protobuf::int32 PeerMessage::prev_log_index() const {
+  // @@protoc_insertion_point(field_get:proto.PeerMessage.prev_log_index)
+  return prev_log_index_;
+}
+inline void PeerMessage::set_prev_log_index(::google::protobuf::int32 value) {
+  set_has_prev_log_index();
+  prev_log_index_ = value;
+  // @@protoc_insertion_point(field_set:proto.PeerMessage.prev_log_index)
+}
+
+// optional int32 prev_log_term = 5;
+inline bool PeerMessage::has_prev_log_term() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void PeerMessage::set_has_prev_log_term() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void PeerMessage::clear_has_prev_log_term() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void PeerMessage::clear_prev_log_term() {
+  prev_log_term_ = 0;
+  clear_has_prev_log_term();
+}
+inline ::google::protobuf::int32 PeerMessage::prev_log_term() const {
+  // @@protoc_insertion_point(field_get:proto.PeerMessage.prev_log_term)
+  return prev_log_term_;
+}
+inline void PeerMessage::set_prev_log_term(::google::protobuf::int32 value) {
+  set_has_prev_log_term();
+  prev_log_term_ = value;
+  // @@protoc_insertion_point(field_set:proto.PeerMessage.prev_log_term)
+}
+
+// repeated string entries = 6;
+inline int PeerMessage::entries_size() const {
+  return entries_.size();
+}
+inline void PeerMessage::clear_entries() {
+  entries_.Clear();
+}
+inline const ::std::string& PeerMessage::entries(int index) const {
+  // @@protoc_insertion_point(field_get:proto.PeerMessage.entries)
+  return entries_.Get(index);
+}
+inline ::std::string* PeerMessage::mutable_entries(int index) {
+  // @@protoc_insertion_point(field_mutable:proto.PeerMessage.entries)
+  return entries_.Mutable(index);
+}
+inline void PeerMessage::set_entries(int index, const ::std::string& value) {
+  // @@protoc_insertion_point(field_set:proto.PeerMessage.entries)
+  entries_.Mutable(index)->assign(value);
+}
+#if LANG_CXX11
+inline void PeerMessage::set_entries(int index, ::std::string&& value) {
+  // @@protoc_insertion_point(field_set:proto.PeerMessage.entries)
+  entries_.Mutable(index)->assign(std::move(value));
+}
+#endif
+inline void PeerMessage::set_entries(int index, const char* value) {
+  GOOGLE_DCHECK(value != NULL);
+  entries_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:proto.PeerMessage.entries)
+}
+inline void PeerMessage::set_entries(int index, const char* value, size_t size) {
+  entries_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:proto.PeerMessage.entries)
+}
+inline ::std::string* PeerMessage::add_entries() {
+  // @@protoc_insertion_point(field_add_mutable:proto.PeerMessage.entries)
+  return entries_.Add();
+}
+inline void PeerMessage::add_entries(const ::std::string& value) {
+  entries_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:proto.PeerMessage.entries)
+}
+#if LANG_CXX11
+inline void PeerMessage::add_entries(::std::string&& value) {
+  entries_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:proto.PeerMessage.entries)
+}
+#endif
+inline void PeerMessage::add_entries(const char* value) {
+  GOOGLE_DCHECK(value != NULL);
+  entries_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:proto.PeerMessage.entries)
+}
+inline void PeerMessage::add_entries(const char* value, size_t size) {
+  entries_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:proto.PeerMessage.entries)
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+PeerMessage::entries() const {
+  // @@protoc_insertion_point(field_list:proto.PeerMessage.entries)
+  return entries_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+PeerMessage::mutable_entries() {
+  // @@protoc_insertion_point(field_mutable_list:proto.PeerMessage.entries)
+  return &entries_;
+}
+
+// optional int32 leader_commit = 7;
+inline bool PeerMessage::has_leader_commit() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void PeerMessage::set_has_leader_commit() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void PeerMessage::clear_has_leader_commit() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void PeerMessage::clear_leader_commit() {
+  leader_commit_ = 0;
+  clear_has_leader_commit();
+}
+inline ::google::protobuf::int32 PeerMessage::leader_commit() const {
+  // @@protoc_insertion_point(field_get:proto.PeerMessage.leader_commit)
+  return leader_commit_;
+}
+inline void PeerMessage::set_leader_commit(::google::protobuf::int32 value) {
+  set_has_leader_commit();
+  leader_commit_ = value;
+  // @@protoc_insertion_point(field_set:proto.PeerMessage.leader_commit)
+}
+
+// optional bool success = 8;
+inline bool PeerMessage::has_success() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void PeerMessage::set_has_success() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void PeerMessage::clear_has_success() {
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void PeerMessage::clear_success() {
   success_ = false;
@@ -424,15 +638,63 @@ inline void PeerMessage::set_success(bool value) {
   // @@protoc_insertion_point(field_set:proto.PeerMessage.success)
 }
 
-// optional bool vote_granted = 5;
+// optional int32 last_log_index = 9;
+inline bool PeerMessage::has_last_log_index() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void PeerMessage::set_has_last_log_index() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void PeerMessage::clear_has_last_log_index() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void PeerMessage::clear_last_log_index() {
+  last_log_index_ = 0;
+  clear_has_last_log_index();
+}
+inline ::google::protobuf::int32 PeerMessage::last_log_index() const {
+  // @@protoc_insertion_point(field_get:proto.PeerMessage.last_log_index)
+  return last_log_index_;
+}
+inline void PeerMessage::set_last_log_index(::google::protobuf::int32 value) {
+  set_has_last_log_index();
+  last_log_index_ = value;
+  // @@protoc_insertion_point(field_set:proto.PeerMessage.last_log_index)
+}
+
+// optional int32 last_log_term = 10;
+inline bool PeerMessage::has_last_log_term() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void PeerMessage::set_has_last_log_term() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void PeerMessage::clear_has_last_log_term() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void PeerMessage::clear_last_log_term() {
+  last_log_term_ = 0;
+  clear_has_last_log_term();
+}
+inline ::google::protobuf::int32 PeerMessage::last_log_term() const {
+  // @@protoc_insertion_point(field_get:proto.PeerMessage.last_log_term)
+  return last_log_term_;
+}
+inline void PeerMessage::set_last_log_term(::google::protobuf::int32 value) {
+  set_has_last_log_term();
+  last_log_term_ = value;
+  // @@protoc_insertion_point(field_set:proto.PeerMessage.last_log_term)
+}
+
+// optional bool vote_granted = 11;
 inline bool PeerMessage::has_vote_granted() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000100u) != 0;
 }
 inline void PeerMessage::set_has_vote_granted() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000100u;
 }
 inline void PeerMessage::clear_has_vote_granted() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline void PeerMessage::clear_vote_granted() {
   vote_granted_ = false;
