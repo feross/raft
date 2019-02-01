@@ -164,7 +164,13 @@ class RaftServer {
          */
         mutex server_mutex;
 
+        /**
+         * Friendly name that the server uses to identify itself to other
+         * servers in the cluster, as well as to name thee persistent storage
+         * file.
+         */
         const string& server_id;
+
         ServerState server_state = Follower;
         Storage storage;
 
