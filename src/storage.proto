@@ -3,7 +3,14 @@ syntax = "proto2";
 package proto;
 
 message StorageMessage {
-  required int32 current_term = 1;
-  required string voted_for = 2;
-  repeated string log = 3;
+    // Latest term server has seen (initialized to 0 on first boot, increases
+    // monotonically)
+    required int32 current_term = 1;
+
+    // The server_id that received vote in current term (or empty string if none)
+    required string voted_for = 2;
+
+    // Log entries; each entry contains command for state machine (first index is 1)
+    // TODO: add term when entry was received by leader, in project2
+    repeated string log = 3;
 }
