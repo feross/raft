@@ -25,12 +25,18 @@
 #include "stream_parser.h"
 
 /**
- * General implementation idea - we receive chunks of data that any number of bytes formatted in the following way:
- *      Format: (prepended integer length 1) + message 1 + (prepended integer length 2) + message 2 + ...
+ * General implementation idea - we receive chunks of data that are
+ * any number of bytes formatted in the following way:
+ *      Format: (prepended integer length 1) + message 1 +
+                (prepended integer length 2) + message 2 + ...
  *
- * We need to handle all possible splits of this data, including partial prepended numbers split across received chunks, multiple messages in a single chunk, etc.
- * To do this, we attempt to accumulate a message, and save any partial state between calls to HandleReceivedChunk
- * Sending is simpler: we just create a buffer, prepend a number, and return (heap-allocated)
+ * We need to handle all possible splits of this data, including partial
+ * prepended numbers split across received chunks, multiple messages in a
+ * single chunk, etc.  To do this, we attempt to accumulate a message, and
+ * save any partial state between calls to HandleReceivedChunk
+
+ * Sending is simpler: we create a buffer, prepend a number, and return the
+ * (heap-allocated) formatted message buffer and its length
  */
 
 StreamParser::StreamParser(std::function<void(char*, int)> callback) {
@@ -51,14 +57,17 @@ void StreamParser::HandleRecievedChunk(char* buffer, int valid_bytes) {
         if (target_message_length == -1) {
             int bytes_needed = sizeof(int) - partial_number_bytes;
             if(valid_bytes < bytes_needed) {
-                //partial message_len_number, must save & wait for more from stream
-                memcpy(incomplete_number_buffer + partial_number_bytes, buffer, valid_bytes);
+                //partial message_len_number, save & wait for more from stream
+                memcpy(incomplete_number_buffer + partial_number_bytes,
+                    buffer, valid_bytes);
                 partial_number_bytes += valid_bytes;
                 valid_bytes -= valid_bytes;
                 break;
             } else {
-                //complete message_len_number obtainable, get & create buffer in which to place message
-                memcpy(incomplete_number_buffer + partial_number_bytes, buffer, bytes_needed);
+                // complete message_len_number obtainable,
+                // get & create buffer in which to place message
+                memcpy(incomplete_number_buffer + partial_number_bytes,
+                    buffer, bytes_needed);
                 partial_number_bytes += bytes_needed;
                 valid_bytes -= bytes_needed;
 
@@ -67,13 +76,15 @@ void StreamParser::HandleRecievedChunk(char* buffer, int valid_bytes) {
 
                 buffer = buffer + bytes_needed;
                 message_under_construction = new char[target_message_length + 1];
-                message_under_construction[target_message_length] = '\0'; //null-terminate because it's low-cost to do so
+                message_under_construction[target_message_length] = '\0';
+                //null-terminate only because it's low-cost to do so
             }
         } else {
             // accumulate current message
             int bytes_to_copy = target_message_length;
             if (valid_bytes < target_message_length) bytes_to_copy = valid_bytes;
-            memcpy(message_under_construction + current_message_length, buffer, bytes_to_copy);
+            memcpy(message_under_construction + current_message_length,
+                buffer, bytes_to_copy);
             buffer = buffer + bytes_to_copy;
             current_message_length += bytes_to_copy;
 
@@ -88,8 +99,10 @@ void StreamParser::HandleRecievedChunk(char* buffer, int valid_bytes) {
                 LOG(DEBUG) << "Found full message: " <<
                     message_under_construction << ", buffer: " << buffer;
 
-                message_received_callback(message_under_construction, target_message_length);
-                message_under_construction = NULL; // we are no longer owner of this data, client's job to manage (e.g. like strdup)
+                message_received_callback(message_under_construction,
+                    target_message_length);
+                message_under_construction = NULL;
+                // we are no longer owner of this data, client's job to manage
                 ResetIncomingMessage();
             }
         }
@@ -104,11 +117,13 @@ void StreamParser::ResetIncomingMessage() {
     message_under_construction = NULL;
 }
 
-std::tuple<char*, int> StreamParser::CreateMessageToSend(const char* raw_message, int message_len) {
+std::tuple<char*, int> StreamParser::CreateMessageToSend(
+                    const char* raw_message, int message_len) {
     char* send_buffer = new char[message_len + sizeof(int)];
     *(int*)send_buffer = message_len;
     memcpy(send_buffer + sizeof(int), raw_message, message_len);
     LOG(DEBUG) << "raw: " << raw_message << ", created: " << send_buffer;
-    std::tuple<char*, int> formatted_message_info(send_buffer, message_len + sizeof(int));
-    return formatted_message_info;   // Should really return a struct, or similar.  Because that would allow stack usage & be more explicit
+    std::tuple<char*, int> formatted_message_info(send_buffer,
+        message_len + sizeof(int));
+    return formatted_message_info;
 }
