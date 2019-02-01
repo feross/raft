@@ -32,10 +32,11 @@ class LOG {
          *
          * Example:
          *
-         *     LogType LOG_LEVEL = ERROR;
+         *     LogType LOG_LEVEL = INFO; // Exclude logs at DEBUG level
          *
          *     int main(int argc, char* argv[]) {
-         *         LOG(DEBUG) << "This is a debug message"; // not printed!
+         *         LOG(DEBUG) << "This is a debug message"; // Not printed!
+         *         LOG(INFO) << "This is some useful information";
          *         LOG(ERROR) << "Unexpected error: " << error_message;
          *     }
          */
