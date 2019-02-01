@@ -166,12 +166,29 @@ class Arguments {
         string get_help_text();
 
     private:
+        /**
+         * Argument descriptions. Maps argument names to string descriptions
+         * that describe the purpose of the arguments.
+         */
         map<string, string> descriptions;
 
+        /**
+         * Argument value map. Maps arguments of each type (bool, int, string)
+         * to their actual values after the argument information (i.e. argc and
+         * argv) has been parsed.
+         */
         map<string, bool> bool_args;
         map<string, int> int_args;
         map<string, string> string_args;
+
+        /**
+         * Vector of the unnamed "extra" arguments included in the command line
+         * argument string.
+         */
         vector<string> unnamed_args;
 
+        /**
+         * Help text to describe the purpose of the program
+         */
         string intro;
 };

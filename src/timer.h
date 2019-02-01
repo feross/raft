@@ -43,12 +43,14 @@ class Timer {
          * Once the timer fires, call this method to restart the timer.
          */
         void Reset();
+
     private:
         int min_duration; // In milliseconds
         int max_duration; // In milliseconds
-
         int remaining_time; // In milliseconds
-        thread timer_thread;
+
         bool destroyed = false;
         bool active = false;
+
+        thread timer_thread;
 };
