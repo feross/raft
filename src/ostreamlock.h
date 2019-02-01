@@ -1,9 +1,7 @@
-#pragma once
+// Implementation from CS110
+// /usr/class/cs110/local/include/ostreamlock.h
 
-/**
- * Implementation from CS110
- * /usr/class/cs110/local/include/ostreamlock.h
- */
+#pragma once
 
 #include <ostream>
 #include <iostream>

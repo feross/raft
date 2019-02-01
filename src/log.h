@@ -25,10 +25,10 @@ class LOG {
          * one of four levels, so just the desired level can be included in
          * any given program run:
          *
-         *     - DEBUG
+         *     - DEBUG (most verbose)
          *     - INFO
          *     - WARN
-         *     - ERROR
+         *     - ERROR (least verbose)
          *
          * Example:
          *

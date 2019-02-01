@@ -1,7 +1,5 @@
-/**
- * Implementation from CS110
- * /usr/class/cs110/local/src/threads/ostreamlock.cc
- */
+// Implementation from CS110
+// /usr/class/cs110/local/src/threads/ostreamlock.cc
 
 #include "ostreamlock.h"
 
