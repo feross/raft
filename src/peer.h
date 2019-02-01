@@ -18,22 +18,19 @@ class Peer {
          * and will fail silently.
          *
          * @param listening_port - port we will listen for connections from this
-         * machine.  This port number must not be shared with anything else
-         * because it uniquely identifies the peer.
-         *
+         *      machine.  This port number must not be shared with anything else
+         *      because it uniquely identifies the peer.
          * @param destination_ip_address - ip address of the machine we want to
-         * peer with
-         *
+         *      peer with
          * @param destination_port - port the peer machine will be listening for
-         * our connection on.  Must not be shared on destination machine because
-         *  it uniquely identifies our machine to the peer.
-         *
+         *      our connection on.  Must not be shared on destination machine because
+         *      it uniquely identifies our machine to the peer.
          * @param message_received_callback - callback function to be called
-         * whenever we receive a message
-         *              callback arguments:
-         *                  peer - who we received from
-         *                  char* - pointer to heap-allocated message data
-         *                  int - size of message data
+         *      whenever we receive a message
+         *      callback arguments:
+         *          peer - who we received from
+         *          char* - pointer to heap-allocated message data
+         *          int - size of message data
          */
         Peer(unsigned short listening_port, std::string destination_ip_address,
             unsigned short destination_port,
@@ -66,8 +63,8 @@ class Peer {
         // maybe TODO: similarly, could change to reuse listening port but would
         // need a "peer manager" that has knowledge of sockets, layered above
         // the peer (that hands-off connections to peers when it needs to send
-        // a message to a particular peer, or gets a message & identifies which
-        // peer sent it)
+        //a message to a particular peer, or gets a message & identifies which
+        //peer sent it)
 
         int send_socket;
         int receive_socket;

@@ -20,10 +20,10 @@ class StreamParser {
          * Must be used by both ends of the stream, due to encoding scheme
          *
          * @param callback - callback function for whenever we receive a message
-         *          callback arguments:
-                        char* - pointer to heap-allocated received message
-                            data, which the client is responsible for freeing
-                        int - size of message data
+         *      callback arguments:
+         *          char* - pointer to heap-allocated received message
+         *              data, which the client is responsible for freeing
+         *          int - size of message data
          */
         StreamParser(std::function<void(char*, int)> callback);
 
