@@ -58,11 +58,26 @@ class StreamParser {
         void ResetIncomingMessage();
 
     private:
+        /**
+         * Callback invoked every time we have accumulated a "complete" message
+         * as defined by "was sent as CreateMessageToSend blob on other end of
+         * stream".
+         *
+         * Callback arguments:
+         *      - char* : the blob of bytes received
+         *      - int : the length of the blob of bytes received
+         */
         std::function<void(char*, int)> message_received_callback;
         int current_message_length;
         int target_message_length;
         char* message_under_construction;
 
+        /**
+         * Because the stream of bytes may be cut even along within the middle
+         * of the 4 bytes identifying the length of the subsequent message blob,
+         * we may need to accumulate a partial integer.  We use this number &
+         * buffer to accumulate bytes until the full number is complete.
+         */
         int partial_number_bytes;
         char incomplete_number_buffer[sizeof(int)];
 };
