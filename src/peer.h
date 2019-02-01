@@ -16,18 +16,18 @@ class Peer {
          * and will fail silently.
          *
          * @param listening_port - port we will listen for connections from this
-         *      machine.  This port number must not be shared with anything else
-         *      because it uniquely identifies the peer.
+         *      machine. NOTE: This port number must not be used by anything
+         *      else because it is used to uniquely identify this peer.
          * @param destination_ip_address - ip address of the machine we want to
          *      peer with
          * @param destination_port - port the peer machine will be listening for
-         *      our connection on.  Must not be shared on destination machine because
-         *      it uniquely identifies our machine to the peer.
+         *      our connection on. NOTE: Must not be shared on destination machine
+         *      because it uniquely identifies our machine to the peer.
          * @param message_received_callback - callback function to be called
-         *      whenever we receive a message
+         *      whenever we receive a message from this peer
          *      callback arguments:
          *          peer - who we received from
-         *          char* - pointer to heap-allocated message data
+         *          char* - pointer to heap-allocated message data (client frees)
          *          int - size of message data
          */
         Peer(unsigned short listening_port, std::string destination_ip_address,
@@ -51,7 +51,21 @@ class Peer {
     private:
         void AcceptConnection(const char* ip_addr, unsigned short port_num);
         void InitiateConnection(const char* ip_addr, unsigned short port_num);
+        /**
+         * Registers a listener that will repeatedly attempt to listen for
+         * incoming connections on my_port coming from dest_ip_addr and updates
+         * associated receiving state when establishing connection. If connection
+         * is established, listens for messages coming in on the currently active
+         * socket.  When messages are received, calls callback for every full
+         * received chunk.
+         */
         void RegisterReceiveListener();
+        /**
+         * Listens for broken outgoing connection (since we use two different
+         * connections for send & receiving to minimize possible race conditions
+         * at small cost & maintain implementation simplicity), and updates state
+         * associated with outgoing connections on hearing the broken connection.
+         */
         void RegisterCloseListener();
         void ListenOnSocket(int socket);
 
@@ -69,9 +83,36 @@ class Peer {
         unsigned short my_port;
         unsigned short dest_port;
         std::string dest_ip_addr;
+
+        /**
+         * Listening for incoming connection and/or incoming messages if
+         * connection has already been established
+         */
         std::thread in_listener;
+
+        /**
+         * Listening for the outgoing connection to break. Do not expect to
+         * receive any real messages, assuming normal peering.
+         */
         std::thread out_listener;
+
+        /**
+         * Indicates whether the connection has been reset, and therefore we
+         * should join the old listening thread
+         */
         bool connection_reset;
+        /**
+         * Indicates that the loops in the listening threads should continue
+         * running. Changed to false when destructing.
+         */
         bool running;
+
+        /**
+         * Class used to manage turning outgoing messages into a format that we
+         * can easily parse on the other end (using this class), even though
+         * we may receive it sliced up in any way.
+         * 
+         * Assumes stream bytes received in-order (though any slicing of bytes)
+         */
         StreamParser *stream_parser;
 };
