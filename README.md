@@ -24,9 +24,9 @@ make
 ./raft <ip_address>:<receive_port>:<destination_port> --id <server name>
 ```
 
-Tells this instance of raft to connect to ip_address by sending to
-port destination_port, and receiving on receive_port.  Id is required to specify
-the server's name, which is used to maintain its persistent storage
+Tells this instance of raft to connect to *ip_address* by sending to
+port *destination_port*, and receiving on *receive_port*.  *Id* is required to
+specify the server's name, which is used to maintain its persistent storage
 
 As a simple example running on localhost (127.0.0.1), you might in three
 different terminals:
