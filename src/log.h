@@ -22,16 +22,16 @@ class LOG {
          *
          * Users of this logger class should set the desired logging level using
          * the extern LOG_LEVEL variable. All log messages are categorized into
-         * one of four levels, so just the desired level can be included in
-         * any given program run:
+         * one of four levels, so only the desired logs can be included when
+         * running a program
          *
+         * Log levels:
          *     - DEBUG (most verbose)
          *     - INFO
          *     - WARN
          *     - ERROR (least verbose)
          *
          * Example:
-         *
          *     LogType LOG_LEVEL = INFO; // Exclude logs at DEBUG level
          *
          *     int main(int argc, char* argv[]) {
@@ -41,6 +41,17 @@ class LOG {
          *     }
          */
         LOG(LogType level);
+
+        /**
+         * Zero argument constructor logger. Has a few differences from the
+         * normal logger:
+         *
+         *     - Always prints, no matter what the log level is set to
+         *     - Prints a bare message without a log level prefix (i.e. no
+         *       prefix of "[DEBUG]")
+         */
+        LOG();
+
         ~LOG();
 
         template<class T>

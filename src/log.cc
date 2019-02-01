@@ -4,6 +4,10 @@
 
 using namespace std;
 
+LOG::LOG() : level(ERROR) {
+    operator << (oslock);
+}
+
 LOG::LOG(LogType level) : level(level) {
     operator << (oslock);
     operator << ("[" + getLabel(level) + "] ");
