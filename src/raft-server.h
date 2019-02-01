@@ -46,6 +46,9 @@ class RaftServer {
         RaftServer(const string& server_id, vector<struct PeerInfo> peer_infos);
 
     private:
+        /**
+         * Implementation comments in the .cc file
+         */
         void HandleElectionTimer();
         void HandleLeaderTimer();
         void HandlePeerMessage(Peer* peer, char* raw_message, int raw_message_len);
@@ -69,6 +72,11 @@ class RaftServer {
         Timer *leaderTimer;
 
         map<string, bool> votes;
+        /**
+         * stateMutex prevents multiple peers from modifying the raft-server
+         * state at the same time, since they have multiple threads calling
+         * these callback functions
+         */
         mutex stateMutex;
 };
 

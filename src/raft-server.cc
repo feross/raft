@@ -28,6 +28,10 @@ RaftServer::RaftServer(const string& server_id,
     LOG(INFO) << "STARTING TERM: " << storage.current_term();
 }
 
+/**
+ * Callback function invoked when we haven't received a valid message
+ * within our timeout window.  Will cause election.
+ */
 void RaftServer::HandleElectionTimer() {
     lock_guard<mutex> lock(stateMutex);
     if (server_state == Leader) {
@@ -36,6 +40,10 @@ void RaftServer::HandleElectionTimer() {
     TransitionServerState(Candidate);
 }
 
+/**
+ * Callback function invoked when we haven't send an AppendEntries heartbeat in
+ * a while.  Will cause a heartbeat AppendEntries message if we are the leader.
+ */
 void RaftServer::HandleLeaderTimer() {
     lock_guard<mutex> lock(stateMutex);
     leaderTimer->Reset();
@@ -47,6 +55,15 @@ void RaftServer::HandleLeaderTimer() {
     }
 }
 
+/**
+ * Callback function used to process messages we have received from peers. Called
+ * any time we receive a message from any peer, though shouldn't be happening 
+ * often except from leader (which should be processed in order anyway).
+ * 
+ * @param peer - the peer connection from which we received the message
+ * @param raw_message - pointer to message received from peer
+ * @param raw_message_len - length of message received from peer
+ */
 void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_message_len) {
     lock_guard<mutex> lock(stateMutex);
     PeerMessage message;
@@ -57,7 +74,6 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
     if (message.term() > storage.current_term()) {
         TransitionCurrentTerm(message.term());
         TransitionServerState(Follower);
-        votes.clear();
     }
 
     switch (message.type()) {
@@ -111,6 +127,10 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
     }
 }
 
+/**
+ * Creates base message upon which all other message types are build.  Includes
+ * the term & sender's id (useful for debugging even when not used directly)
+ */
 PeerMessage RaftServer::CreateMessage() {
     PeerMessage message;
     message.set_term(storage.current_term());
@@ -118,6 +138,12 @@ PeerMessage RaftServer::CreateMessage() {
     return message;
 }
 
+/**
+ * Sends a message formatted by protocol buffers to the specified peer.
+ * 
+ * @param peer - the peer to send this message to
+ * @param message - the message (any type) to send to this peer
+ */
 void RaftServer::SendMessage(Peer *peer, PeerMessage &message) {
     string message_string;
     message.SerializeToString(&message_string);
@@ -126,12 +152,25 @@ void RaftServer::SendMessage(Peer *peer, PeerMessage &message) {
     peer->SendMessage(message_cstr, message_string.size());
 }
 
+/**
+ * Sends an AppendEntries request to the specified peer.  For now, the log
+ * sent is empty & this is just used as a heartbeat.
+ * 
+ * @param peer - the peer to send this AppendEntries request to
+ */
 void RaftServer::SendAppendentriesRequest(Peer *peer) {
     PeerMessage message = CreateMessage();
     message.set_type(PeerMessage::APPENDENTRIES_REQUEST);
     SendMessage(peer, message);
 }
 
+/**
+ * Responds to an AppendEntries request.
+ * For now, nearly always true unless old term.
+ * 
+ * @param peer - the peer which we should send this response to
+ * @param success - whether we accepted the AppendEntries request
+ */
 void RaftServer::SendAppendentriesResponse(Peer *peer, bool success) {
     PeerMessage message = CreateMessage();
     message.set_type(PeerMessage::APPENDENTRIES_RESPONSE);
@@ -152,13 +191,21 @@ void RaftServer::SendRequestvoteResponse(Peer *peer, bool vote_granted) {
     SendMessage(peer, message);
 }
 
+/**
+ * Transition current term to a new term & sets voted_for to be empty,
+ * and resets the votes that we have received
+ */
 void RaftServer::TransitionCurrentTerm(int term) {
     LOG(INFO) << "TERM: " << storage.current_term() << " -> " << term;
     storage.set_current_term(term);
     // When updating the term, reset who we voted for
     storage.set_voted_for("");
+    votes.clear();
 }
 
+/**
+ * 
+ */
 void RaftServer::TransitionServerState(ServerState new_state) {
     LOG(INFO) << "STATE: " << getServerStateString(server_state) <<
         " -> " << getServerStateString(new_state);
@@ -192,6 +239,9 @@ void RaftServer::TransitionServerState(ServerState new_state) {
     }
 }
 
+/**
+ * 
+ */
 void RaftServer::ReceiveVote(string server_id) {
     votes[server_id] = true;
     if (server_state == Leader) return;
