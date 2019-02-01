@@ -57,6 +57,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
     if (message.term() > storage.current_term()) {
         TransitionCurrentTerm(message.term());
         TransitionServerState(Follower);
+        votes.clear();
     }
 
     switch (message.type()) {
@@ -193,6 +194,7 @@ void RaftServer::TransitionServerState(ServerState new_state) {
 
 void RaftServer::ReceiveVote(string server_id) {
     votes[server_id] = true;
+    if (server_state == Leader) return;
 
     int vote_count = 0;
     for (auto const& [_, vote_granted]: votes) {
