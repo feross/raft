@@ -22,17 +22,17 @@ const vector<string> Util::StringSplit(const string &str, string delim) {
     return result;
 }
 
-string Util::PadRight(string const& str, size_t s) {
-    if (str.size() < s) {
-        return str + string(s-str.size(), ' ');
+string Util::PadRight(string const& str, size_t size) {
+    if (str.size() < size) {
+        return str + string(size - str.size(), ' ');
     } else {
         return str;
     }
 }
 
-string Util::PadLeft(string const& str, size_t s) {
-    if (str.size() < s) {
-        return string(s-str.size(), ' ') + str;
+string Util::PadLeft(string const& str, size_t size) {
+    if (str.size() < size) {
+        return string(size - str.size(), ' ') + str;
     } else {
         return str;
     }
