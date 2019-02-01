@@ -4,11 +4,13 @@ static const string& getServerStateString(ServerState server_state) {
     return ServerStateStrings[server_state];
 }
 
-RaftServer::RaftServer(const string& server_id, Storage storage, vector<struct PeerInfo> peer_info_vector) : server_id(server_id),
-        storage(storage) {
+RaftServer::RaftServer(const string& server_id,
+    vector<struct PeerInfo> peer_info_vector) : server_id(server_id),
+    storage(server_id + STORAGE_NAME_SUFFIX) {
 
     for (struct PeerInfo peer_info: peer_info_vector) {
-        Peer *peer = new Peer(peer_info.my_listen_port, peer_info.destination_ip_addr, peer_info.destination_port,
+        Peer *peer = new Peer(peer_info.my_listen_port,
+            peer_info.destination_ip_addr, peer_info.destination_port,
             [this](Peer* peer, char* raw_message, int raw_message_len) {
                 HandlePeerMessage(peer, raw_message, raw_message_len);
             });
@@ -22,6 +24,8 @@ RaftServer::RaftServer(const string& server_id, Storage storage, vector<struct P
     leaderTimer = new Timer(LEADER_HEARTBEAT_INTERVAL, [this]() {
         HandleLeaderTimer();
     });
+
+    LOG(INFO) << "STARTING TERM: " << storage.current_term();
 }
 
 void RaftServer::HandleElectionTimer() {

@@ -27,7 +27,24 @@ class RaftServerException : public exception {
 
 class RaftServer {
     public:
-        RaftServer(const string& server_id, Storage storage, vector<struct PeerInfo>);
+        /**
+         * Start a server that implements Raft, an understandable consensus
+         * protocol.
+         *
+         * The server expects to be given a server id, which is a friendly name
+         * that identifies the server to other servers in the cluster, and a
+         * vector of peer connection information which is used to connect to
+         * other servers in the cluster and start corresponding listening
+         * servers.
+         *
+         * For more information about the operation of Raft, see:
+         * http://web.stanford.edu/~ouster/cgi-bin/papers/raft-extended.pdf
+         *
+         * @param server_id Friendly name to identify the server
+         * @param peer_infos Vector of connection information for peer servers
+         */
+        RaftServer(const string& server_id, vector<struct PeerInfo> peer_infos);
+
     private:
         void HandleElectionTimer();
         void HandleLeaderTimer();

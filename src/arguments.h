@@ -1,9 +1,12 @@
 #pragma once
 
+#include <algorithm>
 #include <exception>
 #include <map>
 #include <string>
 #include <vector>
+
+#include "util.h"
 
 using namespace std;
 

@@ -2,7 +2,7 @@
 
 using namespace std;
 
-LogType LOG_LEVEL = DEBUG;
+LogType LOG_LEVEL = INFO;
 
 int main(int argc, char* argv[]) {
     // Verify that the version of the library that we linked against is
@@ -16,7 +16,8 @@ int main(int argc, char* argv[]) {
     args.RegisterBool("help", "Print help message");
     args.RegisterString("id", "Server identifier");
     args.RegisterBool("reset", "Delete server storage");
-    args.RegisterBool("debug", "Show debug logs");
+    args.RegisterBool("debug", "Show all debug logs");
+    args.RegisterBool("quiet", "Show only warnings and errors");
 
     try {
         args.Parse(argc, argv);
@@ -30,8 +31,11 @@ int main(int argc, char* argv[]) {
         return EXIT_SUCCESS;
     }
 
-    // Set up the logger
-    LOG_LEVEL = args.get_bool("debug") ? DEBUG : INFO;
+    if (args.get_bool("quiet")) {
+        LOG_LEVEL = WARN;
+    } else if (args.get_bool("debug")) {
+        LOG_LEVEL = DEBUG;
+    }
 
     string server_id = args.get_string("id");
     if (server_id.size() == 0) {
@@ -39,9 +43,8 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    Storage storage(server_id + STORAGE_NAME_SUFFIX);
-
     if (args.get_bool("reset")) {
+        Storage storage(server_id + STORAGE_NAME_SUFFIX);
         storage.Reset();
         return EXIT_SUCCESS;
     }
@@ -62,7 +65,7 @@ int main(int argc, char* argv[]) {
         peer_infos.push_back(peer_info);
     }
 
-    RaftServer raft_server(server_id, storage, peer_infos);
+    RaftServer raft_server(server_id, peer_infos);
 
     // Keep the main thread alive until a SIGINT or SIGTERM is received
     while (true) {

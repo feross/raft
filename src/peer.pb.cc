@@ -57,16 +57,28 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, type_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, term_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, server_id_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, prev_log_index_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, prev_log_term_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, entries_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, leader_commit_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, success_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, last_log_index_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, last_log_term_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, vote_granted_),
   1,
   2,
   0,
   3,
   4,
+  ~0u,
+  5,
+  7,
+  6,
+  9,
+  8,
 };
 static const ::google::protobuf::internal::MigrationSchema schemas[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, 10, sizeof(::proto::PeerMessage)},
+  { 0, 16, sizeof(::proto::PeerMessage)},
 };
 
 static ::google::protobuf::Message const * const file_default_instances[] = {
@@ -94,16 +106,20 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\npeer.proto\022\005proto\"\374\001\n\013PeerMessage\022,\n\004t"
+      "\n\npeer.proto\022\005proto\"\202\003\n\013PeerMessage\022,\n\004t"
       "ype\030\001 \002(\0162\036.proto.PeerMessage.MessageTyp"
-      "e\022\014\n\004term\030\002 \002(\005\022\021\n\tserver_id\030\003 \002(\t\022\017\n\007su"
-      "ccess\030\004 \001(\010\022\024\n\014vote_granted\030\005 \001(\010\"w\n\013Mes"
-      "sageType\022\031\n\025APPENDENTRIES_REQUEST\020\000\022\032\n\026A"
-      "PPENDENTRIES_RESPONSE\020\001\022\027\n\023REQUESTVOTE_R"
-      "EQUEST\020\002\022\030\n\024REQUESTVOTE_RESPONSE\020\003"
+      "e\022\014\n\004term\030\002 \002(\005\022\021\n\tserver_id\030\003 \002(\t\022\026\n\016pr"
+      "ev_log_index\030\004 \001(\005\022\025\n\rprev_log_term\030\005 \001("
+      "\005\022\017\n\007entries\030\006 \003(\t\022\025\n\rleader_commit\030\007 \001("
+      "\005\022\017\n\007success\030\010 \001(\010\022\026\n\016last_log_index\030\t \001"
+      "(\005\022\025\n\rlast_log_term\030\n \001(\005\022\024\n\014vote_grante"
+      "d\030\013 \001(\010\"w\n\013MessageType\022\031\n\025APPENDENTRIES_"
+      "REQUEST\020\000\022\032\n\026APPENDENTRIES_RESPONSE\020\001\022\027\n"
+      "\023REQUESTVOTE_REQUEST\020\002\022\030\n\024REQUESTVOTE_RE"
+      "SPONSE\020\003"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 274);
+      descriptor, 408);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "peer.proto", &protobuf_RegisterTypes);
 }
@@ -154,7 +170,13 @@ void PeerMessage::InitAsDefaultInstance() {
 const int PeerMessage::kTypeFieldNumber;
 const int PeerMessage::kTermFieldNumber;
 const int PeerMessage::kServerIdFieldNumber;
+const int PeerMessage::kPrevLogIndexFieldNumber;
+const int PeerMessage::kPrevLogTermFieldNumber;
+const int PeerMessage::kEntriesFieldNumber;
+const int PeerMessage::kLeaderCommitFieldNumber;
 const int PeerMessage::kSuccessFieldNumber;
+const int PeerMessage::kLastLogIndexFieldNumber;
+const int PeerMessage::kLastLogTermFieldNumber;
 const int PeerMessage::kVoteGrantedFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -168,23 +190,24 @@ PeerMessage::PeerMessage()
 PeerMessage::PeerMessage(const PeerMessage& from)
   : ::google::protobuf::Message(),
       _internal_metadata_(NULL),
-      _has_bits_(from._has_bits_) {
+      _has_bits_(from._has_bits_),
+      entries_(from.entries_) {
   _internal_metadata_.MergeFrom(from._internal_metadata_);
   server_id_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (from.has_server_id()) {
     server_id_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.server_id_);
   }
   ::memcpy(&type_, &from.type_,
-    static_cast<size_t>(reinterpret_cast<char*>(&vote_granted_) -
-    reinterpret_cast<char*>(&type_)) + sizeof(vote_granted_));
+    static_cast<size_t>(reinterpret_cast<char*>(&last_log_term_) -
+    reinterpret_cast<char*>(&type_)) + sizeof(last_log_term_));
   // @@protoc_insertion_point(copy_constructor:proto.PeerMessage)
 }
 
 void PeerMessage::SharedCtor() {
   server_id_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(&type_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&vote_granted_) -
-      reinterpret_cast<char*>(&type_)) + sizeof(vote_granted_));
+      reinterpret_cast<char*>(&last_log_term_) -
+      reinterpret_cast<char*>(&type_)) + sizeof(last_log_term_));
 }
 
 PeerMessage::~PeerMessage() {
@@ -216,14 +239,20 @@ void PeerMessage::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  entries_.Clear();
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 0x00000001u) {
     server_id_.ClearNonDefaultToEmptyNoArena();
   }
-  if (cached_has_bits & 30u) {
+  if (cached_has_bits & 254u) {
     ::memset(&type_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&vote_granted_) -
-        reinterpret_cast<char*>(&type_)) + sizeof(vote_granted_));
+        reinterpret_cast<char*>(&success_) -
+        reinterpret_cast<char*>(&type_)) + sizeof(success_));
+  }
+  if (cached_has_bits & 768u) {
+    ::memset(&vote_granted_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&last_log_term_) -
+        reinterpret_cast<char*>(&vote_granted_)) + sizeof(last_log_term_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear();
@@ -289,10 +318,69 @@ bool PeerMessage::MergePartialFromCodedStream(
         break;
       }
 
-      // optional bool success = 4;
+      // optional int32 prev_log_index = 4;
       case 4: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
             static_cast< ::google::protobuf::uint8>(32u /* 32 & 0xFF */)) {
+          set_has_prev_log_index();
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &prev_log_index_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // optional int32 prev_log_term = 5;
+      case 5: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(40u /* 40 & 0xFF */)) {
+          set_has_prev_log_term();
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &prev_log_term_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // repeated string entries = 6;
+      case 6: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(50u /* 50 & 0xFF */)) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->add_entries()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->entries(this->entries_size() - 1).data(),
+            static_cast<int>(this->entries(this->entries_size() - 1).length()),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "proto.PeerMessage.entries");
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // optional int32 leader_commit = 7;
+      case 7: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(56u /* 56 & 0xFF */)) {
+          set_has_leader_commit();
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &leader_commit_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // optional bool success = 8;
+      case 8: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(64u /* 64 & 0xFF */)) {
           set_has_success();
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
@@ -303,10 +391,38 @@ bool PeerMessage::MergePartialFromCodedStream(
         break;
       }
 
-      // optional bool vote_granted = 5;
-      case 5: {
+      // optional int32 last_log_index = 9;
+      case 9: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(40u /* 40 & 0xFF */)) {
+            static_cast< ::google::protobuf::uint8>(72u /* 72 & 0xFF */)) {
+          set_has_last_log_index();
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &last_log_index_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // optional int32 last_log_term = 10;
+      case 10: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(80u /* 80 & 0xFF */)) {
+          set_has_last_log_term();
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &last_log_term_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // optional bool vote_granted = 11;
+      case 11: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(88u /* 88 & 0xFF */)) {
           set_has_vote_granted();
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
@@ -365,14 +481,49 @@ void PeerMessage::SerializeWithCachedSizes(
       3, this->server_id(), output);
   }
 
-  // optional bool success = 4;
+  // optional int32 prev_log_index = 4;
   if (cached_has_bits & 0x00000008u) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(4, this->success(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->prev_log_index(), output);
   }
 
-  // optional bool vote_granted = 5;
+  // optional int32 prev_log_term = 5;
   if (cached_has_bits & 0x00000010u) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(5, this->vote_granted(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->prev_log_term(), output);
+  }
+
+  // repeated string entries = 6;
+  for (int i = 0, n = this->entries_size(); i < n; i++) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->entries(i).data(), static_cast<int>(this->entries(i).length()),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "proto.PeerMessage.entries");
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      6, this->entries(i), output);
+  }
+
+  // optional int32 leader_commit = 7;
+  if (cached_has_bits & 0x00000020u) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->leader_commit(), output);
+  }
+
+  // optional bool success = 8;
+  if (cached_has_bits & 0x00000080u) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(8, this->success(), output);
+  }
+
+  // optional int32 last_log_index = 9;
+  if (cached_has_bits & 0x00000040u) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(9, this->last_log_index(), output);
+  }
+
+  // optional int32 last_log_term = 10;
+  if (cached_has_bits & 0x00000200u) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(10, this->last_log_term(), output);
+  }
+
+  // optional bool vote_granted = 11;
+  if (cached_has_bits & 0x00000100u) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(11, this->vote_granted(), output);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
@@ -412,14 +563,49 @@ void PeerMessage::SerializeWithCachedSizes(
         3, this->server_id(), target);
   }
 
-  // optional bool success = 4;
+  // optional int32 prev_log_index = 4;
   if (cached_has_bits & 0x00000008u) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(4, this->success(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->prev_log_index(), target);
   }
 
-  // optional bool vote_granted = 5;
+  // optional int32 prev_log_term = 5;
   if (cached_has_bits & 0x00000010u) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(5, this->vote_granted(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->prev_log_term(), target);
+  }
+
+  // repeated string entries = 6;
+  for (int i = 0, n = this->entries_size(); i < n; i++) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->entries(i).data(), static_cast<int>(this->entries(i).length()),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "proto.PeerMessage.entries");
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteStringToArray(6, this->entries(i), target);
+  }
+
+  // optional int32 leader_commit = 7;
+  if (cached_has_bits & 0x00000020u) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->leader_commit(), target);
+  }
+
+  // optional bool success = 8;
+  if (cached_has_bits & 0x00000080u) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(8, this->success(), target);
+  }
+
+  // optional int32 last_log_index = 9;
+  if (cached_has_bits & 0x00000040u) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(9, this->last_log_index(), target);
+  }
+
+  // optional int32 last_log_term = 10;
+  if (cached_has_bits & 0x00000200u) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(10, this->last_log_term(), target);
+  }
+
+  // optional bool vote_granted = 11;
+  if (cached_has_bits & 0x00000100u) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(11, this->vote_granted(), target);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
@@ -483,15 +669,60 @@ size_t PeerMessage::ByteSizeLong() const {
   } else {
     total_size += RequiredFieldsByteSizeFallback();
   }
-  if (_has_bits_[0 / 32] & 24u) {
-    // optional bool success = 4;
+  // repeated string entries = 6;
+  total_size += 1 *
+      ::google::protobuf::internal::FromIntSize(this->entries_size());
+  for (int i = 0, n = this->entries_size(); i < n; i++) {
+    total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
+      this->entries(i));
+  }
+
+  if (_has_bits_[0 / 32] & 248u) {
+    // optional int32 prev_log_index = 4;
+    if (has_prev_log_index()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->prev_log_index());
+    }
+
+    // optional int32 prev_log_term = 5;
+    if (has_prev_log_term()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->prev_log_term());
+    }
+
+    // optional int32 leader_commit = 7;
+    if (has_leader_commit()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->leader_commit());
+    }
+
+    // optional int32 last_log_index = 9;
+    if (has_last_log_index()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->last_log_index());
+    }
+
+    // optional bool success = 8;
     if (has_success()) {
       total_size += 1 + 1;
     }
 
-    // optional bool vote_granted = 5;
+  }
+  if (_has_bits_[8 / 32] & 768u) {
+    // optional bool vote_granted = 11;
     if (has_vote_granted()) {
       total_size += 1 + 1;
+    }
+
+    // optional int32 last_log_term = 10;
+    if (has_last_log_term()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->last_log_term());
     }
 
   }
@@ -522,8 +753,9 @@ void PeerMessage::MergeFrom(const PeerMessage& from) {
   ::google::protobuf::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
+  entries_.MergeFrom(from.entries_);
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 31u) {
+  if (cached_has_bits & 255u) {
     if (cached_has_bits & 0x00000001u) {
       set_has_server_id();
       server_id_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.server_id_);
@@ -535,10 +767,28 @@ void PeerMessage::MergeFrom(const PeerMessage& from) {
       term_ = from.term_;
     }
     if (cached_has_bits & 0x00000008u) {
-      success_ = from.success_;
+      prev_log_index_ = from.prev_log_index_;
     }
     if (cached_has_bits & 0x00000010u) {
+      prev_log_term_ = from.prev_log_term_;
+    }
+    if (cached_has_bits & 0x00000020u) {
+      leader_commit_ = from.leader_commit_;
+    }
+    if (cached_has_bits & 0x00000040u) {
+      last_log_index_ = from.last_log_index_;
+    }
+    if (cached_has_bits & 0x00000080u) {
+      success_ = from.success_;
+    }
+    _has_bits_[0] |= cached_has_bits;
+  }
+  if (cached_has_bits & 768u) {
+    if (cached_has_bits & 0x00000100u) {
       vote_granted_ = from.vote_granted_;
+    }
+    if (cached_has_bits & 0x00000200u) {
+      last_log_term_ = from.last_log_term_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
@@ -569,12 +819,18 @@ void PeerMessage::Swap(PeerMessage* other) {
 }
 void PeerMessage::InternalSwap(PeerMessage* other) {
   using std::swap;
+  entries_.InternalSwap(CastToBase(&other->entries_));
   server_id_.Swap(&other->server_id_, &::google::protobuf::internal::GetEmptyStringAlreadyInited(),
     GetArenaNoVirtual());
   swap(type_, other->type_);
   swap(term_, other->term_);
+  swap(prev_log_index_, other->prev_log_index_);
+  swap(prev_log_term_, other->prev_log_term_);
+  swap(leader_commit_, other->leader_commit_);
+  swap(last_log_index_, other->last_log_index_);
   swap(success_, other->success_);
   swap(vote_granted_, other->vote_granted_);
+  swap(last_log_term_, other->last_log_term_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   _internal_metadata_.Swap(&other->_internal_metadata_);
 }
