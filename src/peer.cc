@@ -11,9 +11,7 @@ static void ErrorCheckSysCall(int success, const char* unique_error_message) {
 Peer::Peer(unsigned short listening_port, std::string destination_ip_address,
         unsigned short destination_port,
         std::function<void(Peer*, char*, int)> message_received_callback) {
-
     assert(listening_port != destination_port);
-
     my_port = listening_port;
     dest_port = destination_port;
     dest_ip_addr = destination_ip_address;
@@ -35,7 +33,6 @@ Peer::~Peer() {
         ErrorCheckSysCall(shutdown(receive_socket, SHUT_RDWR), "shudown");
         //not safe to close until called this
         //see: https://stackoverflow.com/a/2489066/6227019
-
         //closing the socket is handled by the thread now
         in_listener.join();
     }
@@ -48,8 +45,9 @@ Peer::~Peer() {
 
 void Peer::SendMessage(const char* message, int message_len) {
     if (send_socket == -1) {
-    //TODO: maybe this should be done in a thread to go faster, particular
-    //when attempting reconnection, though that should be rare
+    //TODO: maybe this could be done in a thread to go faster, particular
+    //when attempting reconnection.  Though that should be rare and that
+    //the much-more-common send method below is non-blocking
         LOG(DEBUG) << "Attempted reconnection";
         InitiateConnection(dest_ip_addr.c_str(), dest_port);
     }
@@ -120,7 +118,7 @@ void Peer::AcceptConnection(const char* ip_addr, unsigned short listening_port) 
 
     memset(&serv, 0, sizeof(serv));             /* zero the struct */
     serv.sin_family = AF_INET;                  /* set connection type TCP/IP */
-    serv.sin_addr.s_addr = htonl(INADDR_ANY); /* accept on any interface */
+    serv.sin_addr.s_addr = htonl(INADDR_ANY);   /* accept on any interface */
     serv.sin_port = htons(listening_port);      /* set the server port number */
 
     mysocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -138,11 +136,12 @@ void Peer::AcceptConnection(const char* ip_addr, unsigned short listening_port) 
     /* start listening, allowing a queue of up to 1 pending connection */
     ErrorCheckSysCall(listen(mysocket, 1), "listen");
 
-    // TODO: could just have one server here, and
-    // use the sockets returned by this to form peers.
-    // However, this would require peers to identify each other, and
-    // the class doing this handoff to be simultaneously aware of multiple
-    // peers and sockets/networking details.
+    // TODO: could just have one server here, and use the sockets returned by
+    // this to form peers.
+    // However, this would require peers to identify each other using messages,
+    // and have an enclosing class doing this handoff from "made connection to
+    // someone" to individual peers, and this class would need to be simultaneously
+    // aware of multiple peers and sockets/networking details.
     receive_socket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
     ErrorCheckSysCall(receive_socket, "accept");
 

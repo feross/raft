@@ -24,7 +24,7 @@ StreamParser::StreamParser(std::function<void(char*, int)> callback) {
 }
 
 StreamParser::~StreamParser() {
-
+    ResetIncomingMessage();
 }
 
 void StreamParser::HandleRecievedChunk(char* buffer, int valid_bytes) {
@@ -63,12 +63,11 @@ void StreamParser::HandleRecievedChunk(char* buffer, int valid_bytes) {
                 buffer, bytes_to_copy);
             buffer = buffer + bytes_to_copy;
             current_message_length += bytes_to_copy;
+            valid_bytes -= bytes_to_copy;
 
             LOG(DEBUG) << "current message len: " << current_message_length <<
                 ", target: " << target_message_length << ", valid: " <<
                 valid_bytes << ", to_copy: " << bytes_to_copy;
-
-            valid_bytes -= bytes_to_copy;
 
             // if accumulated full message, callback & reset internal data
             if(current_message_length == target_message_length) {

@@ -78,6 +78,21 @@ class Peer {
         //a message to a particular peer, or gets a message & identifies which
         //peer sent it)
 
+        /**
+         * Explicitly track both sockets, even though we really only need one,
+         * this is useful for debugging.
+         *
+         * NOTE: we could use a single socket for this, but then several
+         * situations would become more complicated with potential for races
+         * ("glare" situations where we try to connect at the same time
+         * as the other server).
+         *
+         * Moreover, because raft only uses a small number of servers total to
+         * get extremely negligible probability of failure
+         * (P(failure) = probability down at any time ^ (num machines/2))
+         * this won't end up using very many extra ports so seems worth
+         * the reduced complexity
+         */
         int send_socket;
         int receive_socket;
         unsigned short my_port;
