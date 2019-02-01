@@ -1,4 +1,11 @@
-# Raft - An understandable consensus algorithm
+<h1 align="center">
+  <br>
+  <img src="https://raft.github.io/logo/annie-solo.png" alt="Raft logo" width="200">
+  <br>
+  Raft - An understandable consensus algorithm
+  <br>
+  <br>
+</h1>
 
 ## What is Raft?
 
