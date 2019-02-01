@@ -68,16 +68,16 @@ class RaftServer {
         ServerState server_state = Follower;
         vector<Peer*> peers;
 
-        Timer *electionTimer;
-        Timer *leaderTimer;
+        Timer *election_timer;
+        Timer *leader_timer;
 
         map<string, bool> votes;
         /**
-         * stateMutex prevents multiple peers from modifying the raft-server
+         * server_mutex prevents multiple peers from modifying the raft-server
          * state at the same time, since they have multiple threads calling
          * these callback functions
          */
-        mutex stateMutex;
+        mutex server_mutex;
 };
 
 struct PeerInfo {
