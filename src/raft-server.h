@@ -44,6 +44,7 @@ class RaftServer {
          * @param peer_infos Vector of connection information for peer servers
          */
         RaftServer(const string& server_id, vector<struct PeerInfo> peer_infos);
+
     private:
         void HandleElectionTimer();
         void HandleLeaderTimer();
