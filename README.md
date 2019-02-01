@@ -57,15 +57,15 @@ the cluster matches the information provided to all the other servers.
 Here are some commands you can copy-paste into three separate terminals:
 
 ```bash
-./raft --id alice 127.0.0.1:4000:4010 127.0.0.1:4001:4020
+./raft --id alice 127.0.0.1:4000:4001 127.0.0.1:8000:8001
 ```
 
 ```bash
-./raft --id bob 127.0.0.1:4010:4000 127.0.0.1:4011:4021
+./raft --id bob 127.0.0.1:4001:4000 127.0.0.1:6000:6001
 ```
 
 ```bash
-./raft --id carol 127.0.0.1:4020:4001 127.0.0.1:4021:4011
+./raft --id carol 127.0.0.1:8001:8000 127.0.0.1:6001:6000
 ```
 
 ✨ And just like that, you're running a Raft cluster!
