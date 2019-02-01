@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     args.RegisterBool("help", "Print help message");
     args.RegisterString("id", "Server identifier");
     args.RegisterBool("reset", "Delete server storage");
-    args.RegisterBool("debug", "Show all debug logs");
+    args.RegisterBool("debug", "Show debug logs");
     args.RegisterBool("quiet", "Show only warnings and errors");
 
     try {
@@ -27,7 +27,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (args.get_bool("help")) {
-        cout << oslock << args.get_help_text() << endl << osunlock;
+        LOG() << args.get_help_text();
         return EXIT_SUCCESS;
     }
 

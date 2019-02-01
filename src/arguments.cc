@@ -89,7 +89,7 @@ string Arguments::get_help_text() {
         result += intro + "\n";
     }
 
-    result += "Usage:\n";
+    result += "Usage:";
 
     unsigned long max_name_len = 0;
     unsigned long max_description_len = 0;
@@ -108,9 +108,9 @@ string Arguments::get_help_text() {
             type = "string";
         }
 
-        result += "    --" + Util::PadRight(name, max_name_len) + "  ";
+        result += "\n    --" + Util::PadRight(name, max_name_len) + "  ";
         result += Util::PadRight(description, max_description_len);
-        result += " [" + type + "]\n";
+        result += " [" + type + "]";
     }
     return result;
 }

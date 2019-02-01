@@ -6,7 +6,6 @@
 #include <ostream>
 #include <iostream>
 #include <mutex>
-#include <memory>
 #include <map>
 
 /**

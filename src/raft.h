@@ -17,11 +17,18 @@ R"(Raft - An understandable consensus algorithm
 Usage:
     ./raft [options] [peers ...]
 
-Start a Raft server. The server will treat each operand in *peers* as a "peer"
-Raft server part of the same cluster. These arguments should be in the format
-"hostname:listen_port:remote_port", e.g. "12.34.56.67:4000:4001".
+Minimal Example:
+    Start a server that connects to one other server.
 
-Example:
+        ./raft --id <server_id> <ip_address>:<listen_port>:<destination_port>
+
+        Tells this instance of raft to connect to *ip_address* by sending to
+        port *destination_port*, and receiving on *listen_port*. *--id* is
+        required to specify the server's name, which is used to maintain its
+        persistent storage as well as to identify itself to other servers in the
+        cluster.
+
+Cluster Example:
     Start a three server Raft cluster.
 
         ./raft --id alice 127.0.0.1:4000:4010 127.0.0.1:4001:4020
