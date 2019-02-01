@@ -43,9 +43,8 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    Storage storage(server_id + STORAGE_NAME_SUFFIX);
-
     if (args.get_bool("reset")) {
+        Storage storage(server_id + STORAGE_NAME_SUFFIX);
         storage.Reset();
         return EXIT_SUCCESS;
     }
@@ -66,7 +65,7 @@ int main(int argc, char* argv[]) {
         peer_infos.push_back(peer_info);
     }
 
-    RaftServer raft_server(server_id, storage, peer_infos);
+    RaftServer raft_server(server_id, peer_infos);
 
     // Keep the main thread alive until a SIGINT or SIGTERM is received
     while (true) {

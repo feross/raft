@@ -7,7 +7,7 @@ Storage::Storage(string storage_path) : storage_path(storage_path) {
         Init();
         Save();
     }
-    LOG(INFO) << "Initial Storage: " << Util::ProtoDebugString(storage_message);
+    LOG(DEBUG) << "Initial Storage: " << Util::ProtoDebugString(storage_message);
 }
 
 void Storage::Reset() {

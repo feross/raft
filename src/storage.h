@@ -11,6 +11,8 @@
 using namespace proto;
 using namespace std;
 
+const string STORAGE_NAME_SUFFIX = "-storage.dat";
+
 class StorageFileException : public exception {
     const char* what() const noexcept {
         return "Storage file IO error";

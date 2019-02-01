@@ -11,8 +11,6 @@
 #include "raft-server.h"
 #include "storage.h"
 
-static const string STORAGE_NAME_SUFFIX = "-storage.dat";
-
 static const string INTRO_TEXT =
 R"(Raft - An understandable consensus algorithm
 
