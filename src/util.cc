@@ -9,7 +9,7 @@ const string Util::ProtoDebugString(::google::protobuf::Message& message) {
     return  str;
 }
 
-const vector<string> Util::StringSplit(string str, string delim) {
+const vector<string> Util::StringSplit(const string &str, string delim) {
     vector<string> result;
 
     size_t last = 0;
@@ -20,4 +20,20 @@ const vector<string> Util::StringSplit(string str, string delim) {
     result.push_back(str.substr(last));
 
     return result;
+}
+
+string Util::PadRight(string const& str, size_t s) {
+    if (str.size() < s) {
+        return str + string(s-str.size(), ' ');
+    } else {
+        return str;
+    }
+}
+
+string Util::PadLeft(string const& str, size_t s) {
+    if (str.size() < s) {
+        return string(s-str.size(), ' ') + str;
+    } else {
+        return str;
+    }
 }

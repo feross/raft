@@ -1,5 +1,13 @@
 #include "arguments.h"
 
+#include <sstream>
+#include <iomanip>
+string pad (string str, int width) {
+    stringstream ss;
+    ss << setw(width) << str;
+    return ss.str();
+}
+
 void Arguments::RegisterBool(string name, string description) {
     bool_args[name] = false;
     descriptions[name] = description;
@@ -81,15 +89,28 @@ string Arguments::get_help_text() {
         result += intro + "\n";
     }
 
-    result += "Usage:\n\n";
+    result += "Usage:\n";
+
+    unsigned long max_name_len = 0;
+    unsigned long max_description_len = 0;
+    for(auto const& [name, description] : descriptions) {
+        max_name_len = max(max_name_len, name.size());
+        max_description_len = max(max_description_len, description.size());
+    }
 
     for(auto const& [name, description] : descriptions) {
-        string type = bool_args.count(name)
-            ? "bool"
-            : int_args.count(name)
-                ? "int"
-                : "string";
-        result += "  --" + name + "\t" + description + "\t[" + type + "]\n";
+        string type;
+        if (bool_args.count(name)) {
+            type = "bool";
+        } else if (int_args.count(name)) {
+            type = "int";
+        } else {
+            type = "string";
+        }
+
+        result += "    --" + Util::PadRight(name, max_name_len) + "  ";
+        result += Util::PadRight(description, max_description_len);
+        result += " [" + type + "]\n";
     }
     return result;
 }
