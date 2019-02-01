@@ -15,6 +15,30 @@ extern LogType LOG_LEVEL;
 
 class LOG {
     public:
+        /**
+         * A logger class designed to standardize logging across an entire
+         * project, ensures that logging is thread-safe, and is routed to STDOUT
+         * or STDERR as appropriate.
+         *
+         * Users of this logger class should set the desired logging level using
+         * the extern LOG_LEVEL variable. All log messages are categorized into
+         * one of four levels, so just the desired level can be included in
+         * any given program run:
+         *
+         *     - DEBUG
+         *     - INFO
+         *     - WARN
+         *     - ERROR
+         *
+         * Example:
+         *
+         *     LogType LOG_LEVEL = ERROR;
+         *
+         *     int main(int argc, char* argv[]) {
+         *         LOG(DEBUG) << "This is a debug message"; // not printed!
+         *         LOG(ERROR) << "Unexpected error: " << error_message;
+         *     }
+         */
         LOG(LogType level);
         ~LOG();
 
