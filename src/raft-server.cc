@@ -17,11 +17,11 @@ RaftServer::RaftServer(const string& server_id,
         peers.push_back(peer);
     }
 
-    electionTimer = new Timer(ELECTION_MIN_TIMEOUT, ELECTION_MAX_TIMEOUT, [this]() {
+    election_timer = new Timer(ELECTION_MIN_TIMEOUT, ELECTION_MAX_TIMEOUT, [this]() {
         HandleElectionTimer();
     });
 
-    leaderTimer = new Timer(LEADER_HEARTBEAT_INTERVAL, [this]() {
+    leader_timer = new Timer(LEADER_HEARTBEAT_INTERVAL, [this]() {
         HandleLeaderTimer();
     });
 
@@ -33,7 +33,7 @@ RaftServer::RaftServer(const string& server_id,
  * within our timeout window.  Will cause election.
  */
 void RaftServer::HandleElectionTimer() {
-    lock_guard<mutex> lock(stateMutex);
+    lock_guard<mutex> lock(server_mutex);
     if (server_state == Leader) {
         return;
     }
@@ -45,8 +45,8 @@ void RaftServer::HandleElectionTimer() {
  * a while.  Will cause a heartbeat AppendEntries message if we are the leader.
  */
 void RaftServer::HandleLeaderTimer() {
-    lock_guard<mutex> lock(stateMutex);
-    leaderTimer->Reset();
+    lock_guard<mutex> lock(server_mutex);
+    leader_timer->Reset();
     if (server_state != Leader) {
         return;
     }
@@ -57,15 +57,15 @@ void RaftServer::HandleLeaderTimer() {
 
 /**
  * Callback function used to process messages we have received from peers. Called
- * any time we receive a message from any peer, though shouldn't be happening 
+ * any time we receive a message from any peer, though shouldn't be happening
  * often except from leader (which should be processed in order anyway).
- * 
+ *
  * @param peer - the peer connection from which we received the message
  * @param raw_message - pointer to message received from peer
  * @param raw_message_len - length of message received from peer
  */
 void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_message_len) {
-    lock_guard<mutex> lock(stateMutex);
+    lock_guard<mutex> lock(server_mutex);
     PeerMessage message;
     message.ParseFromString(string(raw_message, raw_message_len));
 
@@ -83,7 +83,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 return;
             }
             SendAppendentriesResponse(peer, true);
-            electionTimer->Reset();
+            election_timer->Reset();
             return;
 
         case PeerMessage::APPENDENTRIES_RESPONSE:
@@ -106,7 +106,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             }
             storage.set_voted_for(message.server_id());
             SendRequestvoteResponse(peer, true);
-            electionTimer->Reset();
+            election_timer->Reset();
             return;
 
         case PeerMessage::REQUESTVOTE_RESPONSE:
@@ -140,7 +140,7 @@ PeerMessage RaftServer::CreateMessage() {
 
 /**
  * Sends a message formatted by protocol buffers to the specified peer.
- * 
+ *
  * @param peer - the peer to send this message to
  * @param message - the message (any type) to send to this peer
  */
@@ -155,7 +155,7 @@ void RaftServer::SendMessage(Peer *peer, PeerMessage &message) {
 /**
  * Sends an AppendEntries request to the specified peer.  For now, the log
  * sent is empty & this is just used as a heartbeat.
- * 
+ *
  * @param peer - the peer to send this AppendEntries request to
  */
 void RaftServer::SendAppendentriesRequest(Peer *peer) {
@@ -167,7 +167,7 @@ void RaftServer::SendAppendentriesRequest(Peer *peer) {
 /**
  * Responds to an AppendEntries request.
  * For now, nearly always true unless old term.
- * 
+ *
  * @param peer - the peer which we should send this response to
  * @param success - whether we accepted the AppendEntries request
  */
@@ -204,7 +204,7 @@ void RaftServer::TransitionCurrentTerm(int term) {
 }
 
 /**
- * 
+ *
  */
 void RaftServer::TransitionServerState(ServerState new_state) {
     LOG(INFO) << "STATE: " << getServerStateString(server_state) <<
@@ -226,7 +226,7 @@ void RaftServer::TransitionServerState(ServerState new_state) {
             for (Peer* peer: peers) {
                 SendRequestvoteRequest(peer);
             }
-            electionTimer->Reset();
+            election_timer->Reset();
             return;
 
         case Leader:
@@ -240,7 +240,7 @@ void RaftServer::TransitionServerState(ServerState new_state) {
 }
 
 /**
- * 
+ *
  */
 void RaftServer::ReceiveVote(string server_id) {
     votes[server_id] = true;
