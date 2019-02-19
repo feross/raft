@@ -55,13 +55,11 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   ~0u,  // no _weak_field_map_
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::StorageMessage, current_term_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::StorageMessage, voted_for_),
-  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::StorageMessage, log_),
   1,
   0,
-  ~0u,
 };
 static const ::google::protobuf::internal::MigrationSchema schemas[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, 8, sizeof(::proto::StorageMessage)},
+  { 0, 7, sizeof(::proto::StorageMessage)},
 };
 
 static ::google::protobuf::Message const * const file_default_instances[] = {
@@ -89,12 +87,12 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\025storage-message.proto\022\005proto\"F\n\016Storag"
+      "\n\025storage-message.proto\022\005proto\"9\n\016Storag"
       "eMessage\022\024\n\014current_term\030\001 \002(\005\022\021\n\tvoted_"
-      "for\030\002 \002(\t\022\013\n\003log\030\003 \003(\t"
+      "for\030\002 \002(\t"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 102);
+      descriptor, 89);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "storage-message.proto", &protobuf_RegisterTypes);
 }
@@ -119,7 +117,6 @@ void StorageMessage::InitAsDefaultInstance() {
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int StorageMessage::kCurrentTermFieldNumber;
 const int StorageMessage::kVotedForFieldNumber;
-const int StorageMessage::kLogFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 StorageMessage::StorageMessage()
@@ -132,8 +129,7 @@ StorageMessage::StorageMessage()
 StorageMessage::StorageMessage(const StorageMessage& from)
   : ::google::protobuf::Message(),
       _internal_metadata_(NULL),
-      _has_bits_(from._has_bits_),
-      log_(from.log_) {
+      _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom(from._internal_metadata_);
   voted_for_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (from.has_voted_for()) {
@@ -177,7 +173,6 @@ void StorageMessage::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  log_.Clear();
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 0x00000001u) {
     voted_for_.ClearNonDefaultToEmptyNoArena();
@@ -227,23 +222,6 @@ bool StorageMessage::MergePartialFromCodedStream(
         break;
       }
 
-      // repeated string log = 3;
-      case 3: {
-        if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(26u /* 26 & 0xFF */)) {
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->add_log()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-            this->log(this->log_size() - 1).data(),
-            static_cast<int>(this->log(this->log_size() - 1).length()),
-            ::google::protobuf::internal::WireFormat::PARSE,
-            "proto.StorageMessage.log");
-        } else {
-          goto handle_unusual;
-        }
-        break;
-      }
-
       default: {
       handle_unusual:
         if (tag == 0) {
@@ -286,16 +264,6 @@ void StorageMessage::SerializeWithCachedSizes(
       2, this->voted_for(), output);
   }
 
-  // repeated string log = 3;
-  for (int i = 0, n = this->log_size(); i < n; i++) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->log(i).data(), static_cast<int>(this->log(i).length()),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "proto.StorageMessage.log");
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      3, this->log(i), output);
-  }
-
   if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         _internal_metadata_.unknown_fields(), output);
@@ -325,16 +293,6 @@ void StorageMessage::SerializeWithCachedSizes(
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
         2, this->voted_for(), target);
-  }
-
-  // repeated string log = 3;
-  for (int i = 0, n = this->log_size(); i < n; i++) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->log(i).data(), static_cast<int>(this->log(i).length()),
-      ::google::protobuf::internal::WireFormat::SERIALIZE,
-      "proto.StorageMessage.log");
-    target = ::google::protobuf::internal::WireFormatLite::
-      WriteStringToArray(3, this->log(i), target);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
@@ -388,14 +346,6 @@ size_t StorageMessage::ByteSizeLong() const {
   } else {
     total_size += RequiredFieldsByteSizeFallback();
   }
-  // repeated string log = 3;
-  total_size += 1 *
-      ::google::protobuf::internal::FromIntSize(this->log_size());
-  for (int i = 0, n = this->log_size(); i < n; i++) {
-    total_size += ::google::protobuf::internal::WireFormatLite::StringSize(
-      this->log(i));
-  }
-
   int cached_size = ::google::protobuf::internal::ToCachedSize(total_size);
   SetCachedSize(cached_size);
   return total_size;
@@ -423,7 +373,6 @@ void StorageMessage::MergeFrom(const StorageMessage& from) {
   ::google::protobuf::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  log_.MergeFrom(from.log_);
   cached_has_bits = from._has_bits_[0];
   if (cached_has_bits & 3u) {
     if (cached_has_bits & 0x00000001u) {
@@ -462,7 +411,6 @@ void StorageMessage::Swap(StorageMessage* other) {
 }
 void StorageMessage::InternalSwap(StorageMessage* other) {
   using std::swap;
-  log_.InternalSwap(CastToBase(&other->log_));
   voted_for_.Swap(&other->voted_for_, &::google::protobuf::internal::GetEmptyStringAlreadyInited(),
     GetArenaNoVirtual());
   swap(current_term_, other->current_term_);

@@ -153,28 +153,6 @@ class StorageMessage : public ::google::protobuf::Message /* @@protoc_insertion_
 
   // accessors -------------------------------------------------------
 
-  // repeated string log = 3;
-  int log_size() const;
-  void clear_log();
-  static const int kLogFieldNumber = 3;
-  const ::std::string& log(int index) const;
-  ::std::string* mutable_log(int index);
-  void set_log(int index, const ::std::string& value);
-  #if LANG_CXX11
-  void set_log(int index, ::std::string&& value);
-  #endif
-  void set_log(int index, const char* value);
-  void set_log(int index, const char* value, size_t size);
-  ::std::string* add_log();
-  void add_log(const ::std::string& value);
-  #if LANG_CXX11
-  void add_log(::std::string&& value);
-  #endif
-  void add_log(const char* value);
-  void add_log(const char* value, size_t size);
-  const ::google::protobuf::RepeatedPtrField< ::std::string>& log() const;
-  ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_log();
-
   // required string voted_for = 2;
   bool has_voted_for() const;
   void clear_voted_for();
@@ -210,7 +188,6 @@ class StorageMessage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::internal::HasBits<1> _has_bits_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
-  ::google::protobuf::RepeatedPtrField< ::std::string> log_;
   ::google::protobuf::internal::ArenaStringPtr voted_for_;
   ::google::protobuf::int32 current_term_;
   friend struct ::protobuf_storage_2dmessage_2eproto::TableStruct;
@@ -314,75 +291,6 @@ inline void StorageMessage::set_allocated_voted_for(::std::string* voted_for) {
   }
   voted_for_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), voted_for);
   // @@protoc_insertion_point(field_set_allocated:proto.StorageMessage.voted_for)
-}
-
-// repeated string log = 3;
-inline int StorageMessage::log_size() const {
-  return log_.size();
-}
-inline void StorageMessage::clear_log() {
-  log_.Clear();
-}
-inline const ::std::string& StorageMessage::log(int index) const {
-  // @@protoc_insertion_point(field_get:proto.StorageMessage.log)
-  return log_.Get(index);
-}
-inline ::std::string* StorageMessage::mutable_log(int index) {
-  // @@protoc_insertion_point(field_mutable:proto.StorageMessage.log)
-  return log_.Mutable(index);
-}
-inline void StorageMessage::set_log(int index, const ::std::string& value) {
-  // @@protoc_insertion_point(field_set:proto.StorageMessage.log)
-  log_.Mutable(index)->assign(value);
-}
-#if LANG_CXX11
-inline void StorageMessage::set_log(int index, ::std::string&& value) {
-  // @@protoc_insertion_point(field_set:proto.StorageMessage.log)
-  log_.Mutable(index)->assign(std::move(value));
-}
-#endif
-inline void StorageMessage::set_log(int index, const char* value) {
-  GOOGLE_DCHECK(value != NULL);
-  log_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:proto.StorageMessage.log)
-}
-inline void StorageMessage::set_log(int index, const char* value, size_t size) {
-  log_.Mutable(index)->assign(
-    reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:proto.StorageMessage.log)
-}
-inline ::std::string* StorageMessage::add_log() {
-  // @@protoc_insertion_point(field_add_mutable:proto.StorageMessage.log)
-  return log_.Add();
-}
-inline void StorageMessage::add_log(const ::std::string& value) {
-  log_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:proto.StorageMessage.log)
-}
-#if LANG_CXX11
-inline void StorageMessage::add_log(::std::string&& value) {
-  log_.Add(std::move(value));
-  // @@protoc_insertion_point(field_add:proto.StorageMessage.log)
-}
-#endif
-inline void StorageMessage::add_log(const char* value) {
-  GOOGLE_DCHECK(value != NULL);
-  log_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:proto.StorageMessage.log)
-}
-inline void StorageMessage::add_log(const char* value, size_t size) {
-  log_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:proto.StorageMessage.log)
-}
-inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
-StorageMessage::log() const {
-  // @@protoc_insertion_point(field_list:proto.StorageMessage.log)
-  return log_;
-}
-inline ::google::protobuf::RepeatedPtrField< ::std::string>*
-StorageMessage::mutable_log() {
-  // @@protoc_insertion_point(field_mutable_list:proto.StorageMessage.log)
-  return &log_;
 }
 
 #ifdef __GNUC__
