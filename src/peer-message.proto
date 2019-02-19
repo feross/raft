@@ -1,3 +1,8 @@
+/**
+ * This message format is used for all Raft message types, with certain fields
+ * only applying to certain Raft message types.
+ */
+
 syntax = "proto2";
 
 package proto;
