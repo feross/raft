@@ -4,7 +4,8 @@ Storage::Storage(string storage_path) : storage_path(storage_path) {
     fstream input(storage_path, ios::in | ios::binary);
     if (!storage_message.ParseFromIstream(&input)) {
         LOG(DEBUG) << "Failed to load storage file; using empty storage";
-        Init();
+        storage_message.set_current_term(0);
+        storage_message.set_voted_for("");
         Save();
     }
     LOG(DEBUG) << "Initial Storage: " << Util::ProtoDebugString(storage_message);
@@ -32,13 +33,6 @@ const string& Storage::voted_for() const {
 void Storage::set_voted_for(const string& value) {
     storage_message.set_voted_for(value);
     Save();
-}
-
-
-void Storage::Init() {
-    storage_message.set_current_term(0);
-    storage_message.set_voted_for("");
-    storage_message.clear_log();
 }
 
 void Storage::Save() {

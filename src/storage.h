@@ -77,7 +77,6 @@ class Storage {
          * is persisted to disk. This should be called by all the setters in
          * this class.
          */
-        void Init();
         void Save();
 
         string storage_path;
