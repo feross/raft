@@ -13,16 +13,16 @@ using namespace std;
 
 const string STORAGE_NAME_SUFFIX = "-storage.dat";
 
-class StorageException : public exception {
+class RaftStorageException : public exception {
     public:
-        StorageException(const string& message): message(message) {}
-        StorageException(const char* message): message(message) {}
+        RaftStorageException(const string& message): message(message) {}
+        RaftStorageException(const char* message): message(message) {}
         const char* what() const noexcept { return message.c_str(); }
     private:
         string message;
 };
 
-class Storage {
+class RaftStorage {
     public:
         /**
          * Persistent server state for Raft servers, backed by stable storage.
@@ -32,11 +32,11 @@ class Storage {
          * class ensure that data is persisted to stable storage before
          * returning.
          *
-         * @throw StorageException
+         * @throw RaftStorageException
          *
          * @param storage_path Path to the storage file to use
          */
-        Storage(string storage_path);
+        RaftStorage(string storage_path);
 
         /**
          * Delete the stable storage file.
@@ -82,7 +82,7 @@ class Storage {
          * is persisted to disk. This should be called by all the setters in
          * this class.
          *
-         * @throw StorageException
+         * @throw RaftStorageException
          */
         void Save();
 
