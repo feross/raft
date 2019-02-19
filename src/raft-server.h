@@ -5,7 +5,7 @@
 
 #include "log.h"
 #include "peer.h"
-#include "peer.pb.h"
+#include "peer-message.pb.h"
 #include "storage.h"
 #include "timer.h"
 #include "util.h"

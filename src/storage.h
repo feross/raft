@@ -5,7 +5,7 @@
 #include <google/protobuf/repeated_field.h>
 
 #include "log.h"
-#include "storage.pb.h"
+#include "storage-message.pb.h"
 #include "util.h"
 
 using namespace proto;

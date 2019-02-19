@@ -28,6 +28,7 @@ $(TARGET): proto $(OBJS)
 
 PROTOS := $(shell find $(SRC_DIR) -name *.proto)
 PROTOS_H := $(addsuffix .pb.h,$(basename $(PROTOS)))
+PROTOS_CC := $(addsuffix .pb.cc,$(basename $(PROTOS)))
 
 proto: $(PROTOS_H)
 
@@ -40,6 +41,6 @@ install-deps:
 
 .PHONY: clean
 clean:
-	$(RM) $(TARGET) $(OBJS) $(DEPS)
+	$(RM) $(TARGET) $(OBJS) $(DEPS) $(PROTOS_H) $(PROTOS_CC)
 
 -include $(DEPS)
