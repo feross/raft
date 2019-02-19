@@ -184,7 +184,8 @@ class Arguments {
         vector<string> unnamed_args;
 
         /**
-         * Help text to describe the purpose of the program
+         * Text to describe the purpose of the program. Used to generate the
+         * program's help text.
          */
         string intro;
 };
