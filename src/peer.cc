@@ -10,7 +10,7 @@ static void ErrorCheckSysCall(int success, const char* unique_error_message) {
 
 Peer::Peer(unsigned short listening_port, std::string destination_ip_address,
         unsigned short destination_port,
-        std::function<void(Peer*, char*, int)> message_received_callback) {
+        std::function<void(Peer*, char*, int)> peer_message_received_callback) {
     assert(listening_port != destination_port);
     my_port = listening_port;
     dest_port = destination_port;
@@ -21,10 +21,13 @@ Peer::Peer(unsigned short listening_port, std::string destination_ip_address,
     receive_socket = -1;
 
     RegisterReceiveListener();
-    stream_parser = new StreamParser([this,
-        message_received_callback](char* raw_message, int raw_message_len) {
-        message_received_callback(this, raw_message, raw_message_len);
-    });
+
+    // TODO moved StreamParser Variables
+    partial_number_bytes = 0;
+    current_message_length = 0;
+    target_message_length = -1;
+    message_under_construction = NULL;
+    message_received_callback = peer_message_received_callback;
 }
 
 Peer::~Peer() {
@@ -53,11 +56,11 @@ void Peer::SendMessage(const char* message, int message_len) {
     }
     if (send_socket > 0) {
         LOG(DEBUG) << "Sending over socket: " << send_socket;
-        auto [formatted_message, formatted_message_len] =
-        stream_parser->CreateMessageToSend(message, message_len);
-        ErrorCheckSysCall(send(send_socket, formatted_message,
-            formatted_message_len, 0), "send");
-        delete(formatted_message);
+        //because each peer is sequential, this is fine
+        ErrorCheckSysCall(send(send_socket, &message_len,
+            sizeof(int), 0), "send int message_len prepend");
+        ErrorCheckSysCall(send(send_socket, message,
+            message_len, 0), "send message itself");
     }
 }
 
@@ -72,7 +75,7 @@ void Peer::RegisterReceiveListener() {
                 ErrorCheckSysCall(close(receive_socket),"close receive_socket");
                 receive_socket = -1;
             }
-            stream_parser->ResetIncomingMessage();
+            ResetIncomingMessage();
             //dump anything we haven't used from this previous connection
         }
     });
@@ -106,7 +109,7 @@ void Peer::ListenOnSocket(int socket) {
             break;
         }
         LOG(DEBUG) << "Received " << len << " bytes.";
-        stream_parser->HandleRecievedChunk(buffer, len);
+        HandleRecievedChunk(buffer, len);
     }
 }
 
@@ -177,3 +180,100 @@ void Peer::InitiateConnection(const char* ip_addr, //MAYBE TODO: merge into send
         }
     }
 }
+
+
+
+
+
+void Peer::ResetIncomingMessage() {
+    partial_number_bytes = 0;
+    current_message_length = 0;
+    target_message_length = -1;
+    if (message_under_construction != NULL) delete(message_under_construction);
+    message_under_construction = NULL;
+}
+
+
+void Peer::HandleRecievedChunk(char* buffer, int valid_bytes) {
+    LOG(DEBUG) << "the buffer, assuming leading int: " << (buffer + sizeof(int));
+    // loop necessary, because may have received multiple messages in chunk
+    while(valid_bytes > 0) {
+        if (target_message_length == -1) {
+            //read bytes to determine the next message's length
+            int bytes_needed = sizeof(int) - partial_number_bytes;
+            int message_len_bytes = bytes_needed;
+            if(valid_bytes < bytes_needed) {
+                message_len_bytes = valid_bytes;
+            }
+            memcpy(incomplete_number_buffer + partial_number_bytes,
+            buffer, message_len_bytes);
+            partial_number_bytes += message_len_bytes;
+            valid_bytes -= message_len_bytes;
+            if(message_len_bytes == bytes_needed) {
+                // complete message_len_number was obtained,
+                target_message_length = *(int*)incomplete_number_buffer;
+                current_message_length = 0;
+
+                buffer = buffer + bytes_needed;
+                //heap allocation is not avoidable if e.g. we receive only part
+                // of the full message
+                message_under_construction = new char[target_message_length + 1];
+                message_under_construction[target_message_length] = '\0';
+                //null-terminate only because it's low-cost to do so
+            }
+        } else {
+            // accumulate current message
+            int bytes_to_copy = target_message_length;
+            if (valid_bytes < target_message_length) bytes_to_copy = valid_bytes;
+            memcpy(message_under_construction + current_message_length,
+                buffer, bytes_to_copy);
+            buffer = buffer + bytes_to_copy;
+            current_message_length += bytes_to_copy;
+            valid_bytes -= bytes_to_copy;
+
+            LOG(DEBUG) << "current message len: " << current_message_length <<
+                ", target: " << target_message_length << ", valid: " <<
+                valid_bytes << ", to_copy: " << bytes_to_copy;
+
+            // if accumulated full message, callback & reset internal data
+            if(current_message_length == target_message_length) {
+                LOG(DEBUG) << "Found full message: " <<
+                    message_under_construction << ", buffer: " << buffer;
+
+                message_received_callback(this, message_under_construction,
+                    target_message_length);
+                message_under_construction = NULL;
+                // we are no longer owner of this data, client's job to manage
+                ResetIncomingMessage();
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

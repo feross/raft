@@ -5,7 +5,6 @@
 #include <arpa/inet.h>
 
 #include "log.h"
-#include "stream_parser.h"
 
 //TODO maybe template to allow to make specific if desired, but also generic
 
@@ -25,7 +24,7 @@ class Peer {
          * @param destination_port - port the peer machine will be listening for
          *      our connection on. NOTE: Must not be shared on destination machine
          *      because it uniquely identifies our machine to the peer.
-         * @param message_received_callback - callback function to be called
+         * @param peer_message_received_callback - callback function to be called
          *      whenever we receive a message from this peer
          *      callback arguments:
          *          peer - who we received from
@@ -34,7 +33,7 @@ class Peer {
          */
         Peer(unsigned short listening_port, std::string destination_ip_address,
             unsigned short destination_port,
-            std::function<void(Peer*, char*, int)> message_received_callback);
+            std::function<void(Peer*, char*, int)> peer_message_received_callback);
 
         /**
          *  Destroy the Peer Connection & clean up all resources
@@ -124,12 +123,56 @@ class Peer {
          */
         bool running;
 
+        
+
+
+
+
+
+
+
+
+        // TODO: MERGED STREAMPARSER METHODS & VARIABLES (as per Ousterhout's suggestion)
+
         /**
-         * Class used to manage turning outgoing messages into a format that we
-         * can easily parse on the other end (using this class), even though
-         * we may receive it sliced up in any way.
-         * 
-         * Assumes stream bytes received in-order (though any slicing of bytes)
+         * Given a chunk of data from the stream of any size:
+         *  - parses out any completed messages & calls message_received_callback
+         *      that was passed in the constructor
+         *  - accumulates any partial messages to be completed by future chunks.
+         *
+         * Must be called on bytes coming from stream in order.
+         *
+         * @param buffer - buffer containing received bytes from the stream
+         * @param valid_bytes - number of valid bytes in this buffer from stream
          */
-        StreamParser *stream_parser;
+        void HandleRecievedChunk(char* buffer, int valid_bytes);
+
+        /**
+         * Resets/ throws out any partially accumulated message from the socket,
+         * useful in cases where we know the message can never be completed
+         */
+        void ResetIncomingMessage();
+
+        /**
+         * Callback invoked every time we have accumulated a "complete" message
+         * as defined by "was sent as CreateMessageToSend blob on other end of
+         * stream".
+         *
+         * Callback arguments:
+         *      - char* : the blob of bytes received
+         *      - int : the length of the blob of bytes received
+         */
+        std::function<void(Peer*, char*, int)> message_received_callback;
+        int current_message_length;
+        int target_message_length;
+        char* message_under_construction; //MAYBE TODO: documentation per variable?
+
+        /**
+         * Because the stream of bytes may be cut even along within the middle
+         * of the 4 bytes identifying the length of the subsequent message blob,
+         * we may need to accumulate a partial integer.  We use this number &
+         * buffer to accumulate bytes until the full number is complete.
+         */
+        int partial_number_bytes;
+        char incomplete_number_buffer[sizeof(int)];
 };

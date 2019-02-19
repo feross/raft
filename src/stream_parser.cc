@@ -29,24 +29,21 @@ StreamParser::~StreamParser() {
 
 void StreamParser::HandleRecievedChunk(char* buffer, int valid_bytes) {
     LOG(DEBUG) << "the buffer, assuming leading int: " << (buffer + sizeof(int));
+    // loop necessary, because may have received multiple messages in chunk
     while(valid_bytes > 0) {
         if (target_message_length == -1) {
+            //read bytes to determine the next message's length
             int bytes_needed = sizeof(int) - partial_number_bytes;
+            int message_len_bytes = bytes_needed;
             if(valid_bytes < bytes_needed) {
-                //partial message_len_number, save & wait for more from stream
-                memcpy(incomplete_number_buffer + partial_number_bytes,
-                    buffer, valid_bytes);
-                partial_number_bytes += valid_bytes;
-                valid_bytes -= valid_bytes;
-                break;
-            } else {
-                // complete message_len_number obtainable,
-                // get & create buffer in which to place message
-                memcpy(incomplete_number_buffer + partial_number_bytes,
-                    buffer, bytes_needed);
-                partial_number_bytes += bytes_needed;
-                valid_bytes -= bytes_needed;
-
+                message_len_bytes = valid_bytes;
+            }
+            memcpy(incomplete_number_buffer + partial_number_bytes,
+            buffer, message_len_bytes);
+            partial_number_bytes += message_len_bytes;
+            valid_bytes -= message_len_bytes;
+            if(message_len_bytes == bytes_needed) {
+                // complete message_len_number was obtained,
                 target_message_length = *(int*)incomplete_number_buffer;
                 current_message_length = 0;
 
