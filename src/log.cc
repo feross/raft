@@ -13,7 +13,7 @@ LOG::LOG(LogType level) : level(level) {
     operator << ("[" + getLabel(level) + "] ");
 }
 
-LOG::~LOG() {
+LOG::~LOG() {   // what if we have 2 log objs in same block (so both are still in scope)
     if (opened) {
         if (level == ERROR) {
             cerr << endl;

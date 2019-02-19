@@ -7,6 +7,8 @@
 #include "log.h"
 #include "stream_parser.h"
 
+//TODO maybe template to allow to make specific if desired, but also generic
+
 class Peer {
     public:
         /**

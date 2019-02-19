@@ -2,7 +2,10 @@
 
 #include "log.h"
 
-class StreamParser {
+//TODO maybe merge peer class, to avoid heap allocation
+
+class StreamParser { //TODO: maybe put all comments in the CC (just because ease of reference)?
+                    // TODO: real "interface w/o implementation" should be not even in the code (e.g. generated document/readme/whatever)
     public:
         /**
          * Tool for parsing objects to be passed into a stream,
@@ -16,7 +19,7 @@ class StreamParser {
          *              data, which the client is responsible for freeing
          *          int - size of message data
          */
-        StreamParser(std::function<void(char*, int)> callback);
+        StreamParser(std::function<void(char*, int)> callback); //TODO: better arg name
 
         /**
          * Destroy the StreamParser & clean up all resources
@@ -57,7 +60,7 @@ class StreamParser {
          */
         void ResetIncomingMessage();
 
-    private:
+    private: //TODO: everything below here is implementation detail
         /**
          * Callback invoked every time we have accumulated a "complete" message
          * as defined by "was sent as CreateMessageToSend blob on other end of
@@ -70,7 +73,7 @@ class StreamParser {
         std::function<void(char*, int)> message_received_callback;
         int current_message_length;
         int target_message_length;
-        char* message_under_construction;
+        char* message_under_construction; //MAYBE TODO: documentation per variable?
 
         /**
          * Because the stream of bytes may be cut even along within the middle

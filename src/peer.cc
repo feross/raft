@@ -79,7 +79,7 @@ void Peer::RegisterReceiveListener() {
 }
 
 void Peer::RegisterCloseListener() {
-    if (connection_reset) {
+    if (connection_reset) { //TODO comment why this is here
         out_listener.join();
         connection_reset = false;
         LOG(DEBUG) << "Joined old listening-for-close-on-outbound thread";
@@ -154,7 +154,7 @@ void Peer::AcceptConnection(const char* ip_addr, unsigned short listening_port) 
     ErrorCheckSysCall(close(mysocket), "close mysocket");
 }
 
-void Peer::InitiateConnection(const char* ip_addr,
+void Peer::InitiateConnection(const char* ip_addr, //MAYBE TODO: merge into send, & just group via whitespace & inline comments
     unsigned short destination_port) {
     struct sockaddr_in dest;
     send_socket = socket(AF_INET, SOCK_STREAM, 0);
