@@ -20,9 +20,12 @@ static const int ELECTION_MAX_TIMEOUT = 10'000;
 static const int LEADER_HEARTBEAT_INTERVAL = 2'000;
 
 class RaftServerException : public exception {
-    const char* what() const noexcept {
-        return "Unexpected Raft server error";
-    }
+    public:
+        RaftServerException(const string& message): message(message) {}
+        RaftServerException(const char* message): message(message) {}
+        const char* what() const noexcept { return message.c_str(); }
+    private:
+        string message;
 };
 
 /**
