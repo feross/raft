@@ -104,9 +104,8 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             return;
 
         default:
-            cerr << oslock << "Unexpected message type: " <<
-                Util::ProtoDebugString(message) << endl << osunlock;
-            throw RaftServerException();
+            LOG(WARN) << "Unexpected message type: " <<
+                Util::ProtoDebugString(message);
     }
 }
 
@@ -185,11 +184,6 @@ void RaftServer::TransitionServerState(ServerState new_state) {
 
         case Leader:
             return;
-
-        default:
-            cerr << oslock << "Bad state transition to " << new_state << endl <<
-                osunlock;
-            throw RaftServerException();
     }
 }
 

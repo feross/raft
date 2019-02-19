@@ -26,15 +26,15 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    if (args.get_bool("help")) {
-        LOG() << args.get_help_text();
-        return EXIT_SUCCESS;
-    }
-
     if (args.get_bool("quiet")) {
         LOG_LEVEL = WARN;
     } else if (args.get_bool("debug")) {
         LOG_LEVEL = DEBUG;
+    }
+
+    if (args.get_bool("help")) {
+        LOG() << args.get_help_text();
+        return EXIT_SUCCESS;
     }
 
     string server_id = args.get_string("id");
@@ -45,7 +45,12 @@ int main(int argc, char* argv[]) {
 
     if (args.get_bool("reset")) {
         Storage storage(server_id + STORAGE_NAME_SUFFIX);
-        storage.Reset();
+        try {
+            storage.Reset();
+        } catch (StorageException) {
+            LOG(ERROR) << err.what();
+            return EXIT_FAILURE;
+        }
         return EXIT_SUCCESS;
     }
 
@@ -73,6 +78,5 @@ int main(int argc, char* argv[]) {
     }
 
     google::protobuf::ShutdownProtobufLibrary();
-
     return EXIT_SUCCESS;
 }

@@ -2,11 +2,6 @@
 
 #include <sstream>
 #include <iomanip>
-string pad (string str, int width) {
-    stringstream ss;
-    ss << setw(width) << str;
-    return ss.str();
-}
 
 void Arguments::RegisterBool(string name, string description) {
     bool_args[name] = false;
@@ -39,7 +34,7 @@ void Arguments::Parse(int argc, char* argv[]) {
                 // determine the argument value
                 i += 1;
                 if (i >= arguments.size()) {
-                    throw MissingArgumentException();
+                    throw ArgumentsException("Argument " + arg + " missing value");
                 }
                 string value = arguments[i];
                 if (int_args.count(name)) {
@@ -48,7 +43,7 @@ void Arguments::Parse(int argc, char* argv[]) {
                     string_args[name] = value;
                  }
             } else {
-                throw InvalidArgumentException();
+                throw ArgumentsException("Unexpected argument " + arg);
             }
         } else {
             // Unnamed arguments have no dash prefix
@@ -59,21 +54,21 @@ void Arguments::Parse(int argc, char* argv[]) {
 
 bool Arguments::get_bool(string name) {
     if (!bool_args.count(name)) {
-        throw InvalidArgumentException();
+        throw ArgumentsException("Missing argument " + name);
     }
     return bool_args[name];
 }
 
 int Arguments::get_int(string name) {
     if (!int_args.count(name)) {
-        throw InvalidArgumentException();
+        throw ArgumentsException("Missing argument " + name);
     }
     return int_args[name];
 }
 
 const string& Arguments::get_string(string name) {
     if (!string_args.count(name)) {
-        throw InvalidArgumentException();
+        throw ArgumentsException("Missing argument " + name);
     }
     return string_args[name];
 }
@@ -85,20 +80,17 @@ const vector<string>& Arguments::get_unnamed() {
 string Arguments::get_help_text() {
     string result;
 
-    if (intro.size()) {
-        result += intro + "\n";
-    }
-
+    if (intro.size()) result += intro + "\n";
     result += "Usage:";
 
     unsigned long max_name_len = 0;
     unsigned long max_description_len = 0;
-    for(auto const& [name, description] : descriptions) {
+    for (auto const& [name, description] : descriptions) {
         max_name_len = max(max_name_len, name.size());
         max_description_len = max(max_description_len, description.size());
     }
 
-    for(auto const& [name, description] : descriptions) {
+    for (auto const& [name, description] : descriptions) {
         string type;
         if (bool_args.count(name)) {
             type = "bool";

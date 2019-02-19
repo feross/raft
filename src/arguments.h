@@ -10,16 +10,13 @@
 
 using namespace std;
 
-class InvalidArgumentException : public exception {
-    const char* what() const noexcept {
-        return "Invalid argument name";
-    }
-};
-
-class MissingArgumentException : public exception {
-    const char* what() const noexcept {
-        return "Missing required argument value";
-    }
+class ArgumentsException : public exception {
+    public:
+        ArgumentsException(const string& message): message(message) {}
+        ArgumentsException(const char* message): message(message) {}
+        const char* what() const noexcept { return message.c_str(); }
+    private:
+        string message;
 };
 
 class Arguments {
@@ -97,8 +94,7 @@ class Arguments {
          * malformed, or missing a required value (e.g. for a named string or
          * integer argument which requires a value).
          *
-         * @throw MissingArgumentException
-         * @throw InvalidArgumentException
+         * @throw ArgumentsException
          *
          * @param argc Number of command line arguments
          * @param argv Array of command line argument strings
@@ -108,7 +104,7 @@ class Arguments {
         /**
          * Return the value of the boolean argument with the given name.
          *
-         * @throw InvalidArgumentException
+         * @throw ArgumentsException
          *
          * @param  argument name
          * @return argument value
@@ -118,7 +114,7 @@ class Arguments {
         /**
          * Return the value of the integer argument with the given name.
          *
-         * @throw InvalidArgumentException
+         * @throw ArgumentsException
          *
          * @param  argument name
          * @return argument value
@@ -128,7 +124,7 @@ class Arguments {
         /**
          * Return the value of the string argument with the given name.
          *
-         * @throw InvalidArgumentException
+         * @throw ArgumentsException
          *
          * @param  argument name
          * @return argument value
@@ -188,7 +184,8 @@ class Arguments {
         vector<string> unnamed_args;
 
         /**
-         * Help text to describe the purpose of the program
+         * Text to describe the purpose of the program. Used to generate the
+         * program's help text.
          */
         string intro;
 };

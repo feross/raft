@@ -19,12 +19,6 @@ static const int ELECTION_MIN_TIMEOUT = 5'000;
 static const int ELECTION_MAX_TIMEOUT = 10'000;
 static const int LEADER_HEARTBEAT_INTERVAL = 2'000;
 
-class RaftServerException : public exception {
-    const char* what() const noexcept {
-        return "Unexpected Raft server error";
-    }
-};
-
 /**
  * Peer connection information. Describes a peer that this server should connect
  * to. Peers are specified via destination_ip_addr and destination_port. The
