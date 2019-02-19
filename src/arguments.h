@@ -36,9 +36,9 @@ class Arguments {
          *
          *      int main(int argc, char* argv[]) {
          *          Arguments args("Hello World - A hello world CLI program");
-         *          args.register_bool("help", "Print help message", false);
+         *          args.RegisterBool("help", "Print help message");
          *          try {
-         *              args.parse(argc, argv);
+         *              args.Parse(argc, argv);
          *          } catch (exception& err) {
          *              cerr << "Error: " << err.what() << endl;
          *              return 1;
