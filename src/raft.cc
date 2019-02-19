@@ -44,10 +44,10 @@ int main(int argc, char* argv[]) {
     }
 
     if (args.get_bool("reset")) {
-        Storage storage(server_id + STORAGE_NAME_SUFFIX);
+        RaftStorage storage(server_id + STORAGE_NAME_SUFFIX);
         try {
             storage.Reset();
-        } catch (StorageException) {
+        } catch (RaftStorageException& err) {
             LOG(ERROR) << err.what();
             return EXIT_FAILURE;
         }

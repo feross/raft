@@ -3,10 +3,10 @@
 #include <map>
 #include <vector>
 
-#include "log.h"
+#include "log2.h"
 #include "peer.h"
 #include "peer-message.pb.h"
-#include "storage.h"
+#include "raft-storage.h"
 #include "timer.h"
 #include "util.h"
 
@@ -166,7 +166,7 @@ class RaftServer {
         const string& server_id;
 
         ServerState server_state = Follower;
-        Storage storage;
+        RaftStorage storage;
 
         Timer *election_timer;
         Timer *leader_timer;

@@ -9,7 +9,7 @@
 #include "arguments.h"
 #include "log.h"
 #include "raft-server.h"
-#include "storage.h"
+#include "raft-storage.h"
 
 static const string INTRO_TEXT =
 R"(Raft - An understandable consensus algorithm
