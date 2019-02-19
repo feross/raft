@@ -34,28 +34,6 @@ void Storage::set_voted_for(const string& value) {
     Save();
 }
 
-vector<string> Storage::log () const {
-    google::protobuf::RepeatedPtrField repeatedPtr = storage_message.log();
-    return vector<string>(repeatedPtr.begin(), repeatedPtr.end());
-}
-
-const string& Storage::log (int index) const {
-    return storage_message.log(index);
-}
-
-int Storage::log_size() const {
-    return storage_message.log_size();
-}
-
-void Storage::set_log(int index, const string& value) {
-    storage_message.set_log(index, value);
-    Save();
-}
-
-void Storage::add_log(const string& value) {
-    storage_message.add_log(value);
-    Save();
-}
 
 void Storage::Init() {
     storage_message.set_current_term(0);

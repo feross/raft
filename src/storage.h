@@ -71,52 +71,12 @@ class Storage {
          */
         void set_voted_for(const string& value);
 
-        /**
-         * Returns all log entries in a vector. Each log entry contains a command
-         * for the state machine. (first index is 1)
-         *
-         * TODO: Each log entry should contain the term when the entry was
-         * received by leader.
-         *
-         * @return vector of log entries
-         */
-        vector<string> log () const;
-
-        /**
-         * Returns the log entry element at the given zero-based index. Calling
-         * this method with index outside of [0, log_size()) yields undefined
-         * behavior.
-         *
-         * @param  index the index of the log entry to return
-         * @return the log entry
-         */
-        const string& log (int index) const;
-
-        /**
-         * Returns the number of log entries currently in the log.
-         *
-         * @return integer number of log entries
-         */
-        int log_size() const;
-
-        /**
-         * Sets the value of the log entry element at the given zero-based
-         * index, and persists it to stable storage.
-         *
-         * @param index the index of the log entry to set
-         * @param value the new value to set
-         */
-        void set_log(int index, const string& value);
-
-        /**
-         * Appends a new log entry element to the log with the given value, and
-         * persists it to stable storage
-         *
-         * @param value the new log entry to add
-         */
-        void add_log(const string& value);
-
     private:
+        /**
+         * Persist the storage state to disk. This method blocks until the data
+         * is persisted to disk. This should be called by all the setters in
+         * this class.
+         */
         void Init();
         void Save();
 
