@@ -14,8 +14,10 @@ typedef ::google::protobuf::Message Message;
 class Util {
     public:
         /**
-         * Serialize a Protocol Buffer message into a human-readable debug
-         * string which can be included in logs.
+         * Serialize a Protocol Buffer message into anhuman-readable debug
+         * string which can be included in logs. This method produces a string
+         * that can be printed on a single line, unlike the built in Protocol
+         * Buffer debug string which includes numerous newlines.
          *
          * @param  message The Protocol Buffer message to convert to a string
          * @return  String representation of the Protocol Buffer
@@ -24,7 +26,7 @@ class Util {
 
         /**
          * Split the given string str into a vector of strings using the given
-         * delimiter delim.
+         * single-character delimiter delim.
          *
          * Example:
          *     StringSplit("12.34.56.78:9000", ":")

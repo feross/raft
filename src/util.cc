@@ -12,12 +12,12 @@ const string Util::ProtoDebugString(::google::protobuf::Message& message) {
 const vector<string> Util::StringSplit(const string &str, string delim) {
     vector<string> result;
 
-    size_t last = 0;
+    size_t last_seen = 0;
     size_t next = 0;
-    for (; (next = str.find(delim, last)) != string::npos; last = next + 1) {
-        result.push_back(str.substr(last, next - last));
+    for (; (next = str.find(delim, last_seen)) != string::npos; last_seen = next + 1) {
+        result.push_back(str.substr(last_seen, next - last_seen));
     }
-    result.push_back(str.substr(last));
+    result.push_back(str.substr(last_seen));
 
     return result;
 }
