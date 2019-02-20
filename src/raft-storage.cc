@@ -21,17 +21,13 @@ int RaftStorage::current_term() const {
     return storage_message.current_term();
 }
 
-void RaftStorage::set_current_term(int value) {
-    storage_message.set_current_term(value);
-    Save();
-}
-
 const string& RaftStorage::voted_for() const {
     return storage_message.voted_for();
 }
 
-void RaftStorage::set_voted_for(const string& value) {
-    storage_message.set_voted_for(value);
+void RaftStorage::set_vote_and_term(const string& vote, int term) {
+    storage_message.set_voted_for(vote);
+    storage_message.set_current_term(term);
     Save();
 }
 
@@ -45,8 +41,10 @@ void RaftStorage::set_last_applied(int value) {
 }
 
 void RaftStorage::Save() {
-    fstream output(storage_path, ios::out | ios::trunc | ios::binary);
-    if (!storage_message.SerializeToOstream(&output)) {
+    string storage_string;
+    storage_message.SerializeToString(storage_string);
+    if (Util::PersistentFileUpdate(storage_path, storage_string.c_str(),
+        storage_string.length()) == false) {
         throw RaftStorageException("Failed to write storage: " + storage_path);
     }
 }

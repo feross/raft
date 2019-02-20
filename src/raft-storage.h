@@ -53,14 +53,6 @@ class RaftStorage {
         int current_term() const;
 
         /**
-         * Sets the current term to the given value, and persists it to stable
-         * storage.
-         *
-         * @param value the new current term
-         */
-        void set_current_term(int value);
-
-        /**
          * Returns the candidate id that received a vote in the current term
          * (or "" if none).
          *
@@ -75,7 +67,7 @@ class RaftStorage {
          *
          * @param value the new candidate id that received a vote
          */
-        void set_voted_for(const string& value);
+        void set_vote_and_term(const string& vote, int term);
 
         int last_applied() const;
 
