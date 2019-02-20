@@ -58,4 +58,12 @@ class Util {
          * @return The result string
          */
         static string PadLeft(string const& str, size_t size);
+
+        /**
+         * Trim whitespace from the start of a string, passed by reference.
+         * @param str String to left trim ()
+         */
+        static void LeftTrim(string &str);
+        static void RightTrim(string &str);
+        static void Trim(std::string &str);
 };

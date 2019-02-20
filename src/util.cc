@@ -37,3 +37,24 @@ string Util::PadLeft(string const& str, size_t size) {
         return str;
     }
 }
+
+// String trim implementation inspired by:
+// https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
+void Util::LeftTrim(string &str) {
+    str.erase(str.begin(), std::find_if(str.begin(), str.end(), [](int ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+// trim from end (in place)
+void Util::RightTrim(string &str) {
+    str.erase(std::find_if(str.rbegin(), str.rend(), [](int ch) {
+        return !std::isspace(ch);
+    }).base(), str.end());
+}
+
+// trim from both ends (in place)
+void Util::Trim(std::string &str) {
+    LeftTrim(str);
+    RightTrim(str);
+}
