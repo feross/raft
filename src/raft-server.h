@@ -22,9 +22,9 @@ using namespace proto;
 enum ServerState { Follower, Candidate, Leader };
 static const string ServerStateStrings[] = { "Follower", "Candidate", "Leader" };
 
-static const int ELECTION_MIN_TIMEOUT = 5'000;
-static const int ELECTION_MAX_TIMEOUT = 10'000;
-static const int LEADER_HEARTBEAT_INTERVAL = 2'000;
+static const int ELECTION_MIN_TIMEOUT = 5'000; // milliseconds
+static const int ELECTION_MAX_TIMEOUT = 10'000; // milliseconds
+static const int LEADER_HEARTBEAT_INTERVAL = 2'000; // milliseconds
 
 /**
  * Peer connection information. Describes a peer that this server should connect

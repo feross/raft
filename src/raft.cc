@@ -72,9 +72,11 @@ int main(int argc, char* argv[]) {
 
     RaftServer raft_server(server_id, peer_infos);
 
-    // Keep the main thread alive until a SIGINT or SIGTERM is received
+    // Keep program alive until a SIGINT, SIGTERM, or SIGKILL is received
+    sigset_t mask;
+    sigemptyset(&mask);
     while (true) {
-        this_thread::sleep_for(chrono::seconds(1));
+        sigsuspend(&mask);
     }
 
     google::protobuf::ShutdownProtobufLibrary();
