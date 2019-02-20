@@ -40,23 +40,8 @@ class StreamParser { //TODO: maybe put all comments in the CC (just because ease
         void HandleRecievedChunk(char* buffer, int valid_bytes);
 
         /**
-         * Given a message to send and its size, generates the buffer to be sent
-         * to the other end of the stream.  This buffer is heap-allocated &
-         * returned to the client, who is responsible for freeing it.
-         *
-         * @param raw_message - buffer containing data we wish to send
-         * @param message_len - length (in bytes) of the raw_message buffer
-         *
-         * @return - a tuple containing:
-         *                  char* - a heap-allocated, formatted buffer to send,
-                                which the client is responsible for freeing
-         *                  int - the size of the data in that buffer
-         */
-        std::tuple<char*, int> CreateMessageToSend(const char* raw_message,
-            int message_len);
-
-        /**
-         * Resets/ throws out any partially accumulated message from the stream
+         * Resets/ throws out any partially accumulated message from the socket,
+         * useful in cases where we know the message can never be completed
          */
         void ResetIncomingMessage();
 

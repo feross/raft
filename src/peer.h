@@ -163,9 +163,22 @@ class Peer {
          *      - int : the length of the blob of bytes received
          */
         std::function<void(Peer*, char*, int)> message_received_callback;
+        /*
+         * How many bytes we have currently received as part of the next message
+         * from this peer.
+         */ 
         int current_message_length;
+        /*
+         * How many total bytes will be in our next message
+         */
         int target_message_length;
-        char* message_under_construction; //MAYBE TODO: documentation per variable?
+        /*
+         * Message under construction is a heap-allocated buffer that tracks
+         * the "current" partially-received message that came over the
+         * socket's stream. It will accumulate only until we have a full message.
+         * This must be freed before you point to a new heap location
+         */
+        char* message_under_construction;
 
         /**
          * Because the stream of bytes may be cut even along within the middle
@@ -173,6 +186,9 @@ class Peer {
          * we may need to accumulate a partial integer.  We use this number &
          * buffer to accumulate bytes until the full number is complete.
          */
+        /* number of bytes currently written in incomplete_number_buffer */
         int partial_number_bytes;
+        /* accumulator for the leading integer, that precedes each message
+         * and enables us to provide a message-based interface */
         char incomplete_number_buffer[sizeof(int)];
 };
