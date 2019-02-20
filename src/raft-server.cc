@@ -152,8 +152,14 @@ void RaftServer::TransitionCurrentTerm(int term) {
 }
 
 void RaftServer::TransitionServerState(ServerState new_state) {
-    info("STATE: %s -> %s", ServerStateStrings[server_state].c_str(),
-        ServerStateStrings[new_state].c_str());
+    if (server_state == new_state) {
+        // Do not transition if already in same state
+        return;
+    }
+
+    const char* old_state_str = ServerStateStrings[server_state].c_str();
+    const char* new_state_str = ServerStateStrings[new_state].c_str();
+    info("STATE: %s -> %s", old_state_str, new_state_str);
 
     server_state = new_state;
 
@@ -171,6 +177,7 @@ void RaftServer::TransitionServerState(ServerState new_state) {
             for (Peer* peer: peers) {
                 SendRequestVoteRequest(peer);
             }
+
             election_timer->Reset();
             return;
 
@@ -180,11 +187,11 @@ void RaftServer::TransitionServerState(ServerState new_state) {
 }
 
 void RaftServer::ReceiveVote(string server_id) {
-    votes.insert(server_id);
-
     if (server_state == Leader) {
         return;
     }
+
+    votes.insert(server_id);
 
     int server_count = peers.size() + 1;
     int majority_threshold = (server_count / 2) + 1;
