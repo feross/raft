@@ -7,6 +7,15 @@
 #include <algorithm>
 #include <google/protobuf/message.h>
 
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include <cstring>
+#include <iostream>
+#include <string>
+#include "log.h"
+
+
 using namespace std;
 
 typedef ::google::protobuf::Message Message;
@@ -66,4 +75,28 @@ class Util {
         static void LeftTrim(string &str);
         static void RightTrim(string &str);
         static void Trim(std::string &str);
+
+        /*
+         * Log errno & associate message, in addition to the given error message
+         * prefix that includes more user-specified information
+         *
+         * @param syscall_success - syscall completed as expected
+         * @param error_message_prefix - additional user-specified info to log
+         * @return bool - whether syscall was successful
+         */
+        static bool SyscallErrorInfo(bool syscall_success, const char *error_message_prefix);
+        /*
+         * Update filename to have new_contents, overwriting old file contents
+         * Will always either completely succeed, or fail.  I.e. filename either
+         * has intact old contents, or intact new contents
+         *
+         * @param filename - file to be updated
+         * @param new_contents - pointer to start of new file contents
+         * @param new_contents_len - length of new file contents
+         * @return bool - whether we successfully updated file to new contents
+         *
+         * NOTE: creates a whole new file, so new_contents_len should be
+         * relatively short.  E.g. don't use for a large log.
+         */
+        static bool PersistentFileUpdate(const char * filename, void * new_contents, int new_contents_len);
 };

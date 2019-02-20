@@ -8,7 +8,8 @@
 #include <string>
 #include <vector>
 
-// #include "log.h"
+#include "log.h"
+#include "util.h"
 
 /**
  * Struct describing a particular log entry, including:
@@ -74,7 +75,7 @@ class PersistentLog {
        *
        * @return bool - whether we successfully scanned the log info into memory
        */
-      bool load_index_from_log();
+      bool LoadIndexFromLog();
       /*
        * Persistently updates the cursor file and cursor, effectively adding
        * or removing bytes from the file.  Cursor specifies the active "end"
@@ -82,7 +83,7 @@ class PersistentLog {
        * 
        * @return bool - whether we successfully & persistently moved the cursor
        */
-      bool move_cursor(int distance);
+      bool MoveCursor(int distance);
 
       /*
        * Name of persistent cursor file, necessary to enable safe adding/removing

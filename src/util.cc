@@ -58,3 +58,32 @@ void Util::Trim(std::string &str) {
     LeftTrim(str);
     RightTrim(str);
 }
+
+
+bool Util::SyscallErrorInfo(bool syscall_success, const char *error_message_prefix) {
+  if (!syscall_success) {
+    warn("Error: %s, %s (%d)\n", error_message_prefix, strerror(errno), errno);
+  }
+  return syscall_success;
+}
+
+
+bool Util::PersistentFileUpdate(const char * filename, void * new_contents, int new_contents_len) {
+  // assume old file is safe
+  std::string tmp_filename = "tmp_" + std::string(filename);
+  debug("tmp name: %s\n", tmp_filename.c_str());
+  FILE * tmp_file = fopen( tmp_filename.c_str() , "wb" );
+  bool opened = SyscallErrorInfo(tmp_file != NULL,
+    "fopen of temp file as 'wb' failed"); //TODO: include filename
+  bool written = SyscallErrorInfo(new_contents_len == fwrite(new_contents, 1, new_contents_len, tmp_file),
+    "fwrite of new_contents to tmp_file failed"); //TODO include more info
+  bool flushed = SyscallErrorInfo(0 == fflush(tmp_file),
+    "Error: fflush failed to push all writes to disk, ");
+  bool closed = SyscallErrorInfo(0 == fclose(tmp_file), "fclose of tmp_file failed"); //TODO include filename
+  if (opened && written && closed && flushed) {
+    return SyscallErrorInfo(0 == rename(tmp_filename.c_str(), filename),
+    "rename of tmp_filename to filename failed"); //TODO: include more info
+  }
+  warn("File Update Failed %s, %s, %d", filename, new_contents, new_contents_len);
+  return false;
+}
