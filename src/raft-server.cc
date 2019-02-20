@@ -4,6 +4,8 @@ RaftServer::RaftServer(const string& server_id,
     vector<struct PeerInfo> peer_info_vector) : server_id(server_id),
     storage(server_id + STORAGE_NAME_SUFFIX) {
 
+    info("TERM: %d", storage.current_term());
+
     for (struct PeerInfo peer_info: peer_info_vector) {
         Peer *peer = new Peer(peer_info.my_listen_port,
             peer_info.destination_ip_addr, peer_info.destination_port,
@@ -20,8 +22,6 @@ RaftServer::RaftServer(const string& server_id,
     leader_timer = new Timer(LEADER_HEARTBEAT_INTERVAL, [this]() {
         HandleLeaderTimer();
     });
-
-    info("STARTING TERM: %d", storage.current_term());
 }
 
 void RaftServer::HandleElectionTimer() {
@@ -106,11 +106,10 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
 
 
 void RaftServer::SendMessage(Peer *peer, PeerMessage &message) {
+    debug("SEND: %s", Util::ProtoDebugString(message).c_str());
     string message_string;
     message.SerializeToString(&message_string);
-    debug("SEND: %s", Util::ProtoDebugString(message).c_str());
-    const char* message_cstr = message_string.c_str();
-    peer->SendMessage(message_cstr, message_string.size());
+    peer->SendMessage(message_string.c_str(), message_string.size());
 }
 
 PeerMessage RaftServer::CreateMessage(PeerMessage_Type message_type) {
@@ -181,9 +180,11 @@ void RaftServer::TransitionServerState(ServerState new_state) {
 }
 
 void RaftServer::ReceiveVote(string server_id) {
-    if (server_state == Leader) return;
-
     votes.insert(server_id);
+
+    if (server_state == Leader) {
+        return;
+    }
 
     int server_count = peers.size() + 1;
     int majority_threshold = (server_count / 2) + 1;

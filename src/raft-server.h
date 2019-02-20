@@ -134,19 +134,21 @@ class RaftServer {
         /**
          * Transitions current term to a new term, sets voted_for to be empty,
          * and resets the votes that we have received in any past elections.
+         * Assumes that the server mutex is held.
          */
         void TransitionCurrentTerm(int term);
 
         /**
          * Transitions the server to a new state (i.e. Follower, Candidate,
-         * Leader)
+         * Leader). Assumes that the server mutex is held.
          *
          * @param new_state the new server state to enter
          */
         void TransitionServerState(ServerState new_state);
 
         /**
-         * Note that a vote was received for us in the current election.
+         * Record that a vote was received for us in the current election.
+         * Assumes that the server mutex is held.
          *
          * @param server_id the server id of the server
          */
