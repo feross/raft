@@ -22,6 +22,11 @@ RaftServer::RaftServer(const string& server_id,
     leader_timer = new Timer(LEADER_HEARTBEAT_INTERVAL, [this]() {
         HandleLeaderTimer();
     });
+
+    client_server = new ClientServer([this](char * command) {
+        HandleClientCommand(command);
+    });
+    client_server->Listen(client_listen_port);
 }
 
 void RaftServer::HandleElectionTimer() {
@@ -41,6 +46,11 @@ void RaftServer::HandleLeaderTimer() {
     for (Peer* peer: peers) {
         SendAppendEntriesRequest(peer);
     }
+}
+
+void RaftServer::HandleClientCommand(char * command) {
+    lock_guard<mutex> lock(server_mutex);
+    debug("%s", "HandleClientCommand");
 }
 
 void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_message_len) {

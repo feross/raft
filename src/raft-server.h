@@ -179,6 +179,7 @@ class RaftServer {
         ServerState server_state = Follower;
         RaftStorage storage;
 
+        ClientServer *client_server;
         Timer *election_timer;
         Timer *leader_timer;
 
