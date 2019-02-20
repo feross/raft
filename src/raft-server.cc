@@ -61,6 +61,10 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 SendAppendEntriesResponse(peer, false);
                 return;
             }
+            if (message.term() == storage.current_term()) {
+                // Candidate recognizes another candidate has won election
+                TransitionServerState(Follower);
+            }
             SendAppendEntriesResponse(peer, true);
             election_timer->Reset();
             return;
@@ -80,6 +84,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             }
             if (storage.voted_for() != "" &&
                 storage.voted_for() != message.server_id()) {
+                // Voted for another server already
                 SendRequestVoteResponse(peer, false);
                 return;
             }
@@ -141,7 +146,6 @@ void RaftServer::SendRequestVoteResponse(Peer *peer, bool vote_granted) {
     message.set_vote_granted(vote_granted);
     SendMessage(peer, message);
 }
-
 
 void RaftServer::TransitionCurrentTerm(int term) {
     info("TERM: %d -> %d", storage.current_term(), term);
