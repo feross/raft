@@ -181,17 +181,15 @@ void RaftServer::TransitionServerState(ServerState new_state) {
 }
 
 void RaftServer::ReceiveVote(string server_id) {
-    votes[server_id] = true;
     if (server_state == Leader) return;
 
-    int vote_count = 0;
-    for (auto const& [_, vote_granted]: votes) {
-        if (vote_granted) vote_count += 1;
-    }
+    votes.insert(server_id);
 
     int server_count = peers.size() + 1;
     int majority_threshold = (server_count / 2) + 1;
-    if (vote_count >= majority_threshold) {
+
+    if (votes.size() >= majority_threshold) {
+        // This server won the election
         TransitionServerState(Leader);
     }
 }

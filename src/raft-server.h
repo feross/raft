@@ -182,5 +182,5 @@ class RaftServer {
          * current election. Maps server id strings to boolean values which
          * indicate an affirmative or negative election vote.
          */
-        map<string, bool> votes;
+        set<string> votes;
 };
