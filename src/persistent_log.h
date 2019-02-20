@@ -1,3 +1,27 @@
+#pragma once
+
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
+#include <cstring>
+#include <iostream>
+#include <string>
+#include <vector>
+
+// #include "log.h"
+
+/**
+ * Struct describing a particular log entry, including:
+ * - the content of the log entry
+ * - the length of that content
+ * - the byte-offset into log where the data associated with this entry begins
+ */
+struct LogEntry {
+  char *data;
+  int len;
+  int offset;
+};
+
 class PersistentLog {
     public:
       /*
@@ -11,6 +35,13 @@ class PersistentLog {
        * but leaves the persistent log intacted.
        */
       ~PersistentLog();
+      /*
+       * Returns the index-th entry in the log, if present.  If not present,
+       * returns a log entry with -1 size & NULL entry pointer.
+       * 
+       * @return LogEntry containing a pointer to the entry & its length
+       */
+      const struct LogEntry GetLogEntryByIndex(int index);
       /*
        * Appends an entry to the end of our persistent log.
        * 
@@ -36,6 +67,14 @@ class PersistentLog {
        * @return bool - true if successfully reopened/created the persistent log
        */
       bool ReopenLog();
+      /*
+       * Loads into memory information about the log.  Because we are restoring
+       * from disk, this scans over the full log.  Used for more efficient
+       * manipulation of the log (to avoid constant disk seeking).
+       *
+       * @return bool - whether we successfully scanned the log info into memory
+       */
+      bool load_index_from_log();
       /*
        * Persistently updates the cursor file and cursor, effectively adding
        * or removing bytes from the file.  Cursor specifies the active "end"
@@ -70,4 +109,13 @@ class PersistentLog {
        * other than initialization or in the midst of a crash.
        */
       int cursor;
+
+      /*
+       * In-memory representation of the log.  Because the log may be large, we
+       * only lazily populate log content (which is subsequently tracked and
+       * freed during destruction, so client doesn't have to free)
+       */
+      std::vector<struct LogEntry> log_entries;
+
+
 };
