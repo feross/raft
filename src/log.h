@@ -1,15 +1,13 @@
 #pragma once
 
 #include <iostream>
+#include <cstdio>
 
 #include "ostreamlock.h"
 
-enum LogType {
-    DEBUG,
-    INFO,
-    WARN,
-    ERROR
-};
+enum LogType { DEBUG, INFO, WARN, ERROR };
+static const std::string LogTypeStrings[] = { "DEBUG", "INFO", "WARN", "ERROR" };
+static std::mutex log_mutex;
 
 extern LogType LOG_LEVEL;
 
@@ -71,3 +69,32 @@ class LOG {
         LogType level = DEBUG;
         inline std::string getLabel(LogType type);
 };
+
+template<typename... Args>
+static void log(LogType level, const char* format, Args... args) {
+    std::lock_guard<std::mutex> lock(log_mutex);
+    if (level < LOG_LEVEL) return;
+    printf("[%s] ", LogTypeStrings[level].c_str());
+    printf(format, args...);
+    printf("\n");
+}
+
+template<typename... Args>
+static void debug(const char* format, Args... args) {
+    log(DEBUG, format, args...);
+}
+
+template<typename... Args>
+static void info(const char* format, Args... args) {
+    log(INFO, format, args...);
+}
+
+template<typename... Args>
+static void warn(const char* format, Args... args) {
+    log(WARN, format, args...);
+}
+
+template<typename... Args>
+static void error(const char* format, Args... args) {
+    log(ERROR, format, args...);
+}
