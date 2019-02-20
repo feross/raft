@@ -7,6 +7,7 @@
 
 #include "arguments.h"
 #include "log.h"
+#include "raft-config.h"
 #include "raft-server.h"
 #include "raft-storage.h"
 

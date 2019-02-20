@@ -14,15 +14,16 @@ int main(int argc, char* argv[]) {
 
     Arguments args(INTRO_TEXT);
     args.RegisterBool("help", "Print help message");
-    args.RegisterString("id", "Server identifier");
+    args.RegisterInt("id", "Server identifier");
     args.RegisterInt("listen", "Client listen port");
+    args.RegisterInt("config", "Path to configuration file (default = ./config)");
     args.RegisterBool("reset", "Delete server storage");
     args.RegisterBool("debug", "Show all logs");
     args.RegisterBool("quiet", "Show only errors");
 
     try {
         args.Parse(argc, argv);
-    } catch (exception& err) {
+    } catch (ArgumentsException& err) {
         error("%s", err.what());
         return EXIT_FAILURE;
     }
@@ -38,14 +39,19 @@ int main(int argc, char* argv[]) {
         return EXIT_SUCCESS;
     }
 
-    string server_id = args.get_string("id");
-    if (server_id.size() == 0) {
+    int server_id = args.get_int("id");
+    if (server_id == -1) {
         error("%s", "Server identifier is required (use --id)");
         return EXIT_FAILURE;
     }
 
+    string config_path = args.get_string("config");
+    if (config_path == "") {
+        config_path = "./config";
+    }
+
     if (args.get_bool("reset")) {
-        RaftStorage storage(server_id + STORAGE_NAME_SUFFIX);
+        RaftStorage storage(to_string(server_id) + STORAGE_NAME_SUFFIX);
         try {
             storage.Reset();
         } catch (RaftStorageException& err) {
@@ -55,32 +61,37 @@ int main(int argc, char* argv[]) {
         return EXIT_SUCCESS;
     }
 
-    vector<string> peer_info_strs = args.get_unnamed();
-    if (peer_info_strs.size() == 0) {
-        error("%s", "Specify at least one peer to connect to");
+    RaftConfig raft_config(config_path);
+
+    try {
+        raft_config.parse(server_id);
+    } catch (RaftConfigException& err) {
+        error("%s", err.what());
         return EXIT_FAILURE;
     }
 
-    vector<struct PeerInfo> peer_infos;
-    for (string peer_info_str: peer_info_strs) {
-        auto parts = Util::StringSplit(peer_info_str, ":");
-        struct PeerInfo peer_info;
-        peer_info.destination_ip_addr = parts[0];
-        peer_info.my_listen_port = stoi(parts[1]);
-        peer_info.destination_port = stoi(parts[2]);
-        peer_infos.push_back(peer_info);
-    }
+    return 0;
 
-    int listen_port = args.get_int("listen");
-    RaftServer raft_server(server_id, peer_infos, listen_port);
+    // vector<PeerInfo> peer_infos;
+    // for (string peer_info_str: peer_info_strs) {
+    //     auto parts = Util::StringSplit(peer_info_str, ":");
+    //     PeerInfo peer_info;
+    //     peer_info.destination_ip_addr = parts[0];
+    //     peer_info.my_listen_port = stoi(parts[1]);
+    //     peer_info.destination_port = stoi(parts[2]);
+    //     peer_infos.push_back(peer_info);
+    // }
 
-    // Keep program alive until a SIGINT, SIGTERM, or SIGKILL is received
-    sigset_t mask;
-    sigemptyset(&mask);
-    while (true) {
-        sigsuspend(&mask);
-    }
+    // int listen_port = args.get_int("listen");
+    // RaftServer raft_server(server_id, peer_infos, listen_port);
 
-    google::protobuf::ShutdownProtobufLibrary();
-    return EXIT_SUCCESS;
+    // // Keep program alive until a SIGINT, SIGTERM, or SIGKILL is received
+    // sigset_t mask;
+    // sigemptyset(&mask);
+    // while (true) {
+    //     sigsuspend(&mask);
+    // }
+
+    // google::protobuf::ShutdownProtobufLibrary();
+    // return EXIT_SUCCESS;
 }

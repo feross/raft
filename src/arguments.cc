@@ -9,7 +9,7 @@ void Arguments::RegisterBool(string name, string description) {
 }
 
 void Arguments::RegisterInt(string name, string description) {
-    int_args[name] = 0;
+    int_args[name] = -1;
     descriptions[name] = description;
 }
 

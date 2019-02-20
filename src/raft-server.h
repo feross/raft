@@ -14,6 +14,7 @@
 #include "log.h"
 #include "peer.h"
 #include "peer-message.pb.h"
+#include "raft-config.h"
 #include "raft-storage.h"
 #include "timer.h"
 #include "util.h"
@@ -26,18 +27,6 @@ static const string ServerStateStrings[] = { "Follower", "Candidate", "Leader" }
 static const int ELECTION_MIN_TIMEOUT = 5'000; // milliseconds
 static const int ELECTION_MAX_TIMEOUT = 10'000; // milliseconds
 static const int LEADER_HEARTBEAT_INTERVAL = 2'000; // milliseconds
-
-/**
- * Peer connection information. Describes a peer that this server should connect
- * to. Peers are specified via destination_ip_addr and destination_port. The
- * port on which this server will listen for a incoming connection from this
- * peer is specified as my_listen_port.
- */
-struct PeerInfo {
-    string destination_ip_addr;
-    unsigned short destination_port;
-    unsigned short my_listen_port;
-};
 
 class RaftServer {
     public:
@@ -54,7 +43,7 @@ class RaftServer {
          * @param peer_infos Vector of connection information for peer servers
          * @param client_listen_port Port to listen for client connections
          */
-        RaftServer(const string& server_id, vector<struct PeerInfo> peer_infos,
+        RaftServer(const string& server_id, vector<PeerInfo> peer_infos,
             int client_listen_port);
 
     private:

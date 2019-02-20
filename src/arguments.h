@@ -66,7 +66,7 @@ class Arguments {
 
         /**
          * Register a named integer command line argument with the given name
-         * and description. Dsefaults to 0.
+         * and description. Dsefaults to -1.
          *
          * Integer argument flags must be followed immediately by a space and
          * number (e.g. "--myint 42").

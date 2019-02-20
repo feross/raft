@@ -1,12 +1,12 @@
 #include "raft-server.h"
 
 RaftServer::RaftServer(const string& server_id,
-    vector<struct PeerInfo> peer_info_vector, int client_listen_port) :
+    vector<PeerInfo> peer_info_vector, int client_listen_port) :
     server_id(server_id), storage(server_id + STORAGE_NAME_SUFFIX) {
 
     info("TERM: %d", storage.current_term());
 
-    for (struct PeerInfo peer_info: peer_info_vector) {
+    for (PeerInfo peer_info: peer_info_vector) {
         Peer *peer = new Peer(peer_info.my_listen_port,
             peer_info.destination_ip_addr, peer_info.destination_port,
             [this](Peer* peer, char* raw_message, int raw_message_len) {
