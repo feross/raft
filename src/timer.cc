@@ -27,6 +27,5 @@ Timer::~Timer() {
 void Timer::Reset() {
     active = true;
     remaining_time = min_duration + rand() % (max_duration - min_duration + 1);
-
-    LOG(DEBUG) << "Reset timer (" << remaining_time << "ms)";
+    debug("Reset timer (%d)", remaining_time);
 }

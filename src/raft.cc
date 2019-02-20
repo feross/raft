@@ -22,7 +22,7 @@ int main(int argc, char* argv[]) {
     try {
         args.Parse(argc, argv);
     } catch (exception& err) {
-        LOG(ERROR) << err.what();
+        error("%s", err.what());
         return EXIT_FAILURE;
     }
 
@@ -33,13 +33,13 @@ int main(int argc, char* argv[]) {
     }
 
     if (args.get_bool("help")) {
-        LOG() << args.get_help_text();
+        printf("%s", args.get_help_text().c_str());
         return EXIT_SUCCESS;
     }
 
     string server_id = args.get_string("id");
     if (server_id.size() == 0) {
-        LOG(ERROR) << "Server identifier is required (use --id)";
+        error("%s", "Server identifier is required (use --id)");
         return EXIT_FAILURE;
     }
 
@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
         try {
             storage.Reset();
         } catch (RaftStorageException& err) {
-            LOG(ERROR) << err.what();
+            error("%s", err.what());
             return EXIT_FAILURE;
         }
         return EXIT_SUCCESS;
@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
 
     vector<string> peer_info_strs = args.get_unnamed();
     if (peer_info_strs.size() == 0) {
-        LOG(ERROR) << "Specify at least one peer to connect to";
+        error("%s", "Specify at least one peer to connect to");
         return EXIT_FAILURE;
     }
 

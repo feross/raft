@@ -1,7 +1,7 @@
 #include "raft-server.h"
 
-static const string& getServerStateString(ServerState server_state) {
-    return ServerStateStrings[server_state];
+static const char* getServerStateString(ServerState server_state) {
+    return ServerStateStrings[server_state].c_str();
 }
 
 RaftServer::RaftServer(const string& server_id,
@@ -25,7 +25,7 @@ RaftServer::RaftServer(const string& server_id,
         HandleLeaderTimer();
     });
 
-    LOG(INFO) << "STARTING TERM: " << storage.current_term();
+    info("STARTING TERM: %d", storage.current_term());
 }
 
 void RaftServer::HandleElectionTimer() {
@@ -52,7 +52,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
     PeerMessage message;
     message.ParseFromString(string(raw_message, raw_message_len));
 
-    LOG(DEBUG) << "RECEIVE: " << Util::ProtoDebugString(message);
+    debug("RECEIVE: %s", Util::ProtoDebugString(message).c_str());
 
     if (message.term() > storage.current_term()) {
         TransitionCurrentTerm(message.term());
@@ -104,8 +104,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             return;
 
         default:
-            LOG(WARN) << "Unexpected message type: " <<
-                Util::ProtoDebugString(message);
+            warn("Unexpected message type: %s", message.type());
     }
 }
 
@@ -119,7 +118,7 @@ PeerMessage RaftServer::CreateMessage() {
 void RaftServer::SendMessage(Peer *peer, PeerMessage &message) {
     string message_string;
     message.SerializeToString(&message_string);
-    LOG(DEBUG) << "SEND: " << Util::ProtoDebugString(message);
+    debug("SEND: %s", Util::ProtoDebugString(message).c_str());
     const char* message_cstr = message_string.c_str();
     peer->SendMessage(message_cstr, message_string.size());
 }
@@ -152,7 +151,7 @@ void RaftServer::SendRequestVoteResponse(Peer *peer, bool vote_granted) {
 
 
 void RaftServer::TransitionCurrentTerm(int term) {
-    LOG(INFO) << "TERM: " << storage.current_term() << " -> " << term;
+    info("TERM: %d -> %d", storage.current_term(), term);
     storage.set_current_term(term);
     // When updating the term, reset who we voted for
     storage.set_voted_for("");
@@ -160,8 +159,8 @@ void RaftServer::TransitionCurrentTerm(int term) {
 }
 
 void RaftServer::TransitionServerState(ServerState new_state) {
-    LOG(INFO) << "STATE: " << getServerStateString(server_state) <<
-        " -> " << getServerStateString(new_state);
+    info("STATE: %s -> %s", getServerStateString(server_state),
+        getServerStateString(new_state));
 
     server_state = new_state;
 

@@ -3,7 +3,7 @@
 #include <map>
 #include <vector>
 
-#include "log2.h"
+#include "log.h"
 #include "peer.h"
 #include "peer-message.pb.h"
 #include "raft-storage.h"

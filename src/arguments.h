@@ -37,11 +37,11 @@ class Arguments {
          *          try {
          *              args.Parse(argc, argv);
          *          } catch (exception& err) {
-         *              cerr << "Error: " << err.what() << endl;
+         *              printf("Error: %s\n", err.what());
          *              return 1;
          *          }
          *          if (args.get_bool("help")) {
-         *              cout << args.get_help_text() << endl;
+         *              printf("%s\n", args.get_help_text().c_str());
          *              return 0;
          *          }
          *      }

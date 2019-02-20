@@ -3,8 +3,7 @@
 
 static void ErrorCheckSysCall(int success, const char* unique_error_message) {
     if (success == -1) {
-        LOG(WARN) << "Error: " << unique_error_message << ", " <<
-            strerror(errno) << "(" << errno << ")";
+        warn("Error: %s, %s (%d)", unique_error_message, strerror(errno), errno);
     }
 }
 
@@ -51,11 +50,11 @@ void Peer::SendMessage(const char* message, int message_len) {
     //TODO: maybe this could be done in a thread to go faster, particular
     //when attempting reconnection.  Though that should be rare and that
     //the much-more-common send method below is non-blocking
-        LOG(DEBUG) << "Attempted reconnection";
+        debug("%s", "Attempted reconnection");
         InitiateConnection(dest_ip_addr.c_str(), dest_port);
     }
     if (send_socket > 0) {
-        LOG(DEBUG) << "Sending over socket: " << send_socket;
+        debug("Sending over socket: %d", send_socket);
         //because each peer is sequential, this is fine
         ErrorCheckSysCall(send(send_socket, &message_len,
             sizeof(int), 0), "send int message_len prepend");
@@ -65,11 +64,11 @@ void Peer::SendMessage(const char* message, int message_len) {
 }
 
 void Peer::RegisterReceiveListener() {
-    LOG(DEBUG) << "creating a new inbound listening thread";
+    debug("%s", "creating a new inbound listening thread");
     in_listener = std::thread([this] () {
         while(running) {
             AcceptConnection(dest_ip_addr.c_str(), my_port);
-            LOG(DEBUG) << "receive socket: " << receive_socket;
+            debug("receive socket: %d", receive_socket);
             ListenOnSocket(receive_socket);
             if (receive_socket != -1) {
                 ErrorCheckSysCall(close(receive_socket),"close receive_socket");
@@ -85,15 +84,15 @@ void Peer::RegisterCloseListener() {
     if (connection_reset) { //TODO comment why this is here
         out_listener.join();
         connection_reset = false;
-        LOG(DEBUG) << "Joined old listening-for-close-on-outbound thread";
+        debug("%s", "Joined old listening-for-close-on-outbound thread");
     }
-    LOG(DEBUG) << "Creating a new outbound-close listening thread";
+    debug("%s", "Creating a new outbound-close listening thread");
     out_listener = std::thread([this] () {
         ListenOnSocket(send_socket);
         connection_reset = true;
         close(send_socket);
         send_socket = -1;
-        LOG(DEBUG) << "Outbound Connection Closed";
+        debug("%s", "Outbound Connection Closed");
     });
 }
 
@@ -102,13 +101,13 @@ void Peer::ListenOnSocket(int socket) {
     while(socket > 0 && running) {
         int len = recv(socket, buffer, RECEIVE_BUFFER_SIZE, 0);
         if (len == -1) {
-            LOG(DEBUG) << "recv: " << strerror(errno) << "(" << errno << ")";
+            debug("recv: %s (%d)", strerror(errno), errno);
             break;
         } else if (len == 0) {
-            LOG(DEBUG) << "Peer Disconnected";
+            debug("%s", "Peer Disconnected");
             break;
         }
-        LOG(DEBUG) << "Received " << len << " bytes.";
+        debug("Received %d bytes", len);
         HandleRecievedChunk(buffer, len);
     }
 }
@@ -126,7 +125,7 @@ void Peer::AcceptConnection(const char* ip_addr, unsigned short listening_port) 
 
     mysocket = socket(AF_INET, SOCK_STREAM, 0);
     ErrorCheckSysCall(mysocket, "socket");
-    LOG(DEBUG) << "listen_port:" << listening_port << ",mysocket: " << mysocket;
+    debug("listen_port: %d, mysocket: %d", listening_port, mysocket);
 
     int val = 1; //required for setsockopt
     ErrorCheckSysCall(setsockopt(mysocket, SOL_SOCKET, SO_REUSEADDR, &val,
@@ -149,7 +148,7 @@ void Peer::AcceptConnection(const char* ip_addr, unsigned short listening_port) 
     ErrorCheckSysCall(receive_socket, "accept");
 
     if (dest.sin_addr.s_addr != inet_addr(ip_addr)) {
-        LOG(WARN) << "Connection from unspecified IP, closing connection";
+        warn("%s", "Connection from unspecified IP, closing connection");
         close(receive_socket);
         receive_socket = -1;
     }
@@ -175,15 +174,10 @@ void Peer::InitiateConnection(const char* ip_addr, //MAYBE TODO: merge into send
     } else {
         send_socket = -1;
         if (success == -1) {
-            LOG(DEBUG) << "connect error: " << strerror(errno)
-            << " (" << errno << ")";
+            debug("connect error: %s (%d)", strerror(errno), errno);
         }
     }
 }
-
-
-
-
 
 void Peer::ResetIncomingMessage() {
     partial_number_bytes = 0;
@@ -195,7 +189,7 @@ void Peer::ResetIncomingMessage() {
 
 
 void Peer::HandleRecievedChunk(char* buffer, int valid_bytes) {
-    LOG(DEBUG) << "the buffer, assuming leading int: " << (buffer + sizeof(int));
+    debug("the buffer, assuming leading int: %s", buffer + sizeof(int));
     // loop necessary, because may have received multiple messages in chunk
     while(valid_bytes > 0) {
         if (target_message_length == -1) {
@@ -231,14 +225,14 @@ void Peer::HandleRecievedChunk(char* buffer, int valid_bytes) {
             current_message_length += bytes_to_copy;
             valid_bytes -= bytes_to_copy;
 
-            LOG(DEBUG) << "current message len: " << current_message_length <<
-                ", target: " << target_message_length << ", valid: " <<
-                valid_bytes << ", to_copy: " << bytes_to_copy;
+            debug("current message len: %d, target: %d, valid: %d, to_copy: %d",
+                current_message_length, target_message_length, valid_bytes,
+                bytes_to_copy);
 
             // if accumulated full message, callback & reset internal data
             if(current_message_length == target_message_length) {
-                LOG(DEBUG) << "Found full message: " <<
-                    message_under_construction << ", buffer: " << buffer;
+                debug("Found full message: %s, buffer: %s",
+                    message_under_construction, buffer);
 
                 message_received_callback(this, message_under_construction,
                     target_message_length);

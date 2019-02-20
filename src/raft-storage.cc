@@ -8,7 +8,7 @@ RaftStorage::RaftStorage(string storage_path) : storage_path(storage_path) {
         storage_message.set_voted_for("");
         Save();
     }
-    LOG(DEBUG) << "Initial Storage: " << Util::ProtoDebugString(storage_message);
+    debug("Initial Storage: %s", Util::ProtoDebugString(storage_message).c_str());
 }
 
 void RaftStorage::Reset() {
