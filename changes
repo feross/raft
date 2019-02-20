@@ -1,3 +1,9 @@
 # Changes
 
-TODO
+- Renamed peer.proto to peer-message.proto and storage.proto to
+  storage-message.proto to match the names of the message "classes", PeerMessage
+  and StorageMessage.
+- Refactored the logger class to use C style logging (i.e. a mutex and printf)
+  instead of the more complicated C++ style stream logging.
+- Removed the ostreamlock abstraction entirely since we use a mutex to lock
+  stdout and stderr now.
