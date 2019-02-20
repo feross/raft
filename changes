@@ -7,3 +7,8 @@
   instead of the more complicated C++ style stream logging.
 - Removed the ostreamlock abstraction entirely since we use a mutex to lock
   stdout and stderr now.
+- Keep track of votes in a set instead of a map.
+- Moved portions of our verbose constructor comments to the top of files.
+- Refactored Timer class to have more timer precision. Instead of waking up at
+  regular 100ms intervals, we use a condition variable to sleep for the exact
+  correct amount of time.

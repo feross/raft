@@ -9,10 +9,12 @@
 #include <cstdlib>
 #include <iostream>
 #include <thread>
+#include <condition_variable>
 
 #include "log.h"
 
 using namespace std;
+using namespace std::chrono;
 
 class Timer {
     public:
@@ -29,10 +31,10 @@ class Timer {
          *
          * @param min_duration Minimum amount of time to wait (in milliseconds)
          * @param max_duration Maximum amount of time to wait (in milliseconds)
-         * @param callback The function to call when the timer fires
+         * @param timer_callback The function to call when the timer fires
          */
-        Timer(int min_duration, int max_duration, function<void()> callback);
-        Timer(int duration, function<void()> callback) : Timer(duration, duration, callback) {}
+        Timer(int min_duration, int max_duration, function<void()> timer_callback);
+        Timer(int duration, function<void()> callback) : Timer(duration, duration, timer_callback) {}
 
         /**
          * Destroy the timer and cleanup all resources.
@@ -50,12 +52,44 @@ class Timer {
         void Reset();
 
     private:
-        int min_duration; // In milliseconds
-        int max_duration; // In milliseconds
-        int remaining_time; // In milliseconds
+        /**
+         * Main body of the timer thread.
+         */
+        void RunTimerThread();
 
+        /**
+         * Minimum amount of time to wait (in milliseconds)
+         */
+        int min_duration;
+
+        /**
+         * Maximum amount of time to wait (in milliseconds)
+         */
+        int max_duration;
+
+        /**
+         * The function to call when the timer fires
+         */
+        function<void()> timer_callback;
+
+        /**
+         * The absolute time when the callback should run.
+         */
+        time_point<system_clock> timeout_time;
+
+        /**
+         * Is the timer destroyed? Used to signal to the timer thread that it is
+         * time to terminate.
+         */
         bool destroyed = false;
+
+        /**
+         * Is the timer active? Used to signal to the timer thread that there
+         * is a pending callback.
+         */
         bool active = false;
 
         thread timer_thread;
+        condition_variable_any timer_cv;
+        mutex timer_mutex;
 };
