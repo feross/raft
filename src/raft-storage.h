@@ -34,13 +34,19 @@ class RaftStorage {
          * Construct a persistent server state for Raft servers, backed by
          * stable storage.
          *
-         * @throw RaftStorageException
          * @param storage_path Path to the storage file to use
          */
         RaftStorage(string storage_path);
 
         /**
-         * Delete the stable storage file.
+         * Load data from the storage file. Throw if the file does not exist.
+         *
+         * @throw RaftStorageException
+         */
+        void Load();
+
+        /**
+         * Delete and recreate the storage file.
          */
         void Reset();
 
@@ -58,16 +64,17 @@ class RaftStorage {
          *
          * @return the candidate id that received a vote
          */
-        const string& voted_for() const;
+        int voted_for() const;
 
         /**
          * Sets the candidate id that received a vote in the current term to the
          * given value, and persists it to stable storage. Set to "" to indicate
          * that no candidate has been voted for in the current term.
          *
-         * @param value the new candidate id that received a vote
+         * @param current_term the new candidate id that received a vote
+         * @param voted_for the candidate id that received a vote
          */
-        void set_vote_and_term(const string& vote, int term);
+        void set_term_and_voted(int current_term, int voted_for);
 
         int last_applied() const;
 

@@ -1,12 +1,14 @@
 #include "raft-server.h"
 
-RaftServer::RaftServer(const string& server_id,
-    vector<PeerInfo> peer_info_vector, int client_listen_port) :
-    server_id(server_id), storage(server_id + STORAGE_NAME_SUFFIX) {
+RaftServer::RaftServer(int server_id, vector<ServerInfo> server_infos,
+    vector<PeerInfo> peer_infos) : server_id(server_id),
+    server_infos(server_infos), peer_infos(peer_infos),
+    storage(to_string(server_id) + STORAGE_NAME_SUFFIX) {}
 
-    info("TERM: %d", storage.current_term());
+void RaftServer::Run() {
+    storage.Load();
 
-    for (PeerInfo peer_info: peer_info_vector) {
+    for (PeerInfo peer_info: peer_infos) {
         Peer *peer = new Peer(peer_info.my_listen_port,
             peer_info.destination_ip_addr, peer_info.destination_port,
             [this](Peer* peer, char* raw_message, int raw_message_len) {
@@ -23,10 +25,13 @@ RaftServer::RaftServer(const string& server_id,
         HandleLeaderTimer();
     });
 
+    unsigned short listen_port = server_infos[server_id].port;
     client_server = new ClientServer([this](char * command) {
         HandleClientCommand(command);
     });
-    client_server->Listen(client_listen_port);
+    client_server->Listen(listen_port);
+
+    info("TERM: %d", storage.current_term());
 }
 
 void RaftServer::HandleElectionTimer() {
@@ -92,7 +97,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 SendRequestVoteResponse(peer, false);
                 return;
             }
-            if (storage.voted_for() != "" &&
+            if (storage.voted_for() != -1 &&
                 storage.voted_for() != message.server_id()) {
                 // Voted for another server already
                 SendRequestVoteResponse(peer, false);
@@ -161,7 +166,7 @@ void RaftServer::TransitionCurrentTerm(int term) {
     info("TERM: %d -> %d", storage.current_term(), term);
     storage.set_current_term(term);
     // When updating the term, reset who we voted for
-    storage.set_voted_for("");
+    storage.set_voted_for(-1);
     votes.clear();
 }
 
@@ -200,7 +205,7 @@ void RaftServer::TransitionServerState(ServerState new_state) {
     }
 }
 
-void RaftServer::ReceiveVote(string server_id) {
+void RaftServer::ReceiveVote(int server_id) {
     if (server_state == Leader) {
         return;
     }

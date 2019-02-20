@@ -9,6 +9,7 @@ ClientServer::~ClientServer() {
 }
 
 void ClientServer::Listen(unsigned short listen_port) {
+    info("Port: %d", listen_port);
     // Populate server information struct
     struct sockaddr_in server_info;
     memset(&server_info, 0, sizeof(struct sockaddr_in));
@@ -19,23 +20,23 @@ void ClientServer::Listen(unsigned short listen_port) {
     // Create server socket
     int server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket == -1) {
-        throw new ClientServerException("Error creating server socket");
+        throw ClientServerException("Error creating server socket");
     }
 
     // Set socket options
     int val = 1;
     if (setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(int)) == -1) {
-        throw new ClientServerException("Error setting socket options");
+        throw ClientServerException("Error setting socket options");
     }
 
     // Bind socket to address
     if (::bind(server_socket, (struct sockaddr *) &server_info, sizeof(struct sockaddr)) == -1) {
-        throw new ClientServerException("Error binding socket to address");
+        throw ClientServerException("Error binding socket to address: " + to_string(listen_port));
     }
 
     // Start listening, with queue of up to 1 connection
     if (listen(server_socket, 1) == -1) {
-        throw new ClientServerException("Error listening to socket");
+        throw ClientServerException("Error listening to socket");
     }
 
     info("Client server started on port %d", listen_port);

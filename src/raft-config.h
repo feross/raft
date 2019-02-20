@@ -41,6 +41,10 @@ class RaftConfig {
     public:
         RaftConfig(string config_path);
         void parse(int my_server_id);
+        vector<ServerInfo> get_server_infos();
+        vector<PeerInfo> get_peer_infos();
     private:
         string config_path;
+        vector<ServerInfo> server_infos;
+        vector<PeerInfo> peer_infos;
 };

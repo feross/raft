@@ -153,27 +153,19 @@ class StorageMessage : public ::google::protobuf::Message /* @@protoc_insertion_
 
   // accessors -------------------------------------------------------
 
-  // required string voted_for = 2;
-  bool has_voted_for() const;
-  void clear_voted_for();
-  static const int kVotedForFieldNumber = 2;
-  const ::std::string& voted_for() const;
-  void set_voted_for(const ::std::string& value);
-  #if LANG_CXX11
-  void set_voted_for(::std::string&& value);
-  #endif
-  void set_voted_for(const char* value);
-  void set_voted_for(const char* value, size_t size);
-  ::std::string* mutable_voted_for();
-  ::std::string* release_voted_for();
-  void set_allocated_voted_for(::std::string* voted_for);
-
   // required int32 current_term = 1;
   bool has_current_term() const;
   void clear_current_term();
   static const int kCurrentTermFieldNumber = 1;
   ::google::protobuf::int32 current_term() const;
   void set_current_term(::google::protobuf::int32 value);
+
+  // required int32 voted_for = 2;
+  bool has_voted_for() const;
+  void clear_voted_for();
+  static const int kVotedForFieldNumber = 2;
+  ::google::protobuf::int32 voted_for() const;
+  void set_voted_for(::google::protobuf::int32 value);
 
   // required int32 last_applied = 3;
   bool has_last_applied() const;
@@ -197,8 +189,8 @@ class StorageMessage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   ::google::protobuf::internal::HasBits<1> _has_bits_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
-  ::google::protobuf::internal::ArenaStringPtr voted_for_;
   ::google::protobuf::int32 current_term_;
+  ::google::protobuf::int32 voted_for_;
   ::google::protobuf::int32 last_applied_;
   friend struct ::protobuf_storage_2dmessage_2eproto::TableStruct;
 };
@@ -215,13 +207,13 @@ class StorageMessage : public ::google::protobuf::Message /* @@protoc_insertion_
 
 // required int32 current_term = 1;
 inline bool StorageMessage::has_current_term() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
+  return (_has_bits_[0] & 0x00000001u) != 0;
 }
 inline void StorageMessage::set_has_current_term() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
 }
 inline void StorageMessage::clear_has_current_term() {
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline void StorageMessage::clear_current_term() {
   current_term_ = 0;
@@ -237,70 +229,28 @@ inline void StorageMessage::set_current_term(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:proto.StorageMessage.current_term)
 }
 
-// required string voted_for = 2;
+// required int32 voted_for = 2;
 inline bool StorageMessage::has_voted_for() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void StorageMessage::set_has_voted_for() {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
 }
 inline void StorageMessage::clear_has_voted_for() {
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void StorageMessage::clear_voted_for() {
-  voted_for_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  voted_for_ = 0;
   clear_has_voted_for();
 }
-inline const ::std::string& StorageMessage::voted_for() const {
+inline ::google::protobuf::int32 StorageMessage::voted_for() const {
   // @@protoc_insertion_point(field_get:proto.StorageMessage.voted_for)
-  return voted_for_.GetNoArena();
+  return voted_for_;
 }
-inline void StorageMessage::set_voted_for(const ::std::string& value) {
+inline void StorageMessage::set_voted_for(::google::protobuf::int32 value) {
   set_has_voted_for();
-  voted_for_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  voted_for_ = value;
   // @@protoc_insertion_point(field_set:proto.StorageMessage.voted_for)
-}
-#if LANG_CXX11
-inline void StorageMessage::set_voted_for(::std::string&& value) {
-  set_has_voted_for();
-  voted_for_.SetNoArena(
-    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:proto.StorageMessage.voted_for)
-}
-#endif
-inline void StorageMessage::set_voted_for(const char* value) {
-  GOOGLE_DCHECK(value != NULL);
-  set_has_voted_for();
-  voted_for_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:proto.StorageMessage.voted_for)
-}
-inline void StorageMessage::set_voted_for(const char* value, size_t size) {
-  set_has_voted_for();
-  voted_for_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:proto.StorageMessage.voted_for)
-}
-inline ::std::string* StorageMessage::mutable_voted_for() {
-  set_has_voted_for();
-  // @@protoc_insertion_point(field_mutable:proto.StorageMessage.voted_for)
-  return voted_for_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline ::std::string* StorageMessage::release_voted_for() {
-  // @@protoc_insertion_point(field_release:proto.StorageMessage.voted_for)
-  if (!has_voted_for()) {
-    return NULL;
-  }
-  clear_has_voted_for();
-  return voted_for_.ReleaseNonDefaultNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline void StorageMessage::set_allocated_voted_for(::std::string* voted_for) {
-  if (voted_for != NULL) {
-    set_has_voted_for();
-  } else {
-    clear_has_voted_for();
-  }
-  voted_for_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), voted_for);
-  // @@protoc_insertion_point(field_set_allocated:proto.StorageMessage.voted_for)
 }
 
 // required int32 last_applied = 3;

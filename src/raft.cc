@@ -15,8 +15,7 @@ int main(int argc, char* argv[]) {
     Arguments args(INTRO_TEXT);
     args.RegisterBool("help", "Print help message");
     args.RegisterInt("id", "Server identifier");
-    args.RegisterInt("listen", "Client listen port");
-    args.RegisterInt("config", "Path to configuration file (default = ./config)");
+    args.RegisterString("config", "Path to configuration file (default = ./config)");
     args.RegisterBool("reset", "Delete server storage");
     args.RegisterBool("debug", "Show all logs");
     args.RegisterBool("quiet", "Show only errors");
@@ -52,12 +51,7 @@ int main(int argc, char* argv[]) {
 
     if (args.get_bool("reset")) {
         RaftStorage storage(to_string(server_id) + STORAGE_NAME_SUFFIX);
-        try {
-            storage.Reset();
-        } catch (RaftStorageException& err) {
-            error("%s", err.what());
-            return EXIT_FAILURE;
-        }
+        storage.Reset();
         return EXIT_SUCCESS;
     }
 
@@ -70,28 +64,26 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    return 0;
+    vector<ServerInfo> server_infos = raft_config.get_server_infos();
+    vector<PeerInfo> peer_infos = raft_config.get_peer_infos();
 
-    // vector<PeerInfo> peer_infos;
-    // for (string peer_info_str: peer_info_strs) {
-    //     auto parts = Util::StringSplit(peer_info_str, ":");
-    //     PeerInfo peer_info;
-    //     peer_info.destination_ip_addr = parts[0];
-    //     peer_info.my_listen_port = stoi(parts[1]);
-    //     peer_info.destination_port = stoi(parts[2]);
-    //     peer_infos.push_back(peer_info);
-    // }
+    RaftServer raft_server(server_id, server_infos, peer_infos);
+    try {
+        info("%s", "Before run");
+        raft_server.Run();
+        info("%s", "After run");
+    } catch (exception& err) {
+        error("%s", err.what());
+        return EXIT_FAILURE;
+    }
 
-    // int listen_port = args.get_int("listen");
-    // RaftServer raft_server(server_id, peer_infos, listen_port);
+    // Keep program alive until a SIGINT, SIGTERM, or SIGKILL is received
+    sigset_t mask;
+    sigemptyset(&mask);
+    while (true) {
+        sigsuspend(&mask);
+    }
 
-    // // Keep program alive until a SIGINT, SIGTERM, or SIGKILL is received
-    // sigset_t mask;
-    // sigemptyset(&mask);
-    // while (true) {
-    //     sigsuspend(&mask);
-    // }
-
-    // google::protobuf::ShutdownProtobufLibrary();
-    // return EXIT_SUCCESS;
+    google::protobuf::ShutdownProtobufLibrary();
+    return EXIT_SUCCESS;
 }

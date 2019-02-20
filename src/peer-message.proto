@@ -27,7 +27,7 @@ message PeerMessage {
 
     // The server identifier of the sending server (aka leader_id or
     // candidate_id)
-    required string server_id = 3;
+    required int32 server_id = 3;
 
     /**
      * Fields for AppendEntries request

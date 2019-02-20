@@ -43,8 +43,10 @@ class RaftServer {
          * @param peer_infos Vector of connection information for peer servers
          * @param client_listen_port Port to listen for client connections
          */
-        RaftServer(const string& server_id, vector<PeerInfo> peer_infos,
-            int client_listen_port);
+        RaftServer(int server_id, vector<ServerInfo> server_infos,
+            vector<PeerInfo> peer_infos);
+
+        void Run();
 
     private:
         /**
@@ -146,7 +148,32 @@ class RaftServer {
          *
          * @param server_id the server id of the server
          */
-        void ReceiveVote(string server_id);
+        void ReceiveVote(int server_id);
+
+        /**
+         * Friendly name that the server uses to identify itself to other
+         * servers in the cluster, as well as to name thee persistent storage
+         * file.
+         */
+        int server_id;
+
+        vector<ServerInfo> server_infos;
+        vector<PeerInfo> peer_infos;
+        vector<Peer*> peers;
+
+        ServerState server_state = Follower;
+        RaftStorage storage;
+
+        ClientServer *client_server;
+        Timer *election_timer;
+        Timer *leader_timer;
+
+        /**
+         * Vote record to track which servers have voted for this server in the
+         * current election. Maps server id strings to boolean values which
+         * indicate an affirmative or negative election vote.
+         */
+        set<int> votes;
 
         /**
          * server_mutex prevents multiple handler functions from modifying the
@@ -157,27 +184,4 @@ class RaftServer {
          * duration of their execution.
          */
         mutex server_mutex;
-
-        /**
-         * Friendly name that the server uses to identify itself to other
-         * servers in the cluster, as well as to name thee persistent storage
-         * file.
-         */
-        const string& server_id;
-
-        ServerState server_state = Follower;
-        RaftStorage storage;
-
-        ClientServer *client_server;
-        Timer *election_timer;
-        Timer *leader_timer;
-
-        vector<Peer*> peers;
-
-        /**
-         * Vote record to track which servers have voted for this server in the
-         * current election. Maps server id strings to boolean values which
-         * indicate an affirmative or negative election vote.
-         */
-        set<string> votes;
 };

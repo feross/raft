@@ -227,21 +227,6 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   const ::google::protobuf::RepeatedPtrField< ::std::string>& entries() const;
   ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_entries();
 
-  // required string server_id = 3;
-  bool has_server_id() const;
-  void clear_server_id();
-  static const int kServerIdFieldNumber = 3;
-  const ::std::string& server_id() const;
-  void set_server_id(const ::std::string& value);
-  #if LANG_CXX11
-  void set_server_id(::std::string&& value);
-  #endif
-  void set_server_id(const char* value);
-  void set_server_id(const char* value, size_t size);
-  ::std::string* mutable_server_id();
-  ::std::string* release_server_id();
-  void set_allocated_server_id(::std::string* server_id);
-
   // required .proto.PeerMessage.Type type = 1;
   bool has_type() const;
   void clear_type();
@@ -255,6 +240,13 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   static const int kTermFieldNumber = 2;
   ::google::protobuf::int32 term() const;
   void set_term(::google::protobuf::int32 value);
+
+  // required int32 server_id = 3;
+  bool has_server_id() const;
+  void clear_server_id();
+  static const int kServerIdFieldNumber = 3;
+  ::google::protobuf::int32 server_id() const;
+  void set_server_id(::google::protobuf::int32 value);
 
   // optional int32 prev_log_index = 4;
   bool has_prev_log_index() const;
@@ -335,9 +327,9 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   ::google::protobuf::internal::HasBits<1> _has_bits_;
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
   ::google::protobuf::RepeatedPtrField< ::std::string> entries_;
-  ::google::protobuf::internal::ArenaStringPtr server_id_;
   int type_;
   ::google::protobuf::int32 term_;
+  ::google::protobuf::int32 server_id_;
   ::google::protobuf::int32 prev_log_index_;
   ::google::protobuf::int32 prev_log_term_;
   ::google::protobuf::int32 leader_commit_;
@@ -360,13 +352,13 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
 
 // required .proto.PeerMessage.Type type = 1;
 inline bool PeerMessage::has_type() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
+  return (_has_bits_[0] & 0x00000001u) != 0;
 }
 inline void PeerMessage::set_has_type() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
 }
 inline void PeerMessage::clear_has_type() {
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline void PeerMessage::clear_type() {
   type_ = 0;
@@ -385,13 +377,13 @@ inline void PeerMessage::set_type(::proto::PeerMessage_Type value) {
 
 // required int32 term = 2;
 inline bool PeerMessage::has_term() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void PeerMessage::set_has_term() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000002u;
 }
 inline void PeerMessage::clear_has_term() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void PeerMessage::clear_term() {
   term_ = 0;
@@ -407,70 +399,28 @@ inline void PeerMessage::set_term(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:proto.PeerMessage.term)
 }
 
-// required string server_id = 3;
+// required int32 server_id = 3;
 inline bool PeerMessage::has_server_id() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void PeerMessage::set_has_server_id() {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void PeerMessage::clear_has_server_id() {
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void PeerMessage::clear_server_id() {
-  server_id_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  server_id_ = 0;
   clear_has_server_id();
 }
-inline const ::std::string& PeerMessage::server_id() const {
+inline ::google::protobuf::int32 PeerMessage::server_id() const {
   // @@protoc_insertion_point(field_get:proto.PeerMessage.server_id)
-  return server_id_.GetNoArena();
+  return server_id_;
 }
-inline void PeerMessage::set_server_id(const ::std::string& value) {
+inline void PeerMessage::set_server_id(::google::protobuf::int32 value) {
   set_has_server_id();
-  server_id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  server_id_ = value;
   // @@protoc_insertion_point(field_set:proto.PeerMessage.server_id)
-}
-#if LANG_CXX11
-inline void PeerMessage::set_server_id(::std::string&& value) {
-  set_has_server_id();
-  server_id_.SetNoArena(
-    &::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
-  // @@protoc_insertion_point(field_set_rvalue:proto.PeerMessage.server_id)
-}
-#endif
-inline void PeerMessage::set_server_id(const char* value) {
-  GOOGLE_DCHECK(value != NULL);
-  set_has_server_id();
-  server_id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:proto.PeerMessage.server_id)
-}
-inline void PeerMessage::set_server_id(const char* value, size_t size) {
-  set_has_server_id();
-  server_id_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:proto.PeerMessage.server_id)
-}
-inline ::std::string* PeerMessage::mutable_server_id() {
-  set_has_server_id();
-  // @@protoc_insertion_point(field_mutable:proto.PeerMessage.server_id)
-  return server_id_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline ::std::string* PeerMessage::release_server_id() {
-  // @@protoc_insertion_point(field_release:proto.PeerMessage.server_id)
-  if (!has_server_id()) {
-    return NULL;
-  }
-  clear_has_server_id();
-  return server_id_.ReleaseNonDefaultNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline void PeerMessage::set_allocated_server_id(::std::string* server_id) {
-  if (server_id != NULL) {
-    set_has_server_id();
-  } else {
-    clear_has_server_id();
-  }
-  server_id_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), server_id);
-  // @@protoc_insertion_point(field_set_allocated:proto.PeerMessage.server_id)
 }
 
 // optional int32 prev_log_index = 4;

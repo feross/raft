@@ -3,11 +3,8 @@
 RaftConfig::RaftConfig(string config_path) : config_path(config_path) {}
 
 void RaftConfig::parse(int my_server_id) {
-    // char * config[MAX_CONFIG_FILE_SIZE + 1];
     fstream input(config_path, ios::in);
-    // input.read(config, MAX_CONFIG_FILE_SIZE);
 
-    vector<ServerInfo> server_infos;
     vector<vector<unsigned short>> servers_ports;
 
     string line;
@@ -45,19 +42,6 @@ void RaftConfig::parse(int my_server_id) {
         servers_ports.push_back(server_ports);
     }
 
-    for (ServerInfo server_info: server_infos) {
-        info("server: %s:%d", server_info.ip_addr.c_str(), server_info.port);
-    }
-
-    vector<PeerInfo> peer_infos;
-
-    // for (int i = 0; i < server_ports.size(); i++) {
-    //     if (i == my_server_id) {
-    //         continue;
-    //     }
-    //     server_ports[]
-    // }
-
     int num_servers = servers_ports.size();
     for (int server_id = 0; server_id < num_servers; server_id++) {
         if (server_id == my_server_id) {
@@ -84,8 +68,19 @@ void RaftConfig::parse(int my_server_id) {
 
         peer_infos.push_back(peer_info);
     }
+}
 
-    for (PeerInfo peer_info: peer_infos) {
-        info("peer info: %s:%d:%d", peer_info.destination_ip_addr.c_str(), peer_info.my_listen_port, peer_info.destination_port);
+vector<ServerInfo> RaftConfig::get_server_infos() {
+    for (ServerInfo server_info: server_infos) {
+        debug("server: %s:%d", server_info.ip_addr.c_str(), server_info.port);
     }
+    return server_infos;
+}
+
+vector<PeerInfo> RaftConfig::get_peer_infos() {
+    for (PeerInfo peer_info: peer_infos) {
+        debug("peer info: %s:%d:%d", peer_info.destination_ip_addr.c_str(),
+            peer_info.my_listen_port, peer_info.destination_port);
+    }
+    return peer_infos;
 }
