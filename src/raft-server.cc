@@ -1,9 +1,5 @@
 #include "raft-server.h"
 
-static const char* getServerStateString(ServerState server_state) {
-    return ServerStateStrings[server_state].c_str();
-}
-
 RaftServer::RaftServer(const string& server_id,
     vector<struct PeerInfo> peer_info_vector) : server_id(server_id),
     storage(server_id + STORAGE_NAME_SUFFIX) {
@@ -159,8 +155,8 @@ void RaftServer::TransitionCurrentTerm(int term) {
 }
 
 void RaftServer::TransitionServerState(ServerState new_state) {
-    info("STATE: %s -> %s", getServerStateString(server_state),
-        getServerStateString(new_state));
+    info("STATE: %s -> %s", get_server_state_string(server_state),
+        get_server_state_string(new_state));
 
     server_state = new_state;
 
@@ -200,4 +196,8 @@ void RaftServer::ReceiveVote(string server_id) {
     if (vote_count >= majority_threshold) {
         TransitionServerState(Leader);
     }
+}
+
+static const char* get_server_state_string(ServerState server_state) {
+    return ServerStateStrings[server_state].c_str();
 }
