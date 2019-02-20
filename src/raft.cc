@@ -52,7 +52,6 @@ int main(int argc, char* argv[]) {
     if (args.get_bool("reset")) {
         RaftStorage storage(to_string(server_id) + STORAGE_NAME_SUFFIX);
         storage.Reset();
-        return EXIT_SUCCESS;
     }
 
     RaftConfig raft_config(config_path);

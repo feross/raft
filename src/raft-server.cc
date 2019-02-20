@@ -103,7 +103,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 SendRequestVoteResponse(peer, false);
                 return;
             }
-            storage.set_voted_for(message.server_id());
+            storage.set_term_and_voted(storage.current_term(), message.server_id());
             SendRequestVoteResponse(peer, true);
             election_timer->Reset();
             return;
@@ -164,9 +164,8 @@ void RaftServer::SendRequestVoteResponse(Peer *peer, bool vote_granted) {
 
 void RaftServer::TransitionCurrentTerm(int term) {
     info("TERM: %d -> %d", storage.current_term(), term);
-    storage.set_current_term(term);
     // When updating the term, reset who we voted for
-    storage.set_voted_for(-1);
+    storage.set_term_and_voted(term, -1);
     votes.clear();
 }
 
@@ -190,7 +189,7 @@ void RaftServer::TransitionServerState(ServerState new_state) {
             TransitionCurrentTerm(storage.current_term() + 1);
 
             // Candidate server votes for itself
-            storage.set_voted_for(server_id);
+            storage.set_term_and_voted(storage.current_term(), server_id);
             ReceiveVote(server_id);
 
             for (Peer* peer: peers) {

@@ -98,5 +98,5 @@ class Util {
          * NOTE: creates a whole new file, so new_contents_len should be
          * relatively short.  E.g. don't use for a large log.
          */
-        static bool PersistentFileUpdate(const char * filename, void * new_contents, int new_contents_len);
+        static bool PersistentFileUpdate(const char * filename, const void * new_contents, int new_contents_len);
 };

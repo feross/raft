@@ -43,8 +43,8 @@ void RaftStorage::set_last_applied(int value) {
 
 void RaftStorage::Save() {
     string storage_string;
-    storage_message.SerializeToString(storage_string);
-    if (Util::PersistentFileUpdate(storage_path, storage_string.c_str(),
+    storage_message.SerializeToString(&storage_string);
+    if (Util::PersistentFileUpdate(storage_path.c_str(), storage_string.c_str(),
         storage_string.length()) == false) {
         throw RaftStorageException("Failed to write storage: " + storage_path);
     }

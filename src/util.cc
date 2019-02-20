@@ -68,7 +68,7 @@ bool Util::SyscallErrorInfo(bool syscall_success, const char *error_message_pref
 }
 
 
-bool Util::PersistentFileUpdate(const char * filename, void * new_contents, int new_contents_len) {
+bool Util::PersistentFileUpdate(const char * filename, const void * new_contents, int new_contents_len) {
   // assume old file is safe
   std::string tmp_filename = "tmp_" + std::string(filename);
   debug("tmp name: %s\n", tmp_filename.c_str());
