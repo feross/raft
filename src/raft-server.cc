@@ -50,7 +50,7 @@ void RaftServer::HandleLeaderTimer() {
 
 void RaftServer::HandleClientCommand(char * command) {
     lock_guard<mutex> lock(server_mutex);
-    debug("%s", "HandleClientCommand");
+    info("%s", "HandleClientCommand");
 }
 
 void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_message_len) {

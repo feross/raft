@@ -85,5 +85,11 @@ int main(int argc, char* argv[]) {
     info("Connect to server %s:%d", inet_ntoa(local_info.sin_addr),
         ntohs(local_info.sin_port));
 
+    const char * message = "Hello server!";
+    int len = strlen(message);
+    // TODO: error check
+    write(leader_socket, &len, sizeof(int));
+    dprintf(leader_socket, "%s", message);
+
     while (true);
 }
