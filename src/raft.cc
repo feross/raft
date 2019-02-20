@@ -71,7 +71,8 @@ int main(int argc, char* argv[]) {
         peer_infos.push_back(peer_info);
     }
 
-    RaftServer raft_server(server_id, peer_infos);
+    int listen_port = args.get_int("listen");
+    RaftServer raft_server(server_id, peer_infos, listen_port);
 
     // Keep program alive until a SIGINT, SIGTERM, or SIGKILL is received
     sigset_t mask;

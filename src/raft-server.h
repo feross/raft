@@ -10,6 +10,7 @@
 #include <map>
 #include <vector>
 
+#include "client-server.h"
 #include "log.h"
 #include "peer.h"
 #include "peer-message.pb.h"
@@ -51,8 +52,10 @@ class RaftServer {
          *
          * @param server_id Friendly name to identify the server
          * @param peer_infos Vector of connection information for peer servers
+         * @param client_listen_port Port to listen for client connections
          */
-        RaftServer(const string& server_id, vector<struct PeerInfo> peer_infos);
+        RaftServer(const string& server_id, vector<struct PeerInfo> peer_infos,
+            int client_listen_port);
 
     private:
         /**
@@ -66,6 +69,8 @@ class RaftServer {
          * can send an AppendEntries heartbeat, if it is the leader.
          */
         void HandleLeaderTimer();
+
+        void HandleClientCommand(char * command);
 
         /**
          * Callback function used to process messages we receive from peers.

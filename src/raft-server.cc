@@ -1,8 +1,8 @@
 #include "raft-server.h"
 
 RaftServer::RaftServer(const string& server_id,
-    vector<struct PeerInfo> peer_info_vector) : server_id(server_id),
-    storage(server_id + STORAGE_NAME_SUFFIX) {
+    vector<struct PeerInfo> peer_info_vector, int client_listen_port) :
+    server_id(server_id), storage(server_id + STORAGE_NAME_SUFFIX) {
 
     info("TERM: %d", storage.current_term());
 

@@ -9,7 +9,6 @@
 
 #include <fstream>
 #include <cstdio>
-#include <google/protobuf/repeated_field.h>
 
 #include "log.h"
 #include "storage-message.pb.h"
