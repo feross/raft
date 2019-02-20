@@ -15,4 +15,8 @@ message StorageMessage {
 
     // The server_id that received vote in current term (or empty string if none)
     required string voted_for = 2;
+
+    // Index of highest log entry applied to state machine (initialized to 0,
+    // increases monotonically)
+    required int32 last_applied = 3;
 }

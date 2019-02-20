@@ -35,6 +35,15 @@ void RaftStorage::set_voted_for(const string& value) {
     Save();
 }
 
+int RaftStorage::last_applied() const {
+    return storage_message.last_applied();
+}
+
+void RaftStorage::set_last_applied(int value) {
+    storage_message.set_last_applied(value);
+    Save();
+}
+
 void RaftStorage::Save() {
     fstream output(storage_path, ios::out | ios::trunc | ios::binary);
     if (!storage_message.SerializeToOstream(&output)) {

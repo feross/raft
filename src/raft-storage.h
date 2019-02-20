@@ -77,6 +77,10 @@ class RaftStorage {
          */
         void set_voted_for(const string& value);
 
+        int last_applied() const;
+
+        void set_last_applied(int value);
+
     private:
         /**
          * Persist the storage state to disk. This method blocks until the data

@@ -175,12 +175,21 @@ class StorageMessage : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::int32 current_term() const;
   void set_current_term(::google::protobuf::int32 value);
 
+  // required int32 last_applied = 3;
+  bool has_last_applied() const;
+  void clear_last_applied();
+  static const int kLastAppliedFieldNumber = 3;
+  ::google::protobuf::int32 last_applied() const;
+  void set_last_applied(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:proto.StorageMessage)
  private:
   void set_has_current_term();
   void clear_has_current_term();
   void set_has_voted_for();
   void clear_has_voted_for();
+  void set_has_last_applied();
+  void clear_has_last_applied();
 
   // helper for ByteSizeLong()
   size_t RequiredFieldsByteSizeFallback() const;
@@ -190,6 +199,7 @@ class StorageMessage : public ::google::protobuf::Message /* @@protoc_insertion_
   mutable ::google::protobuf::internal::CachedSize _cached_size_;
   ::google::protobuf::internal::ArenaStringPtr voted_for_;
   ::google::protobuf::int32 current_term_;
+  ::google::protobuf::int32 last_applied_;
   friend struct ::protobuf_storage_2dmessage_2eproto::TableStruct;
 };
 // ===================================================================
@@ -291,6 +301,30 @@ inline void StorageMessage::set_allocated_voted_for(::std::string* voted_for) {
   }
   voted_for_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), voted_for);
   // @@protoc_insertion_point(field_set_allocated:proto.StorageMessage.voted_for)
+}
+
+// required int32 last_applied = 3;
+inline bool StorageMessage::has_last_applied() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void StorageMessage::set_has_last_applied() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void StorageMessage::clear_has_last_applied() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void StorageMessage::clear_last_applied() {
+  last_applied_ = 0;
+  clear_has_last_applied();
+}
+inline ::google::protobuf::int32 StorageMessage::last_applied() const {
+  // @@protoc_insertion_point(field_get:proto.StorageMessage.last_applied)
+  return last_applied_;
+}
+inline void StorageMessage::set_last_applied(::google::protobuf::int32 value) {
+  set_has_last_applied();
+  last_applied_ = value;
+  // @@protoc_insertion_point(field_set:proto.StorageMessage.last_applied)
 }
 
 #ifdef __GNUC__

@@ -55,11 +55,13 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   ~0u,  // no _weak_field_map_
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::StorageMessage, current_term_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::StorageMessage, voted_for_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::StorageMessage, last_applied_),
   1,
   0,
+  2,
 };
 static const ::google::protobuf::internal::MigrationSchema schemas[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, 7, sizeof(::proto::StorageMessage)},
+  { 0, 8, sizeof(::proto::StorageMessage)},
 };
 
 static ::google::protobuf::Message const * const file_default_instances[] = {
@@ -87,12 +89,12 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\025storage-message.proto\022\005proto\"9\n\016Storag"
+      "\n\025storage-message.proto\022\005proto\"O\n\016Storag"
       "eMessage\022\024\n\014current_term\030\001 \002(\005\022\021\n\tvoted_"
-      "for\030\002 \002(\t"
+      "for\030\002 \002(\t\022\024\n\014last_applied\030\003 \002(\005"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 89);
+      descriptor, 111);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "storage-message.proto", &protobuf_RegisterTypes);
 }
@@ -117,6 +119,7 @@ void StorageMessage::InitAsDefaultInstance() {
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int StorageMessage::kCurrentTermFieldNumber;
 const int StorageMessage::kVotedForFieldNumber;
+const int StorageMessage::kLastAppliedFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 StorageMessage::StorageMessage()
@@ -135,13 +138,17 @@ StorageMessage::StorageMessage(const StorageMessage& from)
   if (from.has_voted_for()) {
     voted_for_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.voted_for_);
   }
-  current_term_ = from.current_term_;
+  ::memcpy(&current_term_, &from.current_term_,
+    static_cast<size_t>(reinterpret_cast<char*>(&last_applied_) -
+    reinterpret_cast<char*>(&current_term_)) + sizeof(last_applied_));
   // @@protoc_insertion_point(copy_constructor:proto.StorageMessage)
 }
 
 void StorageMessage::SharedCtor() {
   voted_for_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  current_term_ = 0;
+  ::memset(&current_term_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&last_applied_) -
+      reinterpret_cast<char*>(&current_term_)) + sizeof(last_applied_));
 }
 
 StorageMessage::~StorageMessage() {
@@ -177,7 +184,11 @@ void StorageMessage::Clear() {
   if (cached_has_bits & 0x00000001u) {
     voted_for_.ClearNonDefaultToEmptyNoArena();
   }
-  current_term_ = 0;
+  if (cached_has_bits & 6u) {
+    ::memset(&current_term_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&last_applied_) -
+        reinterpret_cast<char*>(&current_term_)) + sizeof(last_applied_));
+  }
   _has_bits_.Clear();
   _internal_metadata_.Clear();
 }
@@ -216,6 +227,20 @@ bool StorageMessage::MergePartialFromCodedStream(
             this->voted_for().data(), static_cast<int>(this->voted_for().length()),
             ::google::protobuf::internal::WireFormat::PARSE,
             "proto.StorageMessage.voted_for");
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // required int32 last_applied = 3;
+      case 3: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(24u /* 24 & 0xFF */)) {
+          set_has_last_applied();
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &last_applied_)));
         } else {
           goto handle_unusual;
         }
@@ -264,6 +289,11 @@ void StorageMessage::SerializeWithCachedSizes(
       2, this->voted_for(), output);
   }
 
+  // required int32 last_applied = 3;
+  if (cached_has_bits & 0x00000004u) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->last_applied(), output);
+  }
+
   if (_internal_metadata_.have_unknown_fields()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         _internal_metadata_.unknown_fields(), output);
@@ -295,6 +325,11 @@ void StorageMessage::SerializeWithCachedSizes(
         2, this->voted_for(), target);
   }
 
+  // required int32 last_applied = 3;
+  if (cached_has_bits & 0x00000004u) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->last_applied(), target);
+  }
+
   if (_internal_metadata_.have_unknown_fields()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields(), target);
@@ -321,6 +356,13 @@ size_t StorageMessage::RequiredFieldsByteSizeFallback() const {
         this->current_term());
   }
 
+  if (has_last_applied()) {
+    // required int32 last_applied = 3;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->last_applied());
+  }
+
   return total_size;
 }
 size_t StorageMessage::ByteSizeLong() const {
@@ -332,7 +374,7 @@ size_t StorageMessage::ByteSizeLong() const {
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
         _internal_metadata_.unknown_fields());
   }
-  if (((_has_bits_[0] & 0x00000003) ^ 0x00000003) == 0) {  // All required fields are present.
+  if (((_has_bits_[0] & 0x00000007) ^ 0x00000007) == 0) {  // All required fields are present.
     // required string voted_for = 2;
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::StringSize(
@@ -342,6 +384,11 @@ size_t StorageMessage::ByteSizeLong() const {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int32Size(
         this->current_term());
+
+    // required int32 last_applied = 3;
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int32Size(
+        this->last_applied());
 
   } else {
     total_size += RequiredFieldsByteSizeFallback();
@@ -374,13 +421,16 @@ void StorageMessage::MergeFrom(const StorageMessage& from) {
   (void) cached_has_bits;
 
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 3u) {
+  if (cached_has_bits & 7u) {
     if (cached_has_bits & 0x00000001u) {
       set_has_voted_for();
       voted_for_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.voted_for_);
     }
     if (cached_has_bits & 0x00000002u) {
       current_term_ = from.current_term_;
+    }
+    if (cached_has_bits & 0x00000004u) {
+      last_applied_ = from.last_applied_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
@@ -401,7 +451,7 @@ void StorageMessage::CopyFrom(const StorageMessage& from) {
 }
 
 bool StorageMessage::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+  if ((_has_bits_[0] & 0x00000007) != 0x00000007) return false;
   return true;
 }
 
@@ -414,6 +464,7 @@ void StorageMessage::InternalSwap(StorageMessage* other) {
   voted_for_.Swap(&other->voted_for_, &::google::protobuf::internal::GetEmptyStringAlreadyInited(),
     GetArenaNoVirtual());
   swap(current_term_, other->current_term_);
+  swap(last_applied_, other->last_applied_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   _internal_metadata_.Swap(&other->_internal_metadata_);
 }
