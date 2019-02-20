@@ -1,6 +1,6 @@
 #include "timer.h"
 
-Timer::Timer(int min_duration, int max_duration, function<void()> timer_callback) :
+Timer::Timer(int min_duration, int max_duration, TimerCallback timer_callback) :
         min_duration(min_duration), max_duration(max_duration),
         timer_callback(timer_callback) {
     Reset();

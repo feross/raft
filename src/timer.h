@@ -16,6 +16,8 @@
 using namespace std;
 using namespace std::chrono;
 
+typedef function<void()> TimerCallback;
+
 class Timer {
     public:
         /**
@@ -33,8 +35,9 @@ class Timer {
          * @param max_duration Maximum amount of time to wait (in milliseconds)
          * @param timer_callback The function to call when the timer fires
          */
-        Timer(int min_duration, int max_duration, function<void()> timer_callback);
-        Timer(int duration, function<void()> callback) : Timer(duration, duration, timer_callback) {}
+        Timer(int min_duration, int max_duration, TimerCallback timer_callback);
+        Timer(int duration, TimerCallback timer_callback) :
+            Timer(duration, duration, timer_callback) {}
 
         /**
          * Destroy the timer and cleanup all resources.
@@ -70,7 +73,7 @@ class Timer {
         /**
          * The function to call when the timer fires
          */
-        function<void()> timer_callback;
+        TimerCallback timer_callback;
 
         /**
          * The absolute time when the callback should run.
