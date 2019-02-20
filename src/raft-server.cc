@@ -153,8 +153,8 @@ void RaftServer::TransitionCurrentTerm(int term) {
 }
 
 void RaftServer::TransitionServerState(ServerState new_state) {
-    info("STATE: %s -> %s", get_server_state_string(server_state),
-        get_server_state_string(new_state));
+    info("STATE: %s -> %s", ServerStateStrings[server_state].c_str(),
+        ServerStateStrings[new_state].c_str());
 
     server_state = new_state;
 
@@ -194,8 +194,4 @@ void RaftServer::ReceiveVote(string server_id) {
     if (vote_count >= majority_threshold) {
         TransitionServerState(Leader);
     }
-}
-
-static const char* get_server_state_string(ServerState server_state) {
-    return ServerStateStrings[server_state].c_str();
 }
