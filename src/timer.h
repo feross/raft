@@ -1,3 +1,8 @@
+/**
+ * Timer class that calls a callback function after a certain amount of time has
+ * passed.
+ */
+
 #pragma once
 
 #include <chrono>

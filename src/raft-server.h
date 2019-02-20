@@ -1,3 +1,10 @@
+/**
+ * A server that implements Raft, an understandable consensus protocol.
+ *
+ * For more information about the operation of Raft, see:
+ * http://web.stanford.edu/~ouster/cgi-bin/papers/raft-extended.pdf
+ */
+
 #pragma once
 
 #include <map>
@@ -34,17 +41,13 @@ struct PeerInfo {
 class RaftServer {
     public:
         /**
-         * Start a server that implements Raft, an understandable consensus
-         * protocol.
+         * Construct a Raft server.
          *
          * The server expects to be given a server id, which is a friendly name
          * that identifies the server to other servers in the cluster, and a
          * vector of peer connection information which is used to connect to
          * other servers in the cluster and start listening servers to receive
          * connections in return from the remote servers.
-         *
-         * For more information about the operation of Raft, see:
-         * http://web.stanford.edu/~ouster/cgi-bin/papers/raft-extended.pdf
          *
          * @param server_id Friendly name to identify the server
          * @param peer_infos Vector of connection information for peer servers

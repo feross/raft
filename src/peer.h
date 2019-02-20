@@ -1,3 +1,8 @@
+/**
+ * Peer abstraction that enables sending/receiving messages to/from other
+ * servers with a simple interface.
+ */
+
 #pragma once
 
 #include <thread>
@@ -70,7 +75,7 @@ class Peer {
         void RegisterCloseListener();
         void ListenOnSocket(int socket);
 
-        // maybe TODO: in theory, we could reduce the number of connections 
+        // maybe TODO: in theory, we could reduce the number of connections
         // (currently seperate sockets for inbound & outbound connections),
         // introduces (solvable) race conditions
         // maybe TODO: similarly, could change to reuse listening port but would
@@ -123,7 +128,7 @@ class Peer {
          */
         bool running;
 
-        
+
 
 
 
@@ -166,7 +171,7 @@ class Peer {
         /*
          * How many bytes we have currently received as part of the next message
          * from this peer.
-         */ 
+         */
         int current_message_length;
         /*
          * How many total bytes will be in our next message

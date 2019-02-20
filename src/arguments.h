@@ -1,3 +1,27 @@
+/**
+ * This class exposes a friendly interface for parsing a command line
+ * argument string (i.e. char* argv[]) into a more useful structure. The
+ * user must specify expected argument names, argument descriptions, and
+ * expected argument types (bool, int, or string).
+ *
+ * Example:
+ *
+ *      int main(int argc, char* argv[]) {
+ *          Arguments args("Hello World - A hello world CLI program");
+ *          args.RegisterBool("help", "Print help message");
+ *          try {
+ *              args.Parse(argc, argv);
+ *          } catch (exception& err) {
+ *              printf("Error: %s\n", err.what());
+ *              return 1;
+ *          }
+ *          if (args.get_bool("help")) {
+ *              printf("%s\n", args.get_help_text().c_str());
+ *              return 0;
+ *          }
+ *      }
+ */
+
 #pragma once
 
 #include <algorithm>
@@ -22,29 +46,7 @@ class ArgumentsException : public exception {
 class Arguments {
     public:
         /**
-         * Command line argument parser.
-         *
-         * This class exposes a friendly interface for parsing a command line
-         * argument string (i.e. char* argv[]) into a more useful structure. The
-         * user must specify expected argument names, argument descriptions, and
-         * expected argument types (bool, int, or string).
-         *
-         * Example:
-         *
-         *      int main(int argc, char* argv[]) {
-         *          Arguments args("Hello World - A hello world CLI program");
-         *          args.RegisterBool("help", "Print help message");
-         *          try {
-         *              args.Parse(argc, argv);
-         *          } catch (exception& err) {
-         *              printf("Error: %s\n", err.what());
-         *              return 1;
-         *          }
-         *          if (args.get_bool("help")) {
-         *              printf("%s\n", args.get_help_text().c_str());
-         *              return 0;
-         *          }
-         *      }
+         * Construct a command line argument parser.
          *
          * @param intro Help text to describe the purpose of the program
          */

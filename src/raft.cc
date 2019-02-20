@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (args.get_bool("help")) {
-        printf("%s", args.get_help_text().c_str());
+        printf("%s\n", args.get_help_text().c_str());
         return EXIT_SUCCESS;
     }
 

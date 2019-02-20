@@ -1,3 +1,7 @@
+/**
+ * Utility functions that don't quite fit anywhere else.
+ */
+
 #pragma once
 
 #include <algorithm>

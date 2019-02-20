@@ -1,3 +1,10 @@
+/**
+ * This class exposes a friendly interface for getting or setting the
+ * persistent server state for a Raft server. All setter methods in this
+ * class ensure that data is persisted to stable storage before
+ * returning.
+ */
+
 #pragma once
 
 #include <fstream>
@@ -25,15 +32,10 @@ class RaftStorageException : public exception {
 class RaftStorage {
     public:
         /**
-         * Persistent server state for Raft servers, backed by stable storage.
-         *
-         * This class exposes a friendly interface for getting or setting the
-         * persistent server state for a Raft server. All setter methods in this
-         * class ensure that data is persisted to stable storage before
-         * returning.
+         * Construct a persistent server state for Raft servers, backed by
+         * stable storage.
          *
          * @throw RaftStorageException
-         *
          * @param storage_path Path to the storage file to use
          */
         RaftStorage(string storage_path);
