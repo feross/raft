@@ -15,6 +15,46 @@ struct ServerInfo {
     unsigned short port;
 };
 
+bool send_command(ServerInfo server_info, const char * command) {
+    // Populate leader information struct
+    struct sockaddr_in leader_info;
+    memset(&leader_info, 0, sizeof(leader_info));
+    leader_info.sin_family = AF_INET;
+    leader_info.sin_addr.s_addr = inet_addr(server_info.ip_addr.c_str());
+    leader_info.sin_port = htons(server_info.port);
+
+    // Create socket
+    int leader_socket = socket(AF_INET, SOCK_STREAM, 0);
+    if (leader_socket == -1) {
+        error("Error creating server socket (%s)", strerror(errno));
+        return false;
+    }
+
+    // Connect socket
+    if (connect(leader_socket, (struct sockaddr *) &leader_info,
+            sizeof(struct sockaddr_in)) == -1) {
+        error("Error connecting to server (%s)", strerror(errno));
+        return false;
+    }
+
+    struct sockaddr_in local_info;
+    socklen_t size = sizeof(struct sockaddr_in);
+    if (getsockname(leader_socket, (struct sockaddr *) &local_info, &size) == -1) {
+        error("Error getting local socket info (%s)", strerror(errno));
+        return false;
+    }
+
+    info("Connect to server %s:%d", inet_ntoa(local_info.sin_addr),
+        ntohs(local_info.sin_port));
+
+    // TODO: error check
+    int len = strlen(command);
+    write(leader_socket, &len, sizeof(int));
+    dprintf(leader_socket, "%s", command);
+
+    return true;
+}
+
 int main(int argc, char* argv[]) {
     Arguments args(INTRO_TEXT);
     args.RegisterBool("help", "Print help message");
@@ -45,51 +85,39 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    vector<struct ServerInfo> server_infos;
+    vector<ServerInfo> server_infos;
     for (string server_info_str: server_info_strs) {
         auto parts = Util::StringSplit(server_info_str, ":");
-        struct ServerInfo peer_info;
+        ServerInfo peer_info;
         peer_info.ip_addr = parts[0];
         peer_info.port = stoi(parts[1]);
         server_infos.push_back(peer_info);
     }
 
-    // Populate leader information struct
-    struct sockaddr_in leader_info;
-    memset(&leader_info, 0, sizeof(leader_info));
-    leader_info.sin_family = AF_INET;
-    leader_info.sin_addr.s_addr = inet_addr(server_infos[0].ip_addr.c_str());
-    leader_info.sin_port = htons(server_infos[0].port);
+    ServerInfo leader_info = server_infos[0];
 
-    // Create socket
-    int leader_socket = socket(AF_INET, SOCK_STREAM, 0);
-    if (leader_socket == -1) {
-        error("Error creating server socket (%s)", strerror(errno));
-        return EXIT_FAILURE;
+    while (true) {
+        string command;
+        printf("> ");
+        getline(cin, command);
+        Util::Trim(command);
+
+        if (cin.eof()) {
+            // End-of-file received; quit client
+            break;
+        }
+        if (command == "exit" || command == "quit") {
+            // User explicitly quit client
+            break;
+        }
+        if (command.empty()) {
+            // Ignore empty commands
+            continue;
+        }
+        bool success = send_command(leader_info, command.c_str());
+
+        if (!success) {
+            return EXIT_FAILURE;
+        }
     }
-
-    // Connect socket
-    if (connect(leader_socket, (struct sockaddr *) &leader_info,
-            sizeof(struct sockaddr_in)) == -1) {
-        error("Error connecting to server (%s)", strerror(errno));
-        return EXIT_FAILURE;
-    }
-
-    struct sockaddr_in local_info;
-    socklen_t size = sizeof(struct sockaddr_in);
-    if (getsockname(leader_socket, (struct sockaddr *) &local_info, &size) == -1) {
-        error("Error getting local socket info (%s)", strerror(errno));
-        return EXIT_FAILURE;
-    }
-
-    info("Connect to server %s:%d", inet_ntoa(local_info.sin_addr),
-        ntohs(local_info.sin_port));
-
-    const char * message = "Hello server!";
-    int len = strlen(message);
-    // TODO: error check
-    write(leader_socket, &len, sizeof(int));
-    dprintf(leader_socket, "%s", message);
-
-    while (true);
 }
