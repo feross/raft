@@ -86,9 +86,10 @@ class RaftServer {
          * The protocol buffer definition of the returned PeerMessage can be
          * found in peer.proto.
          *
+         * @param message_type The raft message type
          * @return a PeerMessage protocol buffer
          */
-        PeerMessage CreateMessage();
+        PeerMessage CreateMessage(PeerMessage_Type message_type);
 
         /**
          * Sends a protocol buffer formatted message to the specified peer.

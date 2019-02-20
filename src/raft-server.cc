@@ -104,12 +104,6 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
     }
 }
 
-PeerMessage RaftServer::CreateMessage() {
-    PeerMessage message;
-    message.set_term(storage.current_term());
-    message.set_server_id(server_id);
-    return message;
-}
 
 void RaftServer::SendMessage(Peer *peer, PeerMessage &message) {
     string message_string;
@@ -119,28 +113,32 @@ void RaftServer::SendMessage(Peer *peer, PeerMessage &message) {
     peer->SendMessage(message_cstr, message_string.size());
 }
 
+PeerMessage RaftServer::CreateMessage(PeerMessage_Type message_type) {
+    PeerMessage message;
+    message.set_type(message_type);
+    message.set_term(storage.current_term());
+    message.set_server_id(server_id);
+    return message;
+}
+
 void RaftServer::SendAppendEntriesRequest(Peer *peer) {
-    PeerMessage message = CreateMessage();
-    message.set_type(PeerMessage::APPENDENTRIES_REQUEST);
+    PeerMessage message = CreateMessage(PeerMessage::APPENDENTRIES_REQUEST);
     SendMessage(peer, message);
 }
 
 void RaftServer::SendAppendEntriesResponse(Peer *peer, bool success) {
-    PeerMessage message = CreateMessage();
-    message.set_type(PeerMessage::APPENDENTRIES_RESPONSE);
+    PeerMessage message = CreateMessage(PeerMessage::APPENDENTRIES_RESPONSE);
     message.set_success(success);
     SendMessage(peer, message);
 }
 
 void RaftServer::SendRequestVoteRequest(Peer *peer) {
-    PeerMessage message = CreateMessage();
-    message.set_type(PeerMessage::REQUESTVOTE_REQUEST);
+    PeerMessage message = CreateMessage(PeerMessage::REQUESTVOTE_REQUEST);
     SendMessage(peer, message);
 }
 
 void RaftServer::SendRequestVoteResponse(Peer *peer, bool vote_granted) {
-    PeerMessage message = CreateMessage();
-    message.set_type(PeerMessage::REQUESTVOTE_RESPONSE);
+    PeerMessage message = CreateMessage(PeerMessage::REQUESTVOTE_RESPONSE);
     message.set_vote_granted(vote_granted);
     SendMessage(peer, message);
 }
