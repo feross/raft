@@ -58,26 +58,26 @@ template<> ::proto::PeerMessage* Arena::CreateMaybeMessage<::proto::PeerMessage>
 }  // namespace google
 namespace proto {
 
-enum PeerMessage_MessageType {
-  PeerMessage_MessageType_APPENDENTRIES_REQUEST = 0,
-  PeerMessage_MessageType_APPENDENTRIES_RESPONSE = 1,
-  PeerMessage_MessageType_REQUESTVOTE_REQUEST = 2,
-  PeerMessage_MessageType_REQUESTVOTE_RESPONSE = 3
+enum PeerMessage_Type {
+  PeerMessage_Type_APPENDENTRIES_REQUEST = 0,
+  PeerMessage_Type_APPENDENTRIES_RESPONSE = 1,
+  PeerMessage_Type_REQUESTVOTE_REQUEST = 2,
+  PeerMessage_Type_REQUESTVOTE_RESPONSE = 3
 };
-bool PeerMessage_MessageType_IsValid(int value);
-const PeerMessage_MessageType PeerMessage_MessageType_MessageType_MIN = PeerMessage_MessageType_APPENDENTRIES_REQUEST;
-const PeerMessage_MessageType PeerMessage_MessageType_MessageType_MAX = PeerMessage_MessageType_REQUESTVOTE_RESPONSE;
-const int PeerMessage_MessageType_MessageType_ARRAYSIZE = PeerMessage_MessageType_MessageType_MAX + 1;
+bool PeerMessage_Type_IsValid(int value);
+const PeerMessage_Type PeerMessage_Type_Type_MIN = PeerMessage_Type_APPENDENTRIES_REQUEST;
+const PeerMessage_Type PeerMessage_Type_Type_MAX = PeerMessage_Type_REQUESTVOTE_RESPONSE;
+const int PeerMessage_Type_Type_ARRAYSIZE = PeerMessage_Type_Type_MAX + 1;
 
-const ::google::protobuf::EnumDescriptor* PeerMessage_MessageType_descriptor();
-inline const ::std::string& PeerMessage_MessageType_Name(PeerMessage_MessageType value) {
+const ::google::protobuf::EnumDescriptor* PeerMessage_Type_descriptor();
+inline const ::std::string& PeerMessage_Type_Name(PeerMessage_Type value) {
   return ::google::protobuf::internal::NameOfEnum(
-    PeerMessage_MessageType_descriptor(), value);
+    PeerMessage_Type_descriptor(), value);
 }
-inline bool PeerMessage_MessageType_Parse(
-    const ::std::string& name, PeerMessage_MessageType* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<PeerMessage_MessageType>(
-    PeerMessage_MessageType_descriptor(), name, value);
+inline bool PeerMessage_Type_Parse(
+    const ::std::string& name, PeerMessage_Type* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<PeerMessage_Type>(
+    PeerMessage_Type_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -173,34 +173,34 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
 
   // nested types ----------------------------------------------------
 
-  typedef PeerMessage_MessageType MessageType;
-  static const MessageType APPENDENTRIES_REQUEST =
-    PeerMessage_MessageType_APPENDENTRIES_REQUEST;
-  static const MessageType APPENDENTRIES_RESPONSE =
-    PeerMessage_MessageType_APPENDENTRIES_RESPONSE;
-  static const MessageType REQUESTVOTE_REQUEST =
-    PeerMessage_MessageType_REQUESTVOTE_REQUEST;
-  static const MessageType REQUESTVOTE_RESPONSE =
-    PeerMessage_MessageType_REQUESTVOTE_RESPONSE;
-  static inline bool MessageType_IsValid(int value) {
-    return PeerMessage_MessageType_IsValid(value);
+  typedef PeerMessage_Type Type;
+  static const Type APPENDENTRIES_REQUEST =
+    PeerMessage_Type_APPENDENTRIES_REQUEST;
+  static const Type APPENDENTRIES_RESPONSE =
+    PeerMessage_Type_APPENDENTRIES_RESPONSE;
+  static const Type REQUESTVOTE_REQUEST =
+    PeerMessage_Type_REQUESTVOTE_REQUEST;
+  static const Type REQUESTVOTE_RESPONSE =
+    PeerMessage_Type_REQUESTVOTE_RESPONSE;
+  static inline bool Type_IsValid(int value) {
+    return PeerMessage_Type_IsValid(value);
   }
-  static const MessageType MessageType_MIN =
-    PeerMessage_MessageType_MessageType_MIN;
-  static const MessageType MessageType_MAX =
-    PeerMessage_MessageType_MessageType_MAX;
-  static const int MessageType_ARRAYSIZE =
-    PeerMessage_MessageType_MessageType_ARRAYSIZE;
+  static const Type Type_MIN =
+    PeerMessage_Type_Type_MIN;
+  static const Type Type_MAX =
+    PeerMessage_Type_Type_MAX;
+  static const int Type_ARRAYSIZE =
+    PeerMessage_Type_Type_ARRAYSIZE;
   static inline const ::google::protobuf::EnumDescriptor*
-  MessageType_descriptor() {
-    return PeerMessage_MessageType_descriptor();
+  Type_descriptor() {
+    return PeerMessage_Type_descriptor();
   }
-  static inline const ::std::string& MessageType_Name(MessageType value) {
-    return PeerMessage_MessageType_Name(value);
+  static inline const ::std::string& Type_Name(Type value) {
+    return PeerMessage_Type_Name(value);
   }
-  static inline bool MessageType_Parse(const ::std::string& name,
-      MessageType* value) {
-    return PeerMessage_MessageType_Parse(name, value);
+  static inline bool Type_Parse(const ::std::string& name,
+      Type* value) {
+    return PeerMessage_Type_Parse(name, value);
   }
 
   // accessors -------------------------------------------------------
@@ -242,12 +242,12 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
   ::std::string* release_server_id();
   void set_allocated_server_id(::std::string* server_id);
 
-  // required .proto.PeerMessage.MessageType type = 1;
+  // required .proto.PeerMessage.Type type = 1;
   bool has_type() const;
   void clear_type();
   static const int kTypeFieldNumber = 1;
-  ::proto::PeerMessage_MessageType type() const;
-  void set_type(::proto::PeerMessage_MessageType value);
+  ::proto::PeerMessage_Type type() const;
+  void set_type(::proto::PeerMessage_Type value);
 
   // required int32 term = 2;
   bool has_term() const;
@@ -358,7 +358,7 @@ class PeerMessage : public ::google::protobuf::Message /* @@protoc_insertion_poi
 #endif  // __GNUC__
 // PeerMessage
 
-// required .proto.PeerMessage.MessageType type = 1;
+// required .proto.PeerMessage.Type type = 1;
 inline bool PeerMessage::has_type() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -372,12 +372,12 @@ inline void PeerMessage::clear_type() {
   type_ = 0;
   clear_has_type();
 }
-inline ::proto::PeerMessage_MessageType PeerMessage::type() const {
+inline ::proto::PeerMessage_Type PeerMessage::type() const {
   // @@protoc_insertion_point(field_get:proto.PeerMessage.type)
-  return static_cast< ::proto::PeerMessage_MessageType >(type_);
+  return static_cast< ::proto::PeerMessage_Type >(type_);
 }
-inline void PeerMessage::set_type(::proto::PeerMessage_MessageType value) {
-  assert(::proto::PeerMessage_MessageType_IsValid(value));
+inline void PeerMessage::set_type(::proto::PeerMessage_Type value) {
+  assert(::proto::PeerMessage_Type_IsValid(value));
   set_has_type();
   type_ = value;
   // @@protoc_insertion_point(field_set:proto.PeerMessage.type)
@@ -721,10 +721,10 @@ inline void PeerMessage::set_vote_granted(bool value) {
 namespace google {
 namespace protobuf {
 
-template <> struct is_proto_enum< ::proto::PeerMessage_MessageType> : ::std::true_type {};
+template <> struct is_proto_enum< ::proto::PeerMessage_Type> : ::std::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::proto::PeerMessage_MessageType>() {
-  return ::proto::PeerMessage_MessageType_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::proto::PeerMessage_Type>() {
+  return ::proto::PeerMessage_Type_descriptor();
 }
 
 }  // namespace protobuf

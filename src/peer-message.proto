@@ -12,7 +12,7 @@ message PeerMessage {
      * Fields for all messages
      */
 
-    enum MessageType {
+    enum Type {
         APPENDENTRIES_REQUEST = 0;
         APPENDENTRIES_RESPONSE = 1;
         REQUESTVOTE_REQUEST = 2;
@@ -20,7 +20,7 @@ message PeerMessage {
     }
 
     // The type of message
-    required MessageType type = 1;
+    required Type type = 1;
 
     // The current term of the sending server
     required int32 term = 2;

@@ -106,20 +106,20 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\022peer-message.proto\022\005proto\"\202\003\n\013PeerMess"
-      "age\022,\n\004type\030\001 \002(\0162\036.proto.PeerMessage.Me"
-      "ssageType\022\014\n\004term\030\002 \002(\005\022\021\n\tserver_id\030\003 \002"
-      "(\t\022\026\n\016prev_log_index\030\004 \001(\005\022\025\n\rprev_log_t"
-      "erm\030\005 \001(\005\022\017\n\007entries\030\006 \003(\t\022\025\n\rleader_com"
-      "mit\030\007 \001(\005\022\017\n\007success\030\010 \001(\010\022\026\n\016last_log_i"
-      "ndex\030\t \001(\005\022\025\n\rlast_log_term\030\n \001(\005\022\024\n\014vot"
-      "e_granted\030\013 \001(\010\"w\n\013MessageType\022\031\n\025APPEND"
-      "ENTRIES_REQUEST\020\000\022\032\n\026APPENDENTRIES_RESPO"
-      "NSE\020\001\022\027\n\023REQUESTVOTE_REQUEST\020\002\022\030\n\024REQUES"
-      "TVOTE_RESPONSE\020\003"
+      "\n\022peer-message.proto\022\005proto\"\364\002\n\013PeerMess"
+      "age\022%\n\004type\030\001 \002(\0162\027.proto.PeerMessage.Ty"
+      "pe\022\014\n\004term\030\002 \002(\005\022\021\n\tserver_id\030\003 \002(\t\022\026\n\016p"
+      "rev_log_index\030\004 \001(\005\022\025\n\rprev_log_term\030\005 \001"
+      "(\005\022\017\n\007entries\030\006 \003(\t\022\025\n\rleader_commit\030\007 \001"
+      "(\005\022\017\n\007success\030\010 \001(\010\022\026\n\016last_log_index\030\t "
+      "\001(\005\022\025\n\rlast_log_term\030\n \001(\005\022\024\n\014vote_grant"
+      "ed\030\013 \001(\010\"p\n\004Type\022\031\n\025APPENDENTRIES_REQUES"
+      "T\020\000\022\032\n\026APPENDENTRIES_RESPONSE\020\001\022\027\n\023REQUE"
+      "STVOTE_REQUEST\020\002\022\030\n\024REQUESTVOTE_RESPONSE"
+      "\020\003"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 416);
+      descriptor, 402);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "peer-message.proto", &protobuf_RegisterTypes);
 }
@@ -136,11 +136,11 @@ struct StaticDescriptorInitializer {
 } static_descriptor_initializer;
 }  // namespace protobuf_peer_2dmessage_2eproto
 namespace proto {
-const ::google::protobuf::EnumDescriptor* PeerMessage_MessageType_descriptor() {
+const ::google::protobuf::EnumDescriptor* PeerMessage_Type_descriptor() {
   protobuf_peer_2dmessage_2eproto::protobuf_AssignDescriptorsOnce();
   return protobuf_peer_2dmessage_2eproto::file_level_enum_descriptors[0];
 }
-bool PeerMessage_MessageType_IsValid(int value) {
+bool PeerMessage_Type_IsValid(int value) {
   switch (value) {
     case 0:
     case 1:
@@ -153,13 +153,13 @@ bool PeerMessage_MessageType_IsValid(int value) {
 }
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
-const PeerMessage_MessageType PeerMessage::APPENDENTRIES_REQUEST;
-const PeerMessage_MessageType PeerMessage::APPENDENTRIES_RESPONSE;
-const PeerMessage_MessageType PeerMessage::REQUESTVOTE_REQUEST;
-const PeerMessage_MessageType PeerMessage::REQUESTVOTE_RESPONSE;
-const PeerMessage_MessageType PeerMessage::MessageType_MIN;
-const PeerMessage_MessageType PeerMessage::MessageType_MAX;
-const int PeerMessage::MessageType_ARRAYSIZE;
+const PeerMessage_Type PeerMessage::APPENDENTRIES_REQUEST;
+const PeerMessage_Type PeerMessage::APPENDENTRIES_RESPONSE;
+const PeerMessage_Type PeerMessage::REQUESTVOTE_REQUEST;
+const PeerMessage_Type PeerMessage::REQUESTVOTE_RESPONSE;
+const PeerMessage_Type PeerMessage::Type_MIN;
+const PeerMessage_Type PeerMessage::Type_MAX;
+const int PeerMessage::Type_ARRAYSIZE;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 // ===================================================================
@@ -268,7 +268,7 @@ bool PeerMessage::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required .proto.PeerMessage.MessageType type = 1;
+      // required .proto.PeerMessage.Type type = 1;
       case 1: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
             static_cast< ::google::protobuf::uint8>(8u /* 8 & 0xFF */)) {
@@ -276,8 +276,8 @@ bool PeerMessage::MergePartialFromCodedStream(
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
                  input, &value)));
-          if (::proto::PeerMessage_MessageType_IsValid(value)) {
-            set_type(static_cast< ::proto::PeerMessage_MessageType >(value));
+          if (::proto::PeerMessage_Type_IsValid(value)) {
+            set_type(static_cast< ::proto::PeerMessage_Type >(value));
           } else {
             mutable_unknown_fields()->AddVarint(
                 1, static_cast< ::google::protobuf::uint64>(value));
@@ -460,7 +460,7 @@ void PeerMessage::SerializeWithCachedSizes(
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  // required .proto.PeerMessage.MessageType type = 1;
+  // required .proto.PeerMessage.Type type = 1;
   if (cached_has_bits & 0x00000002u) {
     ::google::protobuf::internal::WireFormatLite::WriteEnum(
       1, this->type(), output);
@@ -541,7 +541,7 @@ void PeerMessage::SerializeWithCachedSizes(
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  // required .proto.PeerMessage.MessageType type = 1;
+  // required .proto.PeerMessage.Type type = 1;
   if (cached_has_bits & 0x00000002u) {
     target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
       1, this->type(), target);
@@ -628,7 +628,7 @@ size_t PeerMessage::RequiredFieldsByteSizeFallback() const {
   }
 
   if (has_type()) {
-    // required .proto.PeerMessage.MessageType type = 1;
+    // required .proto.PeerMessage.Type type = 1;
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
   }
@@ -657,7 +657,7 @@ size_t PeerMessage::ByteSizeLong() const {
       ::google::protobuf::internal::WireFormatLite::StringSize(
         this->server_id());
 
-    // required .proto.PeerMessage.MessageType type = 1;
+    // required .proto.PeerMessage.Type type = 1;
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
 
