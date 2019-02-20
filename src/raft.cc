@@ -15,9 +15,10 @@ int main(int argc, char* argv[]) {
     Arguments args(INTRO_TEXT);
     args.RegisterBool("help", "Print help message");
     args.RegisterString("id", "Server identifier");
+    args.RegisterInt("listen", "Client listen port");
     args.RegisterBool("reset", "Delete server storage");
-    args.RegisterBool("debug", "Show debug logs");
-    args.RegisterBool("quiet", "Show only warnings and errors");
+    args.RegisterBool("debug", "Show all logs");
+    args.RegisterBool("quiet", "Show only errors");
 
     try {
         args.Parse(argc, argv);
@@ -27,7 +28,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (args.get_bool("quiet")) {
-        LOG_LEVEL = WARN;
+        LOG_LEVEL = ERROR;
     } else if (args.get_bool("debug")) {
         LOG_LEVEL = DEBUG;
     }

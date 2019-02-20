@@ -3,9 +3,7 @@
 #include <chrono>
 #include <ctime>
 #include <exception>
-#include <iostream>
 #include <signal.h>
-#include <unistd.h>
 
 #include "arguments.h"
 #include "log.h"
