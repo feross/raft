@@ -70,7 +70,9 @@ int RaftServer::HandleClientCommand(char * command) {
     // Append log entry
     int log_entry_len = strlen(command) + 1;
     char log_entry_buffer[log_entry_len + sizeof(int)];
-    memcpy(log_entry_buffer, &log_entry_len, sizeof(int));
+    int current_term = storage.current_term();
+
+    memcpy(log_entry_buffer, &current_term, sizeof(int));
     memcpy(log_entry_buffer + sizeof(int), command, log_entry_len);
     persistent_log.AddLogEntry(log_entry_buffer, log_entry_len + sizeof(int));
 
@@ -133,8 +135,9 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 string log_entry = message.entries(0);
                 int log_entry_len = log_entry.length();
                 char log_entry_buffer[log_entry_len + sizeof(int)];
+                int current_term = storage.current_term();
 
-                memcpy(log_entry_buffer, &log_entry_len, sizeof(int));
+                memcpy(log_entry_buffer, &current_term, sizeof(int));
                 memcpy(log_entry_buffer + sizeof(int), log_entry.c_str(), log_entry_len);
                 persistent_log.AddLogEntry(log_entry_buffer,
                     log_entry_len + sizeof(int));
@@ -260,7 +263,7 @@ void RaftServer::CheckForCommittedEntries() {
             committed_index += 1;
         }
     }
-    
+
 
 }
 
