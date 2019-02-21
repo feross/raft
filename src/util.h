@@ -111,4 +111,10 @@ class Util {
          * relatively short.  E.g. don't use for a large log.
          */
         static bool PersistentFileUpdate(const char * filename, const void * new_contents, int new_contents_len);
+
+        /**
+         * Close a file descriptor and print a warning if closing fails.
+         * @param fd The file descriptor to close
+         */
+        static void SafeClose(int fd);
 };

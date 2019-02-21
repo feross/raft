@@ -87,3 +87,9 @@ bool Util::PersistentFileUpdate(const char * filename, const void * new_contents
   warn("File Update Failed %s, %s, %d", filename, new_contents, new_contents_len);
   return false;
 }
+
+void Util::SafeClose(int fd) {
+    if (close(fd) == -1) {
+        warn("Error closing socket %d (%s)", fd, strerror(errno));
+    }
+}
