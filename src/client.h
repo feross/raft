@@ -7,6 +7,7 @@
 
 #include "arguments.h"
 #include "log.h"
+#include "raft-config.h"
 
 static const string INTRO_TEXT =
 R"(Raft Client

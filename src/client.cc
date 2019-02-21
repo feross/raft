@@ -4,17 +4,6 @@ using namespace std;
 
 LogType LOG_LEVEL = INFO;
 
-/**
- * Peer connection information. Describes a peer that this server should connect
- * to. Peers are specified via destination_ip_addr and destination_port. The
- * port on which this server will listen for a incoming connection from this
- * peer is specified as my_listen_port.
- */
-struct ServerInfo {
-    string ip_addr;
-    unsigned short port;
-};
-
 bool send_command(ServerInfo server_info, const char * command) {
     // Populate leader information struct
     struct sockaddr_in leader_info;
@@ -52,12 +41,48 @@ bool send_command(ServerInfo server_info, const char * command) {
     write(leader_socket, &len, sizeof(int));
     dprintf(leader_socket, "%s", command);
 
+    // Read response from leader server
+    int message_size;
+    int bytes_read = 0;
+    while (bytes_read < sizeof(int)) {
+        void * dest = (char *) &message_size + bytes_read;
+        int new_bytes = recv(leader_socket, dest, sizeof(int) - bytes_read, 0);
+        if (new_bytes == -1) {
+            warn("Error reading from socket %d (%s)", leader_socket, strerror(errno));
+            if (close(leader_socket) == -1) {
+                warn("Error closing socket %d (%s)", leader_socket, strerror(errno));
+            }
+            return false;
+        }
+        bytes_read += new_bytes;
+    }
+
+    char buf[message_size + 1];
+    bytes_read = 0;
+    while (bytes_read < message_size) {
+        info("bytes_read %d, message_size %d", bytes_read, message_size);
+        void * dest = buf + bytes_read;
+        int new_bytes = read(leader_socket, dest, message_size - bytes_read);
+        if (new_bytes == 0 || new_bytes == -1) {
+            warn("Error reading from socket %d (%s)", leader_socket, strerror(errno));
+            if (close(leader_socket) == -1) {
+                warn("Error closing socket %d (%s)", leader_socket, strerror(errno));
+            }
+            return false;
+        }
+        bytes_read += new_bytes;
+    }
+        // Read complete message from client
+    buf[message_size] = '\0';
+    info("Received server message: %s", buf);
+
     return true;
 }
 
 int main(int argc, char* argv[]) {
     Arguments args(INTRO_TEXT);
     args.RegisterBool("help", "Print help message");
+    args.RegisterString("config", "Path to configuration file (default = ./config)");
     args.RegisterBool("debug", "Show all logs");
     args.RegisterBool("quiet", "Show only errors");
 
@@ -79,20 +104,21 @@ int main(int argc, char* argv[]) {
         return EXIT_SUCCESS;
     }
 
-    vector<string> server_info_strs = args.get_unnamed();
-    if (server_info_strs.size() == 0) {
-        error("%s", "Specify at least one server to connect to");
+    string config_path = args.get_string("config");
+    if (config_path == "") {
+        config_path = DEFAULT_CONFIG_PATH;
+    }
+
+    RaftConfig raft_config(config_path);
+
+    try {
+        raft_config.parse(0);
+    } catch (RaftConfigException& err) {
+        error("%s", err.what());
         return EXIT_FAILURE;
     }
 
-    vector<ServerInfo> server_infos;
-    for (string server_info_str: server_info_strs) {
-        auto parts = Util::StringSplit(server_info_str, ":");
-        ServerInfo peer_info;
-        peer_info.ip_addr = parts[0];
-        peer_info.port = stoi(parts[1]);
-        server_infos.push_back(peer_info);
-    }
+    vector<ServerInfo> server_infos = raft_config.get_server_infos();
 
     ServerInfo leader_info = server_infos[0];
 
