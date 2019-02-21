@@ -57,7 +57,7 @@ bool PersistentLog::ReopenLog() {
     }
   }
   fread(&cursor, sizeof(int), 1, cursor_file);
-  debug("opened log, cursor: %d\n", cursor);
+  debug("opened log, cursor: %d", cursor);
   fclose(cursor_file);
   if (LoadIndexFromLog() != true) {
     warn("Failed to load full log into memory %s", log_filename);
@@ -118,7 +118,7 @@ bool PersistentLog::MoveCursor(int distance) {
 
 bool PersistentLog::AddLogEntry(const void* log_data, int log_data_len) {
   struct LogEntry current_entry;
-  current_entry.data = NULL; 
+  current_entry.data = NULL;
   current_entry.len = log_data_len;
   current_entry.offset = cursor;
 
@@ -127,7 +127,7 @@ bool PersistentLog::AddLogEntry(const void* log_data, int log_data_len) {
     warn("Error: fseek failed to move to move to a new file offset, %s (%d)", strerror(errno), errno);
     return false;
   }
-  int wrote_bytes = fwrite(&log_data_len, 1, sizeof(int), log_file); 
+  int wrote_bytes = fwrite(&log_data_len, 1, sizeof(int), log_file);
   if (wrote_bytes != sizeof(int)) {
     warn("Error: fwrite failed to write int bytes to log file, %s (%d)", strerror(errno), errno);
     return false;
@@ -190,7 +190,7 @@ const struct LogEntry PersistentLog::GetLogEntryByIndex(int index) {
     if (log_entries.size() <= index) {
       debug("index %d is not in log, too large\n", index);
       struct LogEntry current_entry;
-      current_entry.data = NULL; 
+      current_entry.data = NULL;
       current_entry.len = -1;
       current_entry.offset = -1;
       return current_entry;

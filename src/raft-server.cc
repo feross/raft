@@ -60,6 +60,8 @@ void RaftServer::HandleLeaderTimer() {
 
 int RaftServer::HandleClientCommand(char * command) {
     lock_guard<mutex> lock(server_mutex);
+    assert(server_state != Leader);
+
     info("Client command: %s", command);
 
     // TODO: Append to log
@@ -80,7 +82,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
     if (message.term() > storage.current_term()) {
         TransitionCurrentTerm(message.term());
         TransitionServerState(Follower);
-        client_server->RedirectToServer(&server_infos[message.server_id()]);
+        client_server->StartRedirecting(&server_infos[message.server_id()]);
     }
 
     switch (message.type()) {
@@ -89,10 +91,10 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 SendAppendEntriesResponse(peer, false, message.prev_log_index() + 1);
                 return;
             }
-            if (message.term() == storage.current_term()) {
+            if (server_state == Candidate && message.term() == storage.current_term()) {
                 // Candidate recognizes another candidate has won election
                 TransitionServerState(Follower);
-                client_server->RedirectToServer(&server_infos[message.server_id()]);
+                client_server->StartRedirecting(&server_infos[message.server_id()]);
             }
 
             int largest_log_index = persistent_log.LastLogIndex();
@@ -272,8 +274,7 @@ void RaftServer::TransitionServerState(ServerState new_state) {
                 peer_match_indexes[i] = 0;
             }
 
-            // Stop redirecting client requests; start handling them
-            client_server->RedirectToServer(NULL);
+            client_server->StartServing();
             return;
         }
     }
