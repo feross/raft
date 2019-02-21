@@ -90,7 +90,7 @@ bool send_command(const char * command) {
 
         if (redirect_to_leader) {
             server_info = *(ServerInfo *) buf;
-            info("Redirecting to leader: %s:%d", server_info.ip_addr, server_info.port);
+            info("Redirecting to leader: %s:%d", server_info.ip_addr.c_str(), server_info.port);
             retries--;
             continue;
         }
@@ -144,7 +144,7 @@ int main(int argc, char* argv[]) {
 
     vector<ServerInfo> server_infos = raft_config.get_server_infos();
 
-    leader_info = server_infos[0];
+    server_info = server_infos[0];
 
     while (true) {
         string command;

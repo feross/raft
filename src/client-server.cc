@@ -78,7 +78,8 @@ void ClientServer::RespondToClient(int request_id, string& response) {
 
 void ClientServer::RedirectToServer(ServerInfo * server_info) {
     // Close pending client sockets so clients attempt to find new leader
-    for (int client_socket: pending_client_sockets) {
+    for (pair<int, int> pending_client_socket: pending_client_sockets) {
+        int client_socket = pending_client_socket.second;
         if (close(client_socket) == -1) {
             warn("Error closing socket %d (%s)", client_socket, strerror(errno));
         }
