@@ -68,9 +68,10 @@ void ClientServer::RespondToClient(int request_id, string& response) {
     debug("Responding to client (request_id: %d, response: %s)", request_id, response.c_str());
     const char * response_cstr = response.c_str();
 
-    // TODO: error check
     int len = strlen(response_cstr);
-    write(client_socket, &len, sizeof(int));
+    if (write(client_socket, &len, sizeof(int)) == -1) {
+        error("Could not write to socket %d (%s)", client_socket, strerror(errno));
+    }
     dprintf(client_socket, "%s", response_cstr);
 
     shutdown(client_socket, SHUT_WR);
