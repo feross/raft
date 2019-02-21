@@ -49,7 +49,7 @@ void ClientServer::Listen(unsigned short listen_port) {
             warn("Error accepting socket: %s", strerror(errno));
             continue;
         }
-        info("Client connection from %s:%d", inet_ntoa(client_info.sin_addr),
+        debug("Client connection from %s:%d", inet_ntoa(client_info.sin_addr),
             ntohs(client_info.sin_port));
 
         thread_pool.schedule([this, client_socket]() {
@@ -63,9 +63,8 @@ void ClientServer::Listen(unsigned short listen_port) {
 }
 
 void ClientServer::RespondToClient(int request_id, string& response) {
-    info("RespondToClient, request_id: %d, response: %s", request_id, response.c_str());
     int client_socket = pending_client_sockets[request_id];
-    info("got socket: %d", client_socket);
+    debug("Responding to client (request_id: %d, response: %s)", request_id, response.c_str());
     const char * response_cstr = response.c_str();
 
     // TODO: error check
@@ -94,7 +93,6 @@ void ClientServer::HandleClientConnection(int client_socket) {
     char buf[message_size + 1];
     bytes_read = 0;
     while (bytes_read < message_size) {
-        info("bytes_read %d, message_size %d", bytes_read, message_size);
         void * dest = buf + bytes_read;
         int new_bytes = read(client_socket, dest, message_size - bytes_read);
         if (new_bytes == 0 || new_bytes == -1) {
@@ -108,8 +106,6 @@ void ClientServer::HandleClientConnection(int client_socket) {
     }
     // Read complete message from client
     buf[message_size] = '\0';
-    info("Received client message: %s", buf);
     int request_id = request_callback(buf);
-    info("Recieved rpc id %d for socket %d", request_id, client_socket);
     pending_client_sockets[request_id] = client_socket;
 }

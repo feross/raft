@@ -33,7 +33,7 @@ bool send_command(ServerInfo server_info, const char * command) {
         return false;
     }
 
-    info("Connect to server %s:%d", inet_ntoa(local_info.sin_addr),
+    debug("Connect to server %s:%d", inet_ntoa(local_info.sin_addr),
         ntohs(local_info.sin_port));
 
     // TODO: error check
@@ -60,7 +60,6 @@ bool send_command(ServerInfo server_info, const char * command) {
     char buf[message_size + 1];
     bytes_read = 0;
     while (bytes_read < message_size) {
-        info("bytes_read %d, message_size %d", bytes_read, message_size);
         void * dest = buf + bytes_read;
         int new_bytes = read(leader_socket, dest, message_size - bytes_read);
         if (new_bytes == 0 || new_bytes == -1) {
@@ -74,7 +73,7 @@ bool send_command(ServerInfo server_info, const char * command) {
     }
         // Read complete message from client
     buf[message_size] = '\0';
-    info("Received server message: %s", buf);
+    printf("%s", buf);
 
     return true;
 }

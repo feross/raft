@@ -56,6 +56,7 @@ void RaftServer::HandleLeaderTimer() {
 
 int RaftServer::HandleClientCommand(char * command) {
     lock_guard<mutex> lock(server_mutex);
+    info("Client command: %s", command);
 
     // TODO: Append to log
     // TODO: return index number of log entry
