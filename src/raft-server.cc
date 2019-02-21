@@ -94,12 +94,15 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 TransitionServerState(Follower);
                 client_server->RedirectToServer(&server_infos[message.server_id()]);
             }
+            info("%s", "NUMBER 0");
 
             int largest_log_index = persistent_log.LastLogIndex();
             if (largest_log_index < message.prev_log_index()) {
                 SendAppendEntriesResponse(peer, false, message.prev_log_index() + 1);
                 return;
             }
+            info("%s", "NUMBER 1");
+
             struct LogEntry compare_entry =
                 persistent_log.GetLogEntryByIndex(message.prev_log_index());
             int compare_entry_term = *(int *)compare_entry.data;
@@ -119,50 +122,106 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             int log_entry_len = log_entry.length();
             char log_entry_buffer[log_entry_len + sizeof(int)];
 
+            info("%s", "NUMBER 2");
             memcpy(log_entry_buffer, &log_entry_len, sizeof(int));
             memcpy(log_entry_buffer + 4, log_entry.c_str(), log_entry_len);
             persistent_log.AddLogEntry(log_entry_buffer,
                 log_entry_len + sizeof(int));
+            info("%s", "NUMBER 3");
 
             SendAppendEntriesResponse(peer, true, message.prev_log_index() + 1);
             election_timer->Reset();
             return;
         }
+
         case PeerMessage::APPENDENTRIES_RESPONSE: {
             if (message.term() < storage.current_term()) {
                 // Drop responses with an outdated term; they indicate this
                 // response is for a request from a previous term.
                 return;
             }
+            debug("append response: success %d, %d", message.success(), message.appended_log_index());
+
             if (message.success()) {
                 if (message.appended_log_index() >= peer_next_indexes[peer->id]) {
                     peer_next_indexes[peer->id] = message.appended_log_index() + 1;
                     peer_match_indexes[peer->id] = message.appended_log_index();
+
+            warn("%s", "NUMBER 5");
+
                     //might now have new committed entry
+                    while(true) {
+                        int matches = 0;
+                        for(int i = 0; i < peer_match_indexes.size(); i++) {
+                            if (peer_match_indexes[i] > committed_index) {
+                                matches += 1;
+                            }
+                        }
+                        if (matches > (server_infos.size()/2 + 1)) {
+                            struct LogEntry ent = persistent_log.
+                                GetLogEntryByIndex(committed_index + 1);
+                            int term = *(int *)ent.data;
+                            if (term == storage.current_term()) {
+                                committed_index += 1;
+                                // ATTEMPT APPLY SHELL COMMAND
+                                // AFTERWARDS: UPDATE LAST APPLIED
+                                continue;
+                            }
+                        }
+                        warn("%s", "NUMBER 6");
+
+                        break;
+                    }
                 }
             } else {
                 peer_next_indexes[peer->id] = message.appended_log_index() - 1;
             }
-
-            message.appended_log_index();
+            if (peer_next_indexes[peer->id] <= persistent_log.LastLogIndex()){
+                SendAppendEntriesRequest(peer); //still need to catch up
+            }
             return;
         }
+
         case PeerMessage::REQUESTVOTE_REQUEST: {
             if (message.term() < storage.current_term()) {
+                info("%s", "vote rejected: term too old");
                 SendRequestVoteResponse(peer, false);
                 return;
             }
             if (storage.voted_for() != -1 &&
                 storage.voted_for() != message.server_id()) {
                 // Voted for another server already
+                info("%s", "vote rejected: already voted for someone else");
                 SendRequestVoteResponse(peer, false);
                 return;
             }
-            storage.set_term_and_voted(storage.current_term(), message.server_id());
-            SendRequestVoteResponse(peer, true);
-            election_timer->Reset();
+
+            struct LogEntry prev_entry =
+                persistent_log.GetLogEntryByIndex(message.prev_log_index());
+            int prev_entry_term = *(int *)prev_entry.data;
+
+            if (message.last_log_term() > prev_entry_term) {
+                storage.set_term_and_voted(storage.current_term(), message.server_id());
+                info("%s", "vote accepted: term was higher");
+                SendRequestVoteResponse(peer, true);
+                election_timer->Reset();
+                return;
+            }
+            if (message.last_log_term() == prev_entry_term &&
+                message.last_log_index() >= persistent_log.LastLogIndex()) {
+                storage.set_term_and_voted(storage.current_term(), message.server_id());
+                info("%s", "vote accepted: term was equal & index >=");
+                SendRequestVoteResponse(peer, true);
+                election_timer->Reset();
+                return;
+            }
+            info("vote rejected for misc reason their term: %d my term: %d", message.term(), storage.current_term());
+            info("their message term: %d ", message.last_log_term());
+            info("their index %d my index: %d", message.last_log_index(), persistent_log.LastLogIndex());
+            SendRequestVoteResponse(peer, false);
             return;
         }
+
         case PeerMessage::REQUESTVOTE_RESPONSE: {
             if (message.term() < storage.current_term()) {
                 // Drop responses with an outdated term; they indicate this
@@ -174,6 +233,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             }
             return;
         }
+
         default:
             warn("Unexpected message type: %s", message.type());
     }
@@ -196,19 +256,26 @@ PeerMessage RaftServer::CreateMessage(PeerMessage_Type message_type) {
 }
 
 void RaftServer::SendAppendEntriesRequest(Peer *peer) {
+    debug("%s", "send append");
     PeerMessage message = CreateMessage(PeerMessage::APPENDENTRIES_REQUEST);
     int next_index = peer_next_indexes[peer->id];
     if (next_index > persistent_log.LastLogIndex()) {
         next_index = persistent_log.LastLogIndex();
     }
+
     struct LogEntry prev_entry = persistent_log.GetLogEntryByIndex(next_index-1);
+    debug("%p term think at index %d", prev_entry.data, next_index);
     int prev_entry_term = *(int *)prev_entry.data;
+    debug("%d term think", prev_entry_term);
+
     message.set_prev_log_term(prev_entry_term);
     message.set_prev_log_index(next_index - 1);
     message.set_leader_commit(committed_index);
-    message.add_entries(prev_entry.data + sizeof(int),
-        prev_entry.len - sizeof(int));
+    debug("%s", "look up next to send append");
 
+    struct LogEntry cur_entry = persistent_log.GetLogEntryByIndex(next_index);
+    message.add_entries(cur_entry.data + sizeof(int),
+        cur_entry.len - sizeof(int));
     SendMessage(peer, message);
 }
 
@@ -222,6 +289,11 @@ void RaftServer::SendAppendEntriesResponse(Peer *peer, bool success,
 
 void RaftServer::SendRequestVoteRequest(Peer *peer) {
     PeerMessage message = CreateMessage(PeerMessage::REQUESTVOTE_REQUEST);
+    int last_log_entry_index = persistent_log.LastLogIndex();
+    struct LogEntry prev_entry = persistent_log.GetLogEntryByIndex(last_log_entry_index);
+    int last_log_entry_term = *(int *)prev_entry.data;
+    message.set_last_log_index(last_log_entry_index);
+    message.set_last_log_term(last_log_entry_term);
     SendMessage(peer, message);
 }
 
@@ -236,6 +308,7 @@ void RaftServer::TransitionCurrentTerm(int term) {
     // When updating the term, reset who we voted for
     storage.set_term_and_voted(term, -1);
     votes.clear();
+    info("%s","Done transitioning");
 }
 
 void RaftServer::TransitionServerState(ServerState new_state) {
@@ -270,15 +343,18 @@ void RaftServer::TransitionServerState(ServerState new_state) {
         }
         case Leader: {
             int next_log_index = persistent_log.LastLogIndex() + 1;
-
             int num_servers = server_infos.size();
+            peer_next_indexes.clear();
+            peer_match_indexes.clear();
             for (int i = 0; i < num_servers; i++) {
-                peer_next_indexes[i] = next_log_index;
-                peer_match_indexes[i] = 0;
+                peer_next_indexes.push_back(next_log_index);
+                peer_match_indexes.push_back(0);
             }
 
             // Stop redirecting client requests; start handling them
             client_server->RedirectToServer(NULL);
+            debug("%s", "Leader finished transition");
+
             return;
         }
     }
@@ -296,4 +372,5 @@ void RaftServer::ReceiveVote(int server_id) {
         // This server won the election
         TransitionServerState(Leader);
     }
+            info("%s", "Now what");
 }
