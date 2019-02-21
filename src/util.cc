@@ -62,7 +62,7 @@ void Util::Trim(std::string &str) {
 
 bool Util::SyscallErrorInfo(bool syscall_success, const char *error_message_prefix) {
   if (!syscall_success) {
-    warn("Error: %s, %s (%d)\n", error_message_prefix, strerror(errno), errno);
+    warn("Error: %s, %s (%d)", error_message_prefix, strerror(errno), errno);
   }
   return syscall_success;
 }
@@ -71,7 +71,7 @@ bool Util::SyscallErrorInfo(bool syscall_success, const char *error_message_pref
 bool Util::PersistentFileUpdate(const char * filename, const void * new_contents, int new_contents_len) {
   // assume old file is safe
   std::string tmp_filename = "tmp_" + std::string(filename);
-  debug("tmp name: %s\n", tmp_filename.c_str());
+  debug("tmp name: %s", tmp_filename.c_str());
   FILE * tmp_file = fopen( tmp_filename.c_str() , "wb" );
   bool opened = SyscallErrorInfo(tmp_file != NULL,
     "fopen of temp file as 'wb' failed"); //TODO: include filename
