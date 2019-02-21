@@ -18,6 +18,7 @@
 #include "raft-storage.h"
 #include "timer.h"
 #include "util.h"
+#include "persistent_log.h"
 
 using namespace proto;
 
@@ -167,6 +168,15 @@ class RaftServer {
         ClientServer *client_server;
         Timer *election_timer;
         Timer *leader_timer;
+
+        /**
+         * Log that is always in a consistent state, contains history of
+         * appendentries requests
+         */
+        PersistentLog persistent_log;
+        int committed_index;
+        vector<int> peer_next_indexes;
+        vector<int> peer_match_indexes;
 
         /**
          * Vote record to track which servers have voted for this server in the

@@ -18,38 +18,42 @@ PersistentLog::PersistentLog(const char *filename) {
 
 
 PersistentLog::~PersistentLog() {
-  for (int i = 0; i<log_entries.size(); i++) {
-    if (log_entries[i].data != NULL) {
-      delete(log_entries[i].data ); //free lazily populated in-memory log entries
-    }
-  }
+  RemoveCachedLogEntries();
   delete(cursor_filename);
   delete(log_filename);
 }
 
+bool PersistentLog::ResetLog() {
+  cursor = 0;
+  RemoveCachedLogEntries();
+  log_entries.clear();
+
+  if(Util::PersistentFileUpdate(cursor_filename, &cursor, sizeof(int)) == false) {
+    warn("Error: PersistentFileUpdate failed to write to cursor %d file\n", cursor);
+    return false;
+  }
+  log_file = fopen( log_filename , "wb" ); //erases old log
+  fclose(log_file);
+
+  log_file = fopen( log_filename , "r+b" );
+  cursor_file = fopen( cursor_filename, "r+b" );
+  if (log_file == NULL || cursor_file == NULL) {
+    warn("Error: failed to open log || cursor file %s", cursor_filename);
+    return false;
+  }
+  return true;
+}
 
 bool PersistentLog::ReopenLog() {
   cursor_file = fopen( cursor_filename , "r+b" );
   log_file = fopen( log_filename , "r+b" );
 
   if (cursor_file == NULL || log_file == NULL) {
-    debug("creating cursor & log files %d\n", log_filename);
+    debug("creating cursor & log files %s\n", log_filename);
     if (cursor_file != NULL) fclose(cursor_file);
     if (log_file != NULL) fclose(log_file);
-    cursor = 0;
-
-    if(Util::PersistentFileUpdate(cursor_filename, &cursor, sizeof(int)) == false) {
-      warn("Error: PersistentFileUpdate failed to write to cursor %d file\n", cursor);
-      return false;
-    }
-    log_file = fopen( log_filename , "wb" );
-    fclose(log_file);
-
-    log_file = fopen( log_filename , "r+b" );
-    cursor_file = fopen( cursor_filename, "r+b" );
-    if (log_file == NULL || cursor_file == NULL) {
-      warn("Error: failed to open log || cursor file %s", cursor_filename);
-      return false;
+    if (ResetLog() != true) {
+      debug("%s", "Failed to reset log");
     }
   }
   fread(&cursor, sizeof(int), 1, cursor_file);
@@ -87,6 +91,15 @@ bool PersistentLog::LoadIndexFromLog() {
 
     scan_location += ((sizeof(int) * 2) + entry_size);
     if (scan_location == cursor) return true;
+  }
+}
+
+
+void PersistentLog::RemoveCachedLogEntries() {
+  for (int i = 0; i<log_entries.size(); i++) {
+    if (log_entries[i].data != NULL) {
+      delete(log_entries[i].data ); //free lazily populated in-memory log entries
+    }
   }
 }
 
@@ -204,6 +217,10 @@ const struct LogEntry PersistentLog::GetLogEntryByIndex(int index) {
     current_entry.data = buffer;
     log_entries[index] = current_entry;
     return current_entry;
+}
+
+int PersistentLog::LastLogIndex() {
+  return log_entries.size() - 1;
 }
 
 

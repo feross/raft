@@ -58,6 +58,14 @@ class PersistentLog {
        * @return bool - true if successfully removed entry from persistent log
        */  
       bool RemoveLogEntry();
+      /*
+       * Resets the log to be completely empty
+       */
+      bool ResetLog();
+      /*
+       * Returns the highest current index in the log
+       */
+      int LastLogIndex();
 
     private:
 
@@ -84,6 +92,10 @@ class PersistentLog {
        * @return bool - whether we successfully & persistently moved the cursor
        */
       bool MoveCursor(int distance);
+      /*
+       * Removes any lazily-created in-memory representations of the log entries
+       */
+      void RemoveCachedLogEntries();
 
       /*
        * Name of persistent cursor file, necessary to enable safe adding/removing

@@ -3,17 +3,21 @@
 RaftServer::RaftServer(int server_id, vector<ServerInfo> server_infos,
     vector<PeerInfo> peer_infos) : server_id(server_id),
     server_infos(server_infos), peer_infos(peer_infos),
-    storage(to_string(server_id) + STORAGE_NAME_SUFFIX) {}
+    storage(to_string(server_id) + STORAGE_NAME_SUFFIX),
+    persistent_log((to_string(server_id) + STORAGE_NAME_SUFFIX).c_str()),
+    committed_index(0) {}
 
 void RaftServer::Run() {
     storage.Load();
 
-    for (PeerInfo peer_info: peer_infos) {
+    for (int i = 0; i < peer_infos.size(); i++) {
+        PeerInfo peer_info = peer_infos[i];
         Peer *peer = new Peer(peer_info.my_listen_port,
             peer_info.destination_ip_addr, peer_info.destination_port,
             [this](Peer* peer, char* raw_message, int raw_message_len) {
                 HandlePeerMessage(peer, raw_message, raw_message_len);
             });
+        peer->id = i;
         peers.push_back(peer);
     }
 
@@ -80,6 +84,24 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 // Candidate recognizes another candidate has won election
                 TransitionServerState(Follower);
             }
+
+            int largest_log_index = persistent_log.LastLogIndex();
+            if (largest_log_index < message.prev_entry_index()) {
+                SendAppendEntriesResponse(peer, true);
+                return;
+            }
+            struct LogEntry compare_entry =
+                persistent_log.GetLogEntryByIndex(message.prev_entry_index());
+            compare_entry_term = *(int *)compare_entry.data;
+            if (compare_entry_term != message.prev_entry_term()) {
+                SendAppendEntriesResponse(peer, true);
+                return;
+            }
+
+            
+
+
+
             SendAppendEntriesResponse(peer, true);
             election_timer->Reset();
             return;
@@ -142,6 +164,18 @@ PeerMessage RaftServer::CreateMessage(PeerMessage_Type message_type) {
 
 void RaftServer::SendAppendEntriesRequest(Peer *peer) {
     PeerMessage message = CreateMessage(PeerMessage::APPENDENTRIES_REQUEST);
+    int next_index = peer_next_indexes[peer->id];
+    if (next_index > persistent_log.LastLogIndex()) {
+        next_index = persistent_log.LastLogIndex();
+    }
+    struct LogEntry prev_entry = persistent_log.GetLogEntryByIndex(next_index-1);
+    int prev_entry_term = *(int *)prev_entry.data;
+    message.set_prev_log_term(prev_entry_term);
+    message.set_prev_log_index(next_index - 1);
+    message.set_leader_commit(committed_index);
+    message.add_entries(prev_entry.data + sizeof(int),
+        prev_entry.len - sizeof(int));
+
     SendMessage(peer, message);
 }
 
@@ -200,6 +234,13 @@ void RaftServer::TransitionServerState(ServerState new_state) {
             return;
 
         case Leader:
+            int next_log_index = persistent_log.LastLogIndex() + 1;
+
+            int num_servers = server_infos.size();
+            for (int i = 0; i < num_servers; i++) {
+                peer_next_indexes[i] = next_log_index;
+                peer_match_indexes[i] = 0;
+            }
             return;
     }
 }

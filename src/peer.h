@@ -54,6 +54,11 @@ class Peer {
          */
         void SendMessage(const char* message, int message_len);
 
+        /*
+         * Identifier for this peer
+         */
+        int id;
+
     private:
         void AcceptConnection(const char* ip_addr, unsigned short port_num);
         void InitiateConnection(const char* ip_addr, unsigned short port_num);
