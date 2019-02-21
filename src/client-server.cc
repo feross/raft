@@ -57,9 +57,7 @@ void ClientServer::Listen(unsigned short listen_port) {
         });
     }
 
-    if (close(server_socket) == -1) {
-        warn("Error closing socket %d: %s", server_socket, strerror(errno));
-    }
+    Util::SafeClose(server_socket);
 }
 
 void ClientServer::RespondToClient(int request_id, string& response) {
@@ -73,9 +71,11 @@ void ClientServer::RespondToClient(int request_id, string& response) {
     int len = strlen(response_cstr);
     write(client_socket, &len, sizeof(int));
     dprintf(client_socket, "%s", response_cstr);
-    if (close(client_socket) == -1) {
-        warn("Error closing socket %d (%s)", client_socket, strerror(errno));
-    }
+
+    shutdown(client_socket, SHUT_WR);
+    char buf[1];
+    recv(client_socket, buf, 1, 0);
+    Util::SafeClose(client_socket);
 }
 
 void ClientServer::StartRedirecting(ServerInfo * new_redirect_server_info) {
@@ -92,19 +92,16 @@ void ClientServer::StartRedirecting(ServerInfo * new_redirect_server_info) {
     // Close pending client sockets so clients attempt to find new leader
     for (pair<int, int> pending_client_socket: pending_client_sockets) {
         int client_socket = pending_client_socket.second;
-        if (close(client_socket) == -1) {
-            warn("Error closing socket %d (%s)", client_socket, strerror(errno));
-        }
+        Util::SafeClose(client_socket);
     }
     pending_client_sockets.clear();
     server_cv.notify_all();
 }
 
 void ClientServer::StartServing() {
-    info("%s", "Start serving");
     lock_guard<mutex> lock(server_mutex);
 
-    info("%s", "Stop redirecting clients");
+    info("%s", "Start serving");
     redirect_server_info = NULL;
     server_state = Serving;
     server_cv.notify_all();
@@ -117,9 +114,12 @@ void ClientServer::HandleClientConnection(int client_socket) {
         server_cv.wait(server_mutex);
     }
     if (server_state == Redirecting) {
+        info("Redirecting client to %s:%d",
+            redirect_server_info->ip_addr.c_str(), redirect_server_info->port);
         int redirect_sentinel = -1;
         write(client_socket, &redirect_sentinel, sizeof(int));
         write(client_socket, redirect_server_info, sizeof(ServerInfo));
+        Util::SafeClose(client_socket);
         server_mutex.unlock();
         return;
     }
@@ -132,9 +132,7 @@ void ClientServer::HandleClientConnection(int client_socket) {
         int new_bytes = recv(client_socket, dest, sizeof(int) - bytes_read, 0);
         if (new_bytes == -1) {
             warn("Error reading from socket %d (%s)", client_socket, strerror(errno));
-            if (close(client_socket) == -1) {
-                warn("Error closing socket %d (%s)", client_socket, strerror(errno));
-            }
+            Util::SafeClose(client_socket);
             return;
         }
         bytes_read += new_bytes;
@@ -147,14 +145,12 @@ void ClientServer::HandleClientConnection(int client_socket) {
         int new_bytes = recv(client_socket, dest, message_size - bytes_read, 0);
         if (new_bytes == 0 || new_bytes == -1) {
             warn("Error reading from socket %d (%s)", client_socket, strerror(errno));
-            if (close(client_socket) == -1) {
-                warn("Error closing socket %d (%s)", client_socket, strerror(errno));
-            }
+            Util::SafeClose(client_socket);
             return;
         }
         bytes_read += new_bytes;
     }
-    // Read complete message from client
+    // Finished reading complete message from client
     buf[message_size] = '\0';
     int request_id = request_callback(buf);
     server_mutex.lock();
