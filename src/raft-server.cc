@@ -56,6 +56,7 @@ void RaftServer::HandleLeaderTimer() {
     for (Peer* peer: peers) {
         SendAppendEntriesRequest(peer);
     }
+    CheckForCommittedEntries();
 }
 
 int RaftServer::HandleClientCommand(char * command) {
@@ -64,6 +65,8 @@ int RaftServer::HandleClientCommand(char * command) {
 
     info("Client command: %s", command);
 
+    int prev_last_log_index = persistent_log.LastLogIndex();
+
     // Append log entry
     int log_entry_len = strlen(command) + 1;
     char log_entry_buffer[log_entry_len + sizeof(int)];
@@ -71,7 +74,9 @@ int RaftServer::HandleClientCommand(char * command) {
     memcpy(log_entry_buffer + sizeof(int), command, log_entry_len);
     persistent_log.AddLogEntry(log_entry_buffer, log_entry_len + sizeof(int));
 
-    return persistent_log.LastLogIndex();
+    int last_log_index = persistent_log.LastLogIndex();
+    info("Added to log (prev index %d, current index %d)", prev_last_log_index, last_log_index);
+    return last_log_index;
 }
 
 void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_message_len) {
@@ -160,31 +165,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             warn("%s", "NUMBER 5");
 
                     //might now have new committed entry
-                    while(true) {
-                        int matches = 0;
-                        for(int i = 0; i < peer_match_indexes.size(); i++) {
-                            if (peer_match_indexes[i] > committed_index) {
-                                matches += 1;
-                            }
-                        }
-                        int majority_threshold = (server_infos.size() / 2) + 1;
-                        if (matches > majority_threshold) {
-                            struct LogEntry ent = persistent_log.
-                                GetLogEntryByIndex(committed_index + 1);
-                            int term = *(int *)ent.data;
-                            if (term == storage.current_term()) {
-                                char * data = ent.data + sizeof(int);
-                                string response = state_machine.Apply(string(data));
-                                client_server->RespondToClient(committed_index + 1, response);
-                                storage.set_last_applied(committed_index + 1);
-                                committed_index += 1;
-                                continue;
-                            }
-                        }
-                        warn("%s", "NUMBER 6");
-
-                        break;
-                    }
+                    CheckForCommittedEntries();
                 }
             } else {
                 peer_next_indexes[peer->id] = message.appended_log_index() - 1;
@@ -249,6 +230,37 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
 
         default:
             warn("Unexpected message type: %s", message.type());
+    }
+}
+
+void RaftServer::CheckForCommittedEntries() {
+    info("%s", "CheckForCommittedEntries");
+    while (true) {
+        int matches = 1; // Leader always has the latest log entry
+        for (int i = 0; i < peer_match_indexes.size(); i++) {
+            if (peer_match_indexes[i] > committed_index) {
+                matches += 1;
+            }
+        }
+        int majority_threshold = (server_infos.size() / 2) + 1;
+        if (matches >= majority_threshold) {
+            struct LogEntry ent = persistent_log.
+                GetLogEntryByIndex(committed_index + 1);
+            int term = *(int *)ent.data;
+            info("CheckForCommittedEntries 1 (term: %d) (command: %s)", term, ent.data + 4);
+            if (term == storage.current_term()) {
+                info("%s", "CheckForCommittedEntries 2");
+                char * data = ent.data + sizeof(int);
+                string response = state_machine.Apply(string(data));
+                client_server->RespondToClient(committed_index + 1, response);
+                storage.set_last_applied(committed_index + 1);
+                committed_index += 1;
+                continue;
+            }
+        }
+        warn("%s", "NUMBER 6");
+
+        break;
     }
 }
 

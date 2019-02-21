@@ -89,6 +89,8 @@ class RaftServer {
          */
         PeerMessage CreateMessage(PeerMessage_Type message_type);
 
+        void CheckForCommittedEntries();
+
         /**
          * Sends a protocol buffer formatted message to the specified peer.
          *
