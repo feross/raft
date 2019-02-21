@@ -2,7 +2,7 @@
 
 /**
  * Implements a semaphore class, which isn't part of the
- * C++11 specification, but is included in Java and in posix
+ * C++17 specification, but is included in Java and in posix
  * threads, and is a common enough abstraction that we should
  * provide one.
  */
@@ -19,7 +19,6 @@
  * surrounding thread routine has completed and the thread
  * itself is being destroyed.
  */
-
 struct on_thread_exit_t {};
 constexpr on_thread_exit_t on_thread_exit {};
 
