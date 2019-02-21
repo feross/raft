@@ -10,6 +10,9 @@ RaftServer::RaftServer(int server_id, vector<ServerInfo> server_infos,
 void RaftServer::Run() {
     storage.Load();
 
+    info("TERM: %d", storage.current_term());
+    info("STATE: %s", ServerStateStrings[Follower].c_str());
+
     for (int i = 0; i < peer_infos.size(); i++) {
         PeerInfo peer_info = peer_infos[i];
         Peer *peer = new Peer(peer_info.my_listen_port,
@@ -34,9 +37,6 @@ void RaftServer::Run() {
         return HandleClientCommand(command);
     });
     client_server->Listen(listen_port);
-
-    info("TERM: %d", storage.current_term());
-    info("STATE: %s", ServerStateStrings[Follower].c_str());
 }
 
 void RaftServer::HandleElectionTimer() {
