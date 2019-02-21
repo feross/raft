@@ -8,6 +8,7 @@
 #include <unistd.h>
 
 #include "log.h"
+#include "raft-config.h"
 #include "thread-pool.h"
 #include "util.h"
 
@@ -32,10 +33,12 @@ class ClientServer {
         ~ClientServer();
         void Listen(unsigned short listen_port);
         void RespondToClient(int request_id, string& response);
+        void RedirectToServer(ServerInfo *server_info);
 
     private:
         void HandleClientConnection(int client_socket);
         RequestCallback request_callback;
         ThreadPool thread_pool;
+        ServerInfo * redirect_server_info;
         map<int, int> pending_client_sockets; // request_id -> client_socket
 };

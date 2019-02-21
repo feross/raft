@@ -80,6 +80,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
     if (message.term() > storage.current_term()) {
         TransitionCurrentTerm(message.term());
         TransitionServerState(Follower);
+        client_server->RedirectToServer(&server_infos[message.server_id()]);
     }
 
     switch (message.type()) {
@@ -91,6 +92,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             if (message.term() == storage.current_term()) {
                 // Candidate recognizes another candidate has won election
                 TransitionServerState(Follower);
+                client_server->RedirectToServer(&server_infos[message.server_id()]);
             }
 
             int largest_log_index = persistent_log.LastLogIndex();
@@ -137,7 +139,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                     peer_next_indexes[peer->id] = message.appended_log_index() + 1;
                     peer_match_indexes[peer->id] = message.appended_log_index();
                     //might now have new committed entry
-                } 
+                }
             } else {
                 peer_next_indexes[peer->id] = message.appended_log_index() - 1;
             }
@@ -249,10 +251,10 @@ void RaftServer::TransitionServerState(ServerState new_state) {
     server_state = new_state;
 
     switch (new_state) {
-        case Follower:
+        case Follower: {
             return;
-
-        case Candidate:
+        }
+        case Candidate: {
             TransitionCurrentTerm(storage.current_term() + 1);
 
             // Candidate server votes for itself
@@ -265,8 +267,8 @@ void RaftServer::TransitionServerState(ServerState new_state) {
 
             election_timer->Reset();
             return;
-
-        case Leader:
+        }
+        case Leader: {
             int next_log_index = persistent_log.LastLogIndex() + 1;
 
             int num_servers = server_infos.size();
@@ -274,7 +276,11 @@ void RaftServer::TransitionServerState(ServerState new_state) {
                 peer_next_indexes[i] = next_log_index;
                 peer_match_indexes[i] = 0;
             }
+
+            // Stop redirecting client requests; start handling them
+            client_server->RedirectToServer(NULL);
             return;
+        }
     }
 }
 

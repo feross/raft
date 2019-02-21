@@ -71,10 +71,30 @@ void ClientServer::RespondToClient(int request_id, string& response) {
     int len = strlen(response_cstr);
     write(client_socket, &len, sizeof(int));
     dprintf(client_socket, "%s", response_cstr);
-    close(client_socket);
+    if (close(client_socket) == -1) {
+        warn("Error closing socket %d (%s)", client_socket, strerror(errno));
+    }
+}
+
+void ClientServer::RedirectToServer(ServerInfo * server_info) {
+    // Close pending client sockets so clients attempt to find new leader
+    for (int client_socket: pending_client_sockets) {
+        if (close(client_socket) == -1) {
+            warn("Error closing socket %d (%s)", client_socket, strerror(errno));
+        }
+    }
+    pending_client_sockets.clear();
+    redirect_server_info = server_info;
 }
 
 void ClientServer::HandleClientConnection(int client_socket) {
+    if (redirect_server_info != NULL) {
+        int redirect_sentinel = -1;
+        write(client_socket, &redirect_sentinel, sizeof(int));
+        write(client_socket, redirect_server_info, sizeof(ServerInfo));
+        return;
+    }
+
     int message_size;
     int bytes_read = 0;
     while (bytes_read < sizeof(int)) {
@@ -94,7 +114,7 @@ void ClientServer::HandleClientConnection(int client_socket) {
     bytes_read = 0;
     while (bytes_read < message_size) {
         void * dest = buf + bytes_read;
-        int new_bytes = read(client_socket, dest, message_size - bytes_read);
+        int new_bytes = recv(client_socket, dest, message_size - bytes_read, 0);
         if (new_bytes == 0 || new_bytes == -1) {
             warn("Error reading from socket %d (%s)", client_socket, strerror(errno));
             if (close(client_socket) == -1) {
