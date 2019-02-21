@@ -10,6 +10,7 @@
 #include <map>
 #include <vector>
 
+#include "bash-state-machine.h"
 #include "client-server.h"
 #include "log.h"
 #include "peer.h"
@@ -62,7 +63,7 @@ class RaftServer {
          */
         void HandleLeaderTimer();
 
-        void HandleClientCommand(char * command);
+        int HandleClientCommand(char * command);
 
         /**
          * Callback function used to process messages we receive from peers.
@@ -194,4 +195,6 @@ class RaftServer {
          * duration of their execution.
          */
         mutex server_mutex;
+
+        BashStateMachine state_machine;
 };

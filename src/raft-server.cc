@@ -30,12 +30,13 @@ void RaftServer::Run() {
     });
 
     unsigned short listen_port = server_infos[server_id].port;
-    client_server = new ClientServer([this](char * command) {
-        HandleClientCommand(command);
+    client_server = new ClientServer([this](char * command) -> int {
+        return HandleClientCommand(command);
     });
     client_server->Listen(listen_port);
 
     info("TERM: %d", storage.current_term());
+    info("STATE: %s", ServerStateStrings[Follower].c_str());
 }
 
 void RaftServer::HandleElectionTimer() {
@@ -57,9 +58,16 @@ void RaftServer::HandleLeaderTimer() {
     }
 }
 
-void RaftServer::HandleClientCommand(char * command) {
+int RaftServer::HandleClientCommand(char * command) {
     lock_guard<mutex> lock(server_mutex);
-    info("%s", "HandleClientCommand");
+    info("Client command: %s", command);
+
+    // TODO: Append to log
+    // TODO: return index number of log entry
+    //
+    // later...
+    // client_server->RespondToClient(response_id, response);
+    return 1;
 }
 
 void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_message_len) {
@@ -252,9 +260,7 @@ void RaftServer::ReceiveVote(int server_id) {
 
     votes.insert(server_id);
 
-    int server_count = peers.size() + 1;
-    int majority_threshold = (server_count / 2) + 1;
-
+    int majority_threshold = (server_infos.size() / 2) + 1;
     if (votes.size() >= majority_threshold) {
         // This server won the election
         TransitionServerState(Leader);

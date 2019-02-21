@@ -2,6 +2,7 @@
 
 #include <arpa/inet.h>
 #include <cstring>
+#include <map>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -12,10 +13,9 @@
 
 using namespace std;
 
-const static int MAX_CLIENT_MESSAGE_SIZE = 1'000'000; // bytes
 const static int THREAD_POOL_SIZE = 8;
 
-typedef function<void(char * command)> RequestCallback;
+typedef function<int(char * command)> RequestCallback;
 
 class ClientServerException : public exception {
     public:
@@ -31,8 +31,11 @@ class ClientServer {
         ClientServer(RequestCallback request_callback);
         ~ClientServer();
         void Listen(unsigned short listen_port);
-        void HandleClientConnection(int client_socket);
+        void RespondToClient(int request_id, string& response);
+
     private:
+        void HandleClientConnection(int client_socket);
         RequestCallback request_callback;
         ThreadPool thread_pool;
+        map<int, int> pending_client_sockets; // request_id -> client_socket
 };

@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
 
     string config_path = args.get_string("config");
     if (config_path == "") {
-        config_path = "./config";
+        config_path = DEFAULT_CONFIG_PATH;
     }
 
     if (args.get_bool("reset")) {
@@ -70,9 +70,7 @@ int main(int argc, char* argv[]) {
 
     RaftServer raft_server(server_id, server_infos, peer_infos);
     try {
-        info("%s", "Before run");
         raft_server.Run();
-        info("%s", "After run");
     } catch (exception& err) {
         error("%s", err.what());
         return EXIT_FAILURE;

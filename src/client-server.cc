@@ -9,7 +9,6 @@ ClientServer::~ClientServer() {
 }
 
 void ClientServer::Listen(unsigned short listen_port) {
-    info("Port: %d", listen_port);
     // Populate server information struct
     struct sockaddr_in server_info;
     memset(&server_info, 0, sizeof(struct sockaddr_in));
@@ -50,7 +49,7 @@ void ClientServer::Listen(unsigned short listen_port) {
             warn("Error accepting socket: %s", strerror(errno));
             continue;
         }
-        info("Client connection from %s:%d", inet_ntoa(client_info.sin_addr),
+        debug("Client connection from %s:%d", inet_ntoa(client_info.sin_addr),
             ntohs(client_info.sin_port));
 
         thread_pool.schedule([this, client_socket]() {
@@ -61,6 +60,18 @@ void ClientServer::Listen(unsigned short listen_port) {
     if (close(server_socket) == -1) {
         warn("Error closing socket %d: %s", server_socket, strerror(errno));
     }
+}
+
+void ClientServer::RespondToClient(int request_id, string& response) {
+    int client_socket = pending_client_sockets[request_id];
+    debug("Responding to client (request_id: %d, response: %s)", request_id, response.c_str());
+    const char * response_cstr = response.c_str();
+
+    // TODO: error check
+    int len = strlen(response_cstr);
+    write(client_socket, &len, sizeof(int));
+    dprintf(client_socket, "%s", response_cstr);
+    close(client_socket);
 }
 
 void ClientServer::HandleClientConnection(int client_socket) {
@@ -79,19 +90,11 @@ void ClientServer::HandleClientConnection(int client_socket) {
         bytes_read += new_bytes;
     }
 
-    if (message_size > MAX_CLIENT_MESSAGE_SIZE) {
-        if (close(client_socket) == -1) {
-            warn("Error closing socket %d (%s)", client_socket, strerror(errno));
-        }
-        warn("Closed client socket because message was too large: %d", message_size);
-        return;
-    }
-
-    char buf[MAX_CLIENT_MESSAGE_SIZE + 1];
+    char buf[message_size + 1];
     bytes_read = 0;
     while (bytes_read < message_size) {
         void * dest = buf + bytes_read;
-        int new_bytes = read(client_socket, dest, MAX_CLIENT_MESSAGE_SIZE - bytes_read);
+        int new_bytes = read(client_socket, dest, message_size - bytes_read);
         if (new_bytes == 0 || new_bytes == -1) {
             warn("Error reading from socket %d (%s)", client_socket, strerror(errno));
             if (close(client_socket) == -1) {
@@ -99,8 +102,10 @@ void ClientServer::HandleClientConnection(int client_socket) {
             }
             return;
         }
-        buf[message_size] = '\0';
-        info("Received client message: %s", buf);
-        request_callback(buf);
+        bytes_read += new_bytes;
     }
+    // Read complete message from client
+    buf[message_size] = '\0';
+    int request_id = request_callback(buf);
+    pending_client_sockets[request_id] = client_socket;
 }
