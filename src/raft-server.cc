@@ -32,6 +32,7 @@ void RaftServer::Run() {
     client_server->Listen(listen_port);
 
     info("TERM: %d", storage.current_term());
+    info("STATE: %s", ServerStateStrings[Follower].c_str());
 }
 
 void RaftServer::HandleElectionTimer() {

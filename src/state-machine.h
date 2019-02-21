@@ -1,12 +1,21 @@
 #pragma once
 
-#include "log.h"
+#include <string>
 
 using namespace std;
 
+class StateMachineException : public exception {
+    public:
+        StateMachineException(const string& message): message(message) {}
+        StateMachineException(const char* message): message(message) {}
+        const char* what() const noexcept { return message.c_str(); }
+    private:
+        string message;
+};
+
 class StateMachine {
     public:
-        void commit(string command);
-        void commit(vector<string> commands);
-    private:
+        StateMachine() {}
+        virtual ~StateMachine() {}
+        virtual string Apply(string command) = 0;
 };
