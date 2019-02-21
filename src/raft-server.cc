@@ -96,7 +96,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 TransitionServerState(Follower);
                 client_server->StartRedirecting(&server_infos[message.server_id()]);
             }
-            info("%s", "NUMBER 0");
+
 
             int largest_log_index = persistent_log.LastLogIndex();
             if (largest_log_index < message.prev_log_index()) {
@@ -113,27 +113,33 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 return;
             }
 
-            while (largest_log_index >= message.prev_log_index()) {
+            while (largest_log_index > message.prev_log_index()) {
                 if (persistent_log.RemoveLogEntry() != true) {
                     warn("%s", "failed to remove an entry from log");
                 }
                 largest_log_index -= 1;
                 // should == largest_log_index = persistent_log.LastLogIndex();
             }
-            string log_entry = message.entries(0);
-            int log_entry_len = log_entry.length();
-            char log_entry_buffer[log_entry_len + sizeof(int)];
+            if (message.entries_size() == 0) {
+                SendAppendEntriesResponse(peer, true, message.prev_log_index() + 1);
+                election_timer->Reset();
+                return;
+            } else {
+                string log_entry = message.entries(0);
+                int log_entry_len = log_entry.length();
+                char log_entry_buffer[log_entry_len + sizeof(int)];
 
-            info("%s", "NUMBER 2");
-            memcpy(log_entry_buffer, &log_entry_len, sizeof(int));
-            memcpy(log_entry_buffer + 4, log_entry.c_str(), log_entry_len);
-            persistent_log.AddLogEntry(log_entry_buffer,
-                log_entry_len + sizeof(int));
-            info("%s", "NUMBER 3");
+                info("%s", "NUMBER 2");
+                memcpy(log_entry_buffer, &log_entry_len, sizeof(int));
+                memcpy(log_entry_buffer + 4, log_entry.c_str(), log_entry_len);
+                persistent_log.AddLogEntry(log_entry_buffer,
+                    log_entry_len + sizeof(int));
+                info("%s", "NUMBER 3");
 
-            SendAppendEntriesResponse(peer, true, message.prev_log_index() + 1);
-            election_timer->Reset();
-            return;
+                SendAppendEntriesResponse(peer, true, message.prev_log_index() + 1);
+                election_timer->Reset();
+                return;
+            }
         }
 
         case PeerMessage::APPENDENTRIES_RESPONSE: {
@@ -258,26 +264,27 @@ PeerMessage RaftServer::CreateMessage(PeerMessage_Type message_type) {
 }
 
 void RaftServer::SendAppendEntriesRequest(Peer *peer) {
-    debug("%s", "send append");
     PeerMessage message = CreateMessage(PeerMessage::APPENDENTRIES_REQUEST);
     int next_index = peer_next_indexes[peer->id];
+    bool empty_body = false;
     if (next_index > persistent_log.LastLogIndex()) {
-        next_index = persistent_log.LastLogIndex();
+        debug("%s", "empty body of append entries");
+        next_index = persistent_log.LastLogIndex() + 1;
+        empty_body = true;
     }
 
     struct LogEntry prev_entry = persistent_log.GetLogEntryByIndex(next_index-1);
-    debug("%p term think at index %d", prev_entry.data, next_index);
     int prev_entry_term = *(int *)prev_entry.data;
-    debug("%d term think", prev_entry_term);
 
     message.set_prev_log_term(prev_entry_term);
     message.set_prev_log_index(next_index - 1);
     message.set_leader_commit(committed_index);
-    debug("%s", "look up next to send append");
-
-    struct LogEntry cur_entry = persistent_log.GetLogEntryByIndex(next_index);
-    message.add_entries(cur_entry.data + sizeof(int),
-        cur_entry.len - sizeof(int));
+    if (!empty_body) {
+        debug("%s", "Append Entry is non-empty");
+        struct LogEntry cur_entry = persistent_log.GetLogEntryByIndex(next_index);
+        message.add_entries(cur_entry.data + sizeof(int),
+            cur_entry.len - sizeof(int));
+    }
     SendMessage(peer, message);
 }
 

@@ -44,7 +44,7 @@ bool PersistentLog::ResetLog() {
   int zero = 0;
   char base_entry[10 + sizeof(int)];
   memcpy(base_entry, &zero, sizeof(int));
-  memcpy(base_entry + 4, "base_entry", 10);
+  memcpy(base_entry + 4, "echo hello", 10);
   AddLogEntry(base_entry, 10 + sizeof(int)); //start of all logs is same
   AddLogEntry(base_entry, 10 + sizeof(int)); //need previous entry too
   return true;
