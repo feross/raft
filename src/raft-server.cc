@@ -104,13 +104,11 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 client_server->StartRedirecting(&server_infos[message.server_id()]);
             }
 
-
             int largest_log_index = persistent_log.LastLogIndex();
             if (largest_log_index < message.prev_log_index()) {
                 SendAppendEntriesResponse(peer, false, message.prev_log_index() + 1);
                 return;
             }
-            info("%s", "NUMBER 1");
 
             struct LogEntry compare_entry =
                 persistent_log.GetLogEntryByIndex(message.prev_log_index());
@@ -122,7 +120,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
 
             while (largest_log_index > message.prev_log_index()) {
                 if (persistent_log.RemoveLogEntry() != true) {
-                    warn("%s", "failed to remove an entry from log");
+                    error("%s", "failed to remove an entry from log");
                 }
                 largest_log_index -= 1;
                 // should == largest_log_index = persistent_log.LastLogIndex();
@@ -136,12 +134,10 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 int log_entry_len = log_entry.length();
                 char log_entry_buffer[log_entry_len + sizeof(int)];
 
-                info("%s", "NUMBER 2");
                 memcpy(log_entry_buffer, &log_entry_len, sizeof(int));
                 memcpy(log_entry_buffer + sizeof(int), log_entry.c_str(), log_entry_len);
                 persistent_log.AddLogEntry(log_entry_buffer,
                     log_entry_len + sizeof(int));
-                info("%s", "NUMBER 3");
 
                 SendAppendEntriesResponse(peer, true, message.prev_log_index() + 1);
                 election_timer->Reset();
@@ -155,16 +151,11 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 // response is for a request from a previous term.
                 return;
             }
-            debug("append response: success %d, %d", message.success(), message.appended_log_index());
 
             if (message.success()) {
                 if (message.appended_log_index() >= peer_next_indexes[peer->id]) {
                     peer_next_indexes[peer->id] = message.appended_log_index() + 1;
                     peer_match_indexes[peer->id] = message.appended_log_index();
-
-            warn("%s", "NUMBER 5");
-
-                    //might now have new committed entry
                     CheckForCommittedEntries();
                 }
             } else {
@@ -290,7 +281,7 @@ void RaftServer::SendAppendEntriesRequest(Peer *peer) {
         empty_body = true;
     }
 
-    struct LogEntry prev_entry = persistent_log.GetLogEntryByIndex(next_index-1);
+    struct LogEntry prev_entry = persistent_log.GetLogEntryByIndex(next_index - 1);
     int prev_entry_term = *(int *)prev_entry.data;
 
     message.set_prev_log_term(prev_entry_term);
