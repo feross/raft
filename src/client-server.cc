@@ -119,8 +119,13 @@ void ClientServer::HandleClientConnection(int client_socket) {
         int redirect_sentinel = -1;
         write(client_socket, &redirect_sentinel, sizeof(int));
         write(client_socket, redirect_server_info, sizeof(ServerInfo));
-        Util::SafeClose(client_socket);
         server_mutex.unlock();
+
+        shutdown(client_socket, SHUT_WR);
+        char buf[1];
+        recv(client_socket, buf, 1, 0);
+        Util::SafeClose(client_socket);
+
         return;
     }
     server_mutex.unlock();
