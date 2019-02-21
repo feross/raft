@@ -62,6 +62,7 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, entries_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, leader_commit_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, success_),
+  GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, appended_log_index_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, last_log_index_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, last_log_term_),
   GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(::proto::PeerMessage, vote_granted_),
@@ -72,13 +73,14 @@ const ::google::protobuf::uint32 TableStruct::offsets[] GOOGLE_PROTOBUF_ATTRIBUT
   4,
   ~0u,
   5,
-  7,
-  6,
-  9,
   8,
+  6,
+  7,
+  10,
+  9,
 };
 static const ::google::protobuf::internal::MigrationSchema schemas[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, 16, sizeof(::proto::PeerMessage)},
+  { 0, 17, sizeof(::proto::PeerMessage)},
 };
 
 static ::google::protobuf::Message const * const file_default_instances[] = {
@@ -106,20 +108,20 @@ void protobuf_RegisterTypes(const ::std::string&) {
 void AddDescriptorsImpl() {
   InitDefaults();
   static const char descriptor[] GOOGLE_PROTOBUF_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
-      "\n\022peer-message.proto\022\005proto\"\364\002\n\013PeerMess"
+      "\n\022peer-message.proto\022\005proto\"\220\003\n\013PeerMess"
       "age\022%\n\004type\030\001 \002(\0162\027.proto.PeerMessage.Ty"
       "pe\022\014\n\004term\030\002 \002(\005\022\021\n\tserver_id\030\003 \002(\005\022\026\n\016p"
       "rev_log_index\030\004 \001(\005\022\025\n\rprev_log_term\030\005 \001"
       "(\005\022\017\n\007entries\030\006 \003(\t\022\025\n\rleader_commit\030\007 \001"
-      "(\005\022\017\n\007success\030\010 \001(\010\022\026\n\016last_log_index\030\t "
-      "\001(\005\022\025\n\rlast_log_term\030\n \001(\005\022\024\n\014vote_grant"
-      "ed\030\013 \001(\010\"p\n\004Type\022\031\n\025APPENDENTRIES_REQUES"
-      "T\020\000\022\032\n\026APPENDENTRIES_RESPONSE\020\001\022\027\n\023REQUE"
-      "STVOTE_REQUEST\020\002\022\030\n\024REQUESTVOTE_RESPONSE"
-      "\020\003"
+      "(\005\022\017\n\007success\030\010 \001(\010\022\032\n\022appended_log_inde"
+      "x\030\t \001(\005\022\026\n\016last_log_index\030\n \001(\005\022\025\n\rlast_"
+      "log_term\030\013 \001(\005\022\024\n\014vote_granted\030\014 \001(\010\"p\n\004"
+      "Type\022\031\n\025APPENDENTRIES_REQUEST\020\000\022\032\n\026APPEN"
+      "DENTRIES_RESPONSE\020\001\022\027\n\023REQUESTVOTE_REQUE"
+      "ST\020\002\022\030\n\024REQUESTVOTE_RESPONSE\020\003"
   };
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-      descriptor, 402);
+      descriptor, 430);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "peer-message.proto", &protobuf_RegisterTypes);
 }
@@ -175,6 +177,7 @@ const int PeerMessage::kPrevLogTermFieldNumber;
 const int PeerMessage::kEntriesFieldNumber;
 const int PeerMessage::kLeaderCommitFieldNumber;
 const int PeerMessage::kSuccessFieldNumber;
+const int PeerMessage::kAppendedLogIndexFieldNumber;
 const int PeerMessage::kLastLogIndexFieldNumber;
 const int PeerMessage::kLastLogTermFieldNumber;
 const int PeerMessage::kVoteGrantedFieldNumber;
@@ -237,13 +240,13 @@ void PeerMessage::Clear() {
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 255u) {
     ::memset(&type_, 0, static_cast<size_t>(
-        reinterpret_cast<char*>(&success_) -
-        reinterpret_cast<char*>(&type_)) + sizeof(success_));
+        reinterpret_cast<char*>(&last_log_index_) -
+        reinterpret_cast<char*>(&type_)) + sizeof(last_log_index_));
   }
-  if (cached_has_bits & 768u) {
-    ::memset(&vote_granted_, 0, static_cast<size_t>(
+  if (cached_has_bits & 1792u) {
+    ::memset(&success_, 0, static_cast<size_t>(
         reinterpret_cast<char*>(&last_log_term_) -
-        reinterpret_cast<char*>(&vote_granted_)) + sizeof(last_log_term_));
+        reinterpret_cast<char*>(&success_)) + sizeof(last_log_term_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear();
@@ -380,10 +383,24 @@ bool PeerMessage::MergePartialFromCodedStream(
         break;
       }
 
-      // optional int32 last_log_index = 9;
+      // optional int32 appended_log_index = 9;
       case 9: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
             static_cast< ::google::protobuf::uint8>(72u /* 72 & 0xFF */)) {
+          set_has_appended_log_index();
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &appended_log_index_)));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
+      // optional int32 last_log_index = 10;
+      case 10: {
+        if (static_cast< ::google::protobuf::uint8>(tag) ==
+            static_cast< ::google::protobuf::uint8>(80u /* 80 & 0xFF */)) {
           set_has_last_log_index();
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
@@ -394,10 +411,10 @@ bool PeerMessage::MergePartialFromCodedStream(
         break;
       }
 
-      // optional int32 last_log_term = 10;
-      case 10: {
+      // optional int32 last_log_term = 11;
+      case 11: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(80u /* 80 & 0xFF */)) {
+            static_cast< ::google::protobuf::uint8>(88u /* 88 & 0xFF */)) {
           set_has_last_log_term();
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
@@ -408,10 +425,10 @@ bool PeerMessage::MergePartialFromCodedStream(
         break;
       }
 
-      // optional bool vote_granted = 11;
-      case 11: {
+      // optional bool vote_granted = 12;
+      case 12: {
         if (static_cast< ::google::protobuf::uint8>(tag) ==
-            static_cast< ::google::protobuf::uint8>(88u /* 88 & 0xFF */)) {
+            static_cast< ::google::protobuf::uint8>(96u /* 96 & 0xFF */)) {
           set_has_vote_granted();
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
@@ -491,23 +508,28 @@ void PeerMessage::SerializeWithCachedSizes(
   }
 
   // optional bool success = 8;
-  if (cached_has_bits & 0x00000080u) {
+  if (cached_has_bits & 0x00000100u) {
     ::google::protobuf::internal::WireFormatLite::WriteBool(8, this->success(), output);
   }
 
-  // optional int32 last_log_index = 9;
+  // optional int32 appended_log_index = 9;
   if (cached_has_bits & 0x00000040u) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(9, this->last_log_index(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(9, this->appended_log_index(), output);
   }
 
-  // optional int32 last_log_term = 10;
+  // optional int32 last_log_index = 10;
+  if (cached_has_bits & 0x00000080u) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(10, this->last_log_index(), output);
+  }
+
+  // optional int32 last_log_term = 11;
+  if (cached_has_bits & 0x00000400u) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(11, this->last_log_term(), output);
+  }
+
+  // optional bool vote_granted = 12;
   if (cached_has_bits & 0x00000200u) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(10, this->last_log_term(), output);
-  }
-
-  // optional bool vote_granted = 11;
-  if (cached_has_bits & 0x00000100u) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(11, this->vote_granted(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(12, this->vote_granted(), output);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
@@ -567,23 +589,28 @@ void PeerMessage::SerializeWithCachedSizes(
   }
 
   // optional bool success = 8;
-  if (cached_has_bits & 0x00000080u) {
+  if (cached_has_bits & 0x00000100u) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(8, this->success(), target);
   }
 
-  // optional int32 last_log_index = 9;
+  // optional int32 appended_log_index = 9;
   if (cached_has_bits & 0x00000040u) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(9, this->last_log_index(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(9, this->appended_log_index(), target);
   }
 
-  // optional int32 last_log_term = 10;
+  // optional int32 last_log_index = 10;
+  if (cached_has_bits & 0x00000080u) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(10, this->last_log_index(), target);
+  }
+
+  // optional int32 last_log_term = 11;
+  if (cached_has_bits & 0x00000400u) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(11, this->last_log_term(), target);
+  }
+
+  // optional bool vote_granted = 12;
   if (cached_has_bits & 0x00000200u) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(10, this->last_log_term(), target);
-  }
-
-  // optional bool vote_granted = 11;
-  if (cached_has_bits & 0x00000100u) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(11, this->vote_granted(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(12, this->vote_granted(), target);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
@@ -677,26 +704,33 @@ size_t PeerMessage::ByteSizeLong() const {
           this->leader_commit());
     }
 
-    // optional int32 last_log_index = 9;
+    // optional int32 appended_log_index = 9;
+    if (has_appended_log_index()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->appended_log_index());
+    }
+
+    // optional int32 last_log_index = 10;
     if (has_last_log_index()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->last_log_index());
     }
 
+  }
+  if (_has_bits_[8 / 32] & 1792u) {
     // optional bool success = 8;
     if (has_success()) {
       total_size += 1 + 1;
     }
 
-  }
-  if (_has_bits_[8 / 32] & 768u) {
-    // optional bool vote_granted = 11;
+    // optional bool vote_granted = 12;
     if (has_vote_granted()) {
       total_size += 1 + 1;
     }
 
-    // optional int32 last_log_term = 10;
+    // optional int32 last_log_term = 11;
     if (has_last_log_term()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
@@ -753,18 +787,21 @@ void PeerMessage::MergeFrom(const PeerMessage& from) {
       leader_commit_ = from.leader_commit_;
     }
     if (cached_has_bits & 0x00000040u) {
-      last_log_index_ = from.last_log_index_;
+      appended_log_index_ = from.appended_log_index_;
     }
     if (cached_has_bits & 0x00000080u) {
-      success_ = from.success_;
+      last_log_index_ = from.last_log_index_;
     }
     _has_bits_[0] |= cached_has_bits;
   }
-  if (cached_has_bits & 768u) {
+  if (cached_has_bits & 1792u) {
     if (cached_has_bits & 0x00000100u) {
-      vote_granted_ = from.vote_granted_;
+      success_ = from.success_;
     }
     if (cached_has_bits & 0x00000200u) {
+      vote_granted_ = from.vote_granted_;
+    }
+    if (cached_has_bits & 0x00000400u) {
       last_log_term_ = from.last_log_term_;
     }
     _has_bits_[0] |= cached_has_bits;
@@ -803,6 +840,7 @@ void PeerMessage::InternalSwap(PeerMessage* other) {
   swap(prev_log_index_, other->prev_log_index_);
   swap(prev_log_term_, other->prev_log_term_);
   swap(leader_commit_, other->leader_commit_);
+  swap(appended_log_index_, other->appended_log_index_);
   swap(last_log_index_, other->last_log_index_);
   swap(success_, other->success_);
   swap(vote_granted_, other->vote_granted_);

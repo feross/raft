@@ -112,7 +112,8 @@ class RaftServer {
          * @param peer - the peer to send the AppendEntries response to
          * @param success - whether we accepted the AppendEntries request
          */
-        void SendAppendEntriesResponse(Peer *peer, bool success);
+        void SendAppendEntriesResponse(Peer *peer, bool success,
+            int appended_log_index);
 
         /**
          * Sends a RequestVote request to the specified peer.

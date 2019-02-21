@@ -83,9 +83,9 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
     }
 
     switch (message.type()) {
-        case PeerMessage::APPENDENTRIES_REQUEST:
+        case PeerMessage::APPENDENTRIES_REQUEST: {
             if (message.term() < storage.current_term()) {
-                SendAppendEntriesResponse(peer, false);
+                SendAppendEntriesResponse(peer, false, message.prev_log_index() + 1);
                 return;
             }
             if (message.term() == storage.current_term()) {
@@ -94,35 +94,58 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             }
 
             int largest_log_index = persistent_log.LastLogIndex();
-            if (largest_log_index < message.prev_entry_index()) {
-                SendAppendEntriesResponse(peer, true);
+            if (largest_log_index < message.prev_log_index()) {
+                SendAppendEntriesResponse(peer, false, message.prev_log_index() + 1);
                 return;
             }
             struct LogEntry compare_entry =
-                persistent_log.GetLogEntryByIndex(message.prev_entry_index());
-            compare_entry_term = *(int *)compare_entry.data;
-            if (compare_entry_term != message.prev_entry_term()) {
-                SendAppendEntriesResponse(peer, true);
+                persistent_log.GetLogEntryByIndex(message.prev_log_index());
+            int compare_entry_term = *(int *)compare_entry.data;
+            if (compare_entry_term != message.prev_log_term()) {
+                SendAppendEntriesResponse(peer, false, message.prev_log_index() + 1);
                 return;
             }
 
-            
+            while (largest_log_index >= message.prev_log_index()) {
+                if (persistent_log.RemoveLogEntry() != true) {
+                    warn("%s", "failed to remove an entry from log");
+                }
+                largest_log_index -= 1;
+                // should == largest_log_index = persistent_log.LastLogIndex();
+            }
+            string log_entry = message.entries(0);
+            int log_entry_len = log_entry.length();
+            char log_entry_buffer[log_entry_len + sizeof(int)];
 
+            memcpy(log_entry_buffer, &log_entry_len, sizeof(int));
+            memcpy(log_entry_buffer + 4, log_entry.c_str(), log_entry_len);
+            persistent_log.AddLogEntry(log_entry_buffer,
+                log_entry_len + sizeof(int));
 
-
-            SendAppendEntriesResponse(peer, true);
+            SendAppendEntriesResponse(peer, true, message.prev_log_index() + 1);
             election_timer->Reset();
             return;
-
-        case PeerMessage::APPENDENTRIES_RESPONSE:
+        }
+        case PeerMessage::APPENDENTRIES_RESPONSE: {
             if (message.term() < storage.current_term()) {
                 // Drop responses with an outdated term; they indicate this
                 // response is for a request from a previous term.
                 return;
             }
-            return;
+            if (message.success()) {
+                if (message.appended_log_index() >= peer_next_indexes[peer->id]) {
+                    peer_next_indexes[peer->id] = message.appended_log_index() + 1;
+                    peer_match_indexes[peer->id] = message.appended_log_index();
+                    //might now have new committed entry
+                } 
+            } else {
+                peer_next_indexes[peer->id] = message.appended_log_index() - 1;
+            }
 
-        case PeerMessage::REQUESTVOTE_REQUEST:
+            message.appended_log_index();
+            return;
+        }
+        case PeerMessage::REQUESTVOTE_REQUEST: {
             if (message.term() < storage.current_term()) {
                 SendRequestVoteResponse(peer, false);
                 return;
@@ -137,8 +160,8 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             SendRequestVoteResponse(peer, true);
             election_timer->Reset();
             return;
-
-        case PeerMessage::REQUESTVOTE_RESPONSE:
+        }
+        case PeerMessage::REQUESTVOTE_RESPONSE: {
             if (message.term() < storage.current_term()) {
                 // Drop responses with an outdated term; they indicate this
                 // response is for a request from a previous term.
@@ -148,7 +171,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 ReceiveVote(message.server_id());
             }
             return;
-
+        }
         default:
             warn("Unexpected message type: %s", message.type());
     }
@@ -187,8 +210,10 @@ void RaftServer::SendAppendEntriesRequest(Peer *peer) {
     SendMessage(peer, message);
 }
 
-void RaftServer::SendAppendEntriesResponse(Peer *peer, bool success) {
+void RaftServer::SendAppendEntriesResponse(Peer *peer, bool success,
+        int appended_log_index) {
     PeerMessage message = CreateMessage(PeerMessage::APPENDENTRIES_RESPONSE);
+    message.set_appended_log_index(appended_log_index);
     message.set_success(success);
     SendMessage(peer, message);
 }
