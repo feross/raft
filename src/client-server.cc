@@ -63,6 +63,8 @@ void ClientServer::Listen(unsigned short listen_port) {
 }
 
 void ClientServer::RespondToClient(int request_id, string& response) {
+    lock_guard<mutex> lock(server_mutex);
+
     int client_socket = pending_client_sockets[request_id];
     debug("Responding to client (request_id: %d, response: %s)", request_id, response.c_str());
     const char * response_cstr = response.c_str();
@@ -76,7 +78,17 @@ void ClientServer::RespondToClient(int request_id, string& response) {
     }
 }
 
-void ClientServer::RedirectToServer(ServerInfo * server_info) {
+void ClientServer::StartRedirecting(ServerInfo * new_redirect_server_info) {
+    lock_guard<mutex> lock(server_mutex);
+
+    redirect_server_info = new_redirect_server_info;
+
+    info("Start redirecting clients to %s:%d",
+        redirect_server_info->ip_addr.c_str(),
+        redirect_server_info->port);
+
+    server_state = Redirecting;
+
     // Close pending client sockets so clients attempt to find new leader
     for (pair<int, int> pending_client_socket: pending_client_sockets) {
         int client_socket = pending_client_socket.second;
@@ -85,16 +97,33 @@ void ClientServer::RedirectToServer(ServerInfo * server_info) {
         }
     }
     pending_client_sockets.clear();
-    redirect_server_info = server_info;
+    server_cv.notify_all();
+}
+
+void ClientServer::StartServing() {
+    info("%s", "Start serving");
+    lock_guard<mutex> lock(server_mutex);
+
+    info("%s", "Stop redirecting clients");
+    redirect_server_info = NULL;
+    server_state = Serving;
+    server_cv.notify_all();
 }
 
 void ClientServer::HandleClientConnection(int client_socket) {
-    if (redirect_server_info != NULL) {
+    server_mutex.lock();
+    while (server_state == Waiting) {
+        info("%s", "Waiting for server to start serving or redirecting");
+        server_cv.wait(server_mutex);
+    }
+    if (server_state == Redirecting) {
         int redirect_sentinel = -1;
         write(client_socket, &redirect_sentinel, sizeof(int));
         write(client_socket, redirect_server_info, sizeof(ServerInfo));
+        server_mutex.unlock();
         return;
     }
+    server_mutex.unlock();
 
     int message_size;
     int bytes_read = 0;
@@ -128,5 +157,7 @@ void ClientServer::HandleClientConnection(int client_socket) {
     // Read complete message from client
     buf[message_size] = '\0';
     int request_id = request_callback(buf);
+    server_mutex.lock();
     pending_client_sockets[request_id] = client_socket;
+    server_mutex.unlock();
 }

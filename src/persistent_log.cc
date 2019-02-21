@@ -6,12 +6,12 @@ PersistentLog::PersistentLog(const char *filename) {
   cursor_filename = strdup(cursor_filename_str.c_str());
   std::string log_filename_str = std::string(filename) + "_log";
   log_filename = strdup(log_filename_str.c_str());
-  debug("cursor filename: %s , log: %s\n", cursor_filename, log_filename);
+  debug("cursor filename: %s , log: %s", cursor_filename, log_filename);
   log_file = NULL;
   cursor_file = NULL;
   bool success = ReopenLog();
   if (!success) {
-    warn("failed to reopen log %s\n", filename);
+    warn("failed to reopen log %s", filename);
     return;
   }
 }
@@ -29,7 +29,7 @@ bool PersistentLog::ResetLog() {
   log_entries.clear();
 
   if(Util::PersistentFileUpdate(cursor_filename, &cursor, sizeof(int)) == false) {
-    warn("Error: PersistentFileUpdate failed to write to cursor %d file\n", cursor);
+    warn("Error: PersistentFileUpdate failed to write to cursor %d file", cursor);
     return false;
   }
   log_file = fopen( log_filename , "wb" ); //erases old log
@@ -55,7 +55,7 @@ bool PersistentLog::ReopenLog() {
   log_file = fopen( log_filename , "r+b" );
 
   if (cursor_file == NULL || log_file == NULL) {
-    debug("creating cursor & log files %s\n", log_filename);
+    debug("creating cursor & log files %s", log_filename);
     if (cursor_file != NULL) fclose(cursor_file);
     if (log_file != NULL) fclose(log_file);
     if (ResetLog() != true) {
@@ -63,7 +63,7 @@ bool PersistentLog::ReopenLog() {
     }
   }
   fread(&cursor, sizeof(int), 1, cursor_file);
-  debug("opened log, cursor: %d\n", cursor);
+  debug("opened log, cursor: %d", cursor);
   fclose(cursor_file);
   if (LoadIndexFromLog() != true) {
     warn("Failed to load full log into memory %s", log_filename);
@@ -114,7 +114,7 @@ bool PersistentLog::MoveCursor(int distance) {
   int new_cursor_position = cursor + distance;
   if (Util::PersistentFileUpdate(cursor_filename, &new_cursor_position, sizeof(int))) {
     cursor = new_cursor_position;
-    debug("moved cursor to %d\n", cursor);
+    debug("moved cursor to %d", cursor);
     return true;
   }
   warn("Error: failed to update cursor location, cursor: %d", cursor);
@@ -124,7 +124,7 @@ bool PersistentLog::MoveCursor(int distance) {
 
 bool PersistentLog::AddLogEntry(const void* log_data, int log_data_len) {
   struct LogEntry current_entry;
-  current_entry.data = NULL; 
+  current_entry.data = NULL;
   current_entry.len = log_data_len;
   current_entry.offset = cursor;
 
@@ -133,7 +133,7 @@ bool PersistentLog::AddLogEntry(const void* log_data, int log_data_len) {
     warn("Error: fseek failed to move to move to a new file offset, %s (%d)", strerror(errno), errno);
     return false;
   }
-  int wrote_bytes = fwrite(&log_data_len, 1, sizeof(int), log_file); 
+  int wrote_bytes = fwrite(&log_data_len, 1, sizeof(int), log_file);
   if (wrote_bytes != sizeof(int)) {
     warn("Error: fwrite failed to write int bytes to log file, %s (%d)", strerror(errno), errno);
     return false;
@@ -194,16 +194,16 @@ bool PersistentLog::RemoveLogEntry() {
 
 const struct LogEntry PersistentLog::GetLogEntryByIndex(int index) {
     if (log_entries.size() <= index) {
-      debug("index %d is not in log, too large\n", index);
+      debug("index %d is not in log, too large", index);
       struct LogEntry current_entry;
-      current_entry.data = NULL; 
+      current_entry.data = NULL;
       current_entry.len = -1;
       current_entry.offset = -1;
       return current_entry;
     }
     struct LogEntry current_entry = log_entries[index];
     if (current_entry.data != NULL) {
-      debug("Entry already loaded : %s\n", current_entry.data);
+      debug("Entry already loaded : %s", current_entry.data);
       return current_entry;
     }
     int success = fseek(log_file, current_entry.offset + sizeof(int), SEEK_SET); // to make sure we're in right location
@@ -219,7 +219,7 @@ const struct LogEntry PersistentLog::GetLogEntryByIndex(int index) {
       warn("Error: fread failed to read int bytes from log file, %s (%d)", strerror(errno), errno);
       return current_entry; // NULL data
     }
-    debug("Entry Loaded : %s\n", buffer);
+    debug("Entry Loaded : %s", buffer);
     current_entry.data = buffer;
     log_entries[index] = current_entry;
     return current_entry;

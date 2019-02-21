@@ -10,6 +10,9 @@ RaftServer::RaftServer(int server_id, vector<ServerInfo> server_infos,
 void RaftServer::Run() {
     storage.Load();
 
+    info("TERM: %d", storage.current_term());
+    info("STATE: %s", ServerStateStrings[Follower].c_str());
+
     for (int i = 0; i < peer_infos.size(); i++) {
         PeerInfo peer_info = peer_infos[i];
         Peer *peer = new Peer(peer_info.my_listen_port,
@@ -34,9 +37,6 @@ void RaftServer::Run() {
         return HandleClientCommand(command);
     });
     client_server->Listen(listen_port);
-
-    info("TERM: %d", storage.current_term());
-    info("STATE: %s", ServerStateStrings[Follower].c_str());
 }
 
 void RaftServer::HandleElectionTimer() {
@@ -60,6 +60,8 @@ void RaftServer::HandleLeaderTimer() {
 
 int RaftServer::HandleClientCommand(char * command) {
     lock_guard<mutex> lock(server_mutex);
+    assert(server_state != Leader);
+
     info("Client command: %s", command);
 
     // TODO: Append to log
@@ -80,7 +82,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
     if (message.term() > storage.current_term()) {
         TransitionCurrentTerm(message.term());
         TransitionServerState(Follower);
-        client_server->RedirectToServer(&server_infos[message.server_id()]);
+        client_server->StartRedirecting(&server_infos[message.server_id()]);
     }
 
     switch (message.type()) {
@@ -89,10 +91,10 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 SendAppendEntriesResponse(peer, false, message.prev_log_index() + 1);
                 return;
             }
-            if (message.term() == storage.current_term()) {
+            if (server_state == Candidate && message.term() == storage.current_term()) {
                 // Candidate recognizes another candidate has won election
                 TransitionServerState(Follower);
-                client_server->RedirectToServer(&server_infos[message.server_id()]);
+                client_server->StartRedirecting(&server_infos[message.server_id()]);
             }
             info("%s", "NUMBER 0");
 
@@ -312,11 +314,6 @@ void RaftServer::TransitionCurrentTerm(int term) {
 }
 
 void RaftServer::TransitionServerState(ServerState new_state) {
-    if (server_state == new_state) {
-        // Do not transition if already in same state
-        return;
-    }
-
     const char* old_state_str = ServerStateStrings[server_state].c_str();
     const char* new_state_str = ServerStateStrings[new_state].c_str();
     info("STATE: %s -> %s", old_state_str, new_state_str);
@@ -351,10 +348,7 @@ void RaftServer::TransitionServerState(ServerState new_state) {
                 peer_match_indexes.push_back(0);
             }
 
-            // Stop redirecting client requests; start handling them
-            client_server->RedirectToServer(NULL);
-            debug("%s", "Leader finished transition");
-
+            client_server->StartServing();
             return;
         }
     }

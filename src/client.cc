@@ -40,7 +40,7 @@ bool send_command(const char * command) {
             continue;
         }
 
-        debug("Connect to server %s:%d", inet_ntoa(local_info.sin_addr),
+        info("Connect to server %s:%d", inet_ntoa(local_info.sin_addr),
             ntohs(local_info.sin_port));
 
         // TODO: error check
