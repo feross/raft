@@ -9,6 +9,7 @@
 
 using namespace std;
 
+const string DEFAULT_CONFIG_PATH = "./config";
 const int MAX_CONFIG_FILE_SIZE = 1'000'000; // bytes
 
 /**

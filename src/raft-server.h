@@ -62,7 +62,7 @@ class RaftServer {
          */
         void HandleLeaderTimer();
 
-        void HandleClientCommand(char * command);
+        int HandleClientCommand(char * command);
 
         /**
          * Callback function used to process messages we receive from peers.

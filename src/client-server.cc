@@ -62,6 +62,19 @@ void ClientServer::Listen(unsigned short listen_port) {
     }
 }
 
+void ClientServer::RespondToClient(int request_id, string& response) {
+    info("RespondToClient, request_id: %d, response: %s", request_id, response.c_str());
+    int client_socket = pending_client_sockets[request_id];
+    info("got socket: %d", client_socket);
+    const char * response_cstr = response.c_str();
+
+    // TODO: error check
+    int len = strlen(response_cstr);
+    write(client_socket, &len, sizeof(int));
+    dprintf(client_socket, "%s", response_cstr);
+    close(client_socket);
+}
+
 void ClientServer::HandleClientConnection(int client_socket) {
     int message_size;
     int bytes_read = 0;
@@ -78,19 +91,12 @@ void ClientServer::HandleClientConnection(int client_socket) {
         bytes_read += new_bytes;
     }
 
-    if (message_size > MAX_CLIENT_MESSAGE_SIZE) {
-        if (close(client_socket) == -1) {
-            warn("Error closing socket %d (%s)", client_socket, strerror(errno));
-        }
-        warn("Closed client socket because message was too large: %d", message_size);
-        return;
-    }
-
-    char buf[MAX_CLIENT_MESSAGE_SIZE + 1];
+    char buf[message_size + 1];
     bytes_read = 0;
     while (bytes_read < message_size) {
+        info("bytes_read %d, message_size %d", bytes_read, message_size);
         void * dest = buf + bytes_read;
-        int new_bytes = read(client_socket, dest, MAX_CLIENT_MESSAGE_SIZE - bytes_read);
+        int new_bytes = read(client_socket, dest, message_size - bytes_read);
         if (new_bytes == 0 || new_bytes == -1) {
             warn("Error reading from socket %d (%s)", client_socket, strerror(errno));
             if (close(client_socket) == -1) {
@@ -98,8 +104,12 @@ void ClientServer::HandleClientConnection(int client_socket) {
             }
             return;
         }
-        buf[message_size] = '\0';
-        info("Received client message: %s", buf);
-        request_callback(buf);
+        bytes_read += new_bytes;
     }
+    // Read complete message from client
+    buf[message_size] = '\0';
+    info("Received client message: %s", buf);
+    int request_id = request_callback(buf);
+    info("Recieved rpc id %d for socket %d", request_id, client_socket);
+    pending_client_sockets[request_id] = client_socket;
 }

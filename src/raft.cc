@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
 
     string config_path = args.get_string("config");
     if (config_path == "") {
-        config_path = "./config";
+        config_path = DEFAULT_CONFIG_PATH;
     }
 
     if (args.get_bool("reset")) {
