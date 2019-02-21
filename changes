@@ -23,3 +23,10 @@
 - Added support for a config file format which makes starting the server require
   many fewer command line arguments. The same config file can be used by all the
   servers in the Raft cluster.
+
+- Significantly refactored Peer to include streamparser logic inside.  This allowed
+  us to avoid using tuple, avoid allocating some large extra heap buffers, avoid
+  split responsibilities for managing memory, etc.
+
+- Also updated Peer to use more explicit threads (rather than "register listener"
+  functions) and updated to log a bit more verbose and avoid some opaque code.

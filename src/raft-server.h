@@ -70,6 +70,10 @@ class RaftServer {
          */
         void HandleLeaderTimer();
 
+        /**
+         * Callback function inboked when we receive a command from a client,
+         * requesting to be replicated.  Does NOT initiate response to client
+         */
         int HandleClientCommand(char * command);
 
         /**
@@ -95,8 +99,22 @@ class RaftServer {
          */
         PeerMessage CreateMessage(PeerMessage_Type message_type);
 
+        /*
+         * Checks our log to see if any entries are now sufficiently
+         * replicated (& on the current term) such that we can apply them
+         * to our state machine.
+         *
+         * Constraint: should only be used by leaders
+         */
         void CheckForCommittedEntries();
 
+        /*
+         * Called when we know a log is current term & replicated on a majority
+         * of servers.  Will apply & commit all entries between the previous
+         * applied index & current index.
+         *
+         * @param commit_index - entry through which we should commit
+         */
         void CommitEntries(int commit_index);
 
         /**
@@ -186,8 +204,21 @@ class RaftServer {
          * appendentries requests
          */
         PersistentLog persistent_log;
+
+        /**
+         * Index of log which we know will never be overwritten
+         */
         int committed_index;
+
+        /**
+         * Used by leader to track the next entry the leader should attempt
+         * to send to this particular peer
+         */
         vector<int> peer_next_indexes;
+        /**
+         * Tracks the entries we know have been replicated on other servers
+         * in the cluster.
+         */
         vector<int> peer_match_indexes;
 
         /**

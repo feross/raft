@@ -38,7 +38,7 @@ bool PersistentLog::ResetLog() {
     log_file = fopen( log_filename , "r+b" );
     cursor_file = fopen( cursor_filename, "r+b" );
     if (log_file == NULL || cursor_file == NULL) {
-        warn("Error: failed to open log || cursor file %s", cursor_filename);
+        warn("Error: failed to open log || cursor_filename file %s", cursor_filename);
         return false;
     }
     int zero = 0;
