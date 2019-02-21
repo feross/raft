@@ -60,7 +60,7 @@ void RaftServer::HandleLeaderTimer() {
 
 int RaftServer::HandleClientCommand(char * command) {
     lock_guard<mutex> lock(server_mutex);
-    assert(server_state != Leader);
+    assert(server_state == Leader);
 
     info("Client command: %s", command);
 
