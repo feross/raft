@@ -239,11 +239,6 @@ void RaftServer::TransitionCurrentTerm(int term) {
 }
 
 void RaftServer::TransitionServerState(ServerState new_state) {
-    if (server_state == new_state) {
-        // Do not transition if already in same state
-        return;
-    }
-
     const char* old_state_str = ServerStateStrings[server_state].c_str();
     const char* new_state_str = ServerStateStrings[new_state].c_str();
     info("STATE: %s -> %s", old_state_str, new_state_str);
