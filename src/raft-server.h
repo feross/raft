@@ -37,17 +37,24 @@ class RaftServer {
          *
          * The server expects to be given a server id, which is a friendly name
          * that identifies the server to other servers in the cluster, and a
-         * vector of peer connection information which is used to connect to
-         * other servers in the cluster and start listening servers to receive
-         * connections in return from the remote servers.
+         * vector of server information which defines which servers exist in the
+         * cluster, and peer connection information which is used to establish
+         * which incoming and outgoing ports will be used to communicate with
+         * other servers in the cluster.
          *
          * @param server_id Friendly name to identify the server
+         * @param server_infos Vector of server information
          * @param peer_infos Vector of connection information for peer servers
-         * @param client_listen_port Port to listen for client connections
          */
         RaftServer(int server_id, vector<ServerInfo> server_infos,
             vector<PeerInfo> peer_infos);
 
+        /**
+         * Start running the server. Specifically, start the Raft protocol,
+         * begin contacting peer servers, and accepting requests from clients.
+         *
+         * This method never returns.
+         */
         void Run();
 
     private:
@@ -89,6 +96,8 @@ class RaftServer {
         PeerMessage CreateMessage(PeerMessage_Type message_type);
 
         void CheckForCommittedEntries();
+
+        void CommitEntries(int commit_index);
 
         /**
          * Sends a protocol buffer formatted message to the specified peer.

@@ -1,7 +1,8 @@
 #include "client-server.h"
 
 ClientServer::ClientServer(RequestCallback request_callback) :
-    request_callback(request_callback), thread_pool(THREAD_POOL_SIZE) {
+    server_state(Waiting), request_callback(request_callback),
+    thread_pool(THREAD_POOL_SIZE) {
 }
 
 ClientServer::~ClientServer() {
@@ -78,6 +79,15 @@ void ClientServer::RespondToClient(int request_id, string& response) {
     Util::SafeClose(client_socket);
 }
 
+void ClientServer::StartServing() {
+    lock_guard<mutex> lock(server_mutex);
+
+    info("%s", "Start serving");
+    redirect_server_info = NULL;
+    server_state = Serving;
+    server_cv.notify_all();
+}
+
 void ClientServer::StartRedirecting(ServerInfo * new_redirect_server_info) {
     lock_guard<mutex> lock(server_mutex);
 
@@ -95,15 +105,6 @@ void ClientServer::StartRedirecting(ServerInfo * new_redirect_server_info) {
         Util::SafeClose(client_socket);
     }
     pending_client_sockets.clear();
-    server_cv.notify_all();
-}
-
-void ClientServer::StartServing() {
-    lock_guard<mutex> lock(server_mutex);
-
-    info("%s", "Start serving");
-    redirect_server_info = NULL;
-    server_state = Serving;
     server_cv.notify_all();
 }
 
