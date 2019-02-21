@@ -34,6 +34,7 @@ class Peer {
          *      callback arguments:
          *          peer - who we received from
          *          char* - pointer to heap-allocated message data (client frees)
+         *                  This is null-terminated for convenience 
          *          int - size of message data
          */
         Peer(unsigned short listening_port, std::string destination_ip_address,
@@ -51,6 +52,10 @@ class Peer {
          *
          * @param message - blob of data to send to the peer
          * @param message_len - size (in bytes) of message blob to send to peer
+         *
+         * Uses kernel queue to provide nonblocking functionality, however
+         * after filled may block, as we wouldn't be able to make progress
+         * anyway
          */
         void SendMessage(const char* message, int message_len);
 
@@ -60,25 +65,30 @@ class Peer {
         int id;
 
     private:
-        void AcceptConnection(const char* ip_addr, unsigned short port_num);
-        void InitiateConnection(const char* ip_addr, unsigned short port_num);
         /**
-         * Registers a listener that will repeatedly attempt to listen for
-         * incoming connections on my_port coming from dest_ip_addr and updates
-         * associated receiving state when establishing connection. If connection
-         * is established, listens for messages coming in on the currently active
-         * socket.  When messages are received, calls callback for every full
-         * received chunk.
+         * Attempts to listen for incoming connections on this port, and create
+         * a reusable socket on success.  On failure, peer is set to be
+         * non-communicating via this port & the user of this function will
+         * need to retry
          */
-        void RegisterReceiveListener();
+        void AcceptConnection(const char* ip_addr, unsigned short port_num);
+        /**
+         * Will repeatedly attempt to listen for
+         * incoming connections on my_port coming from dest_ip_addr and updates
+         * associated receiving state when establishing connection.
+         * If connection is established, listens for messages coming in on the
+         * currently active socket.  When messages are received, calls callback
+         * for every full received chunk.
+         */
+        void ReceiveListener();
         /**
          * Listens for broken outgoing connection (since we use two different
          * connections for send & receiving to minimize possible race conditions
          * at small cost & maintain implementation simplicity), and updates state
          * associated with outgoing connections on hearing the broken connection.
          */
-        void RegisterCloseListener();
-        void ListenOnSocket(int socket);
+        void CloseListener();
+        void RespondToReceivedMessages(int socket);
 
         // maybe TODO: in theory, we could reduce the number of connections
         // (currently seperate sockets for inbound & outbound connections),
@@ -173,6 +183,10 @@ class Peer {
          *      - int : the length of the blob of bytes received
          */
         std::function<void(Peer*, char*, int)> message_received_callback;
+        //TODO: wonder about typedef v.s. more explicit function signature
+        // typedef seems to lose information/ require scrolling, especially
+        // because we have multiple callbacks throught raft
+
         /*
          * How many bytes we have currently received as part of the next message
          * from this peer.

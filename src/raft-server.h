@@ -67,8 +67,7 @@ class RaftServer {
 
         /**
          * Callback function used to process messages we receive from peers.
-         * Called any time we receive a message from any peer, though shouldn't
-         * happen in the normal case excpet when server is the leader.
+         * Called any time we receive a message from any peer.
          *
          * @param peer - the peer connection from which we received the message
          * @param raw_message - pointer to message received from peer
