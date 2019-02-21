@@ -175,14 +175,12 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
 
         case PeerMessage::REQUESTVOTE_REQUEST: {
             if (message.term() < storage.current_term()) {
-                info("%s", "vote rejected: term too old");
                 SendRequestVoteResponse(peer, false);
                 return;
             }
             if (storage.voted_for() != -1 &&
                 storage.voted_for() != message.server_id()) {
                 // Voted for another server already
-                info("%s", "vote rejected: already voted for someone else");
                 SendRequestVoteResponse(peer, false);
                 return;
             }
@@ -193,7 +191,6 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
 
             if (message.last_log_term() > prev_entry_term) {
                 storage.set_term_and_voted(storage.current_term(), message.server_id());
-                info("%s", "vote accepted: term was higher");
                 SendRequestVoteResponse(peer, true);
                 election_timer->Reset();
                 return;
@@ -201,14 +198,10 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
             if (message.last_log_term() == prev_entry_term &&
                 message.last_log_index() >= persistent_log.LastLogIndex()) {
                 storage.set_term_and_voted(storage.current_term(), message.server_id());
-                info("%s", "vote accepted: term was equal & index >=");
                 SendRequestVoteResponse(peer, true);
                 election_timer->Reset();
                 return;
             }
-            info("vote rejected for misc reason their term: %d my term: %d", message.term(), storage.current_term());
-            info("their message term: %d ", message.last_log_term());
-            info("their index %d my index: %d", message.last_log_index(), persistent_log.LastLogIndex());
             SendRequestVoteResponse(peer, false);
             return;
         }
@@ -342,7 +335,6 @@ void RaftServer::TransitionCurrentTerm(int term) {
     // When updating the term, reset who we voted for
     storage.set_term_and_voted(term, -1);
     votes.clear();
-    info("%s","Done transitioning");
 }
 
 void RaftServer::TransitionServerState(ServerState new_state) {
@@ -398,5 +390,4 @@ void RaftServer::ReceiveVote(int server_id) {
         // This server won the election
         TransitionServerState(Leader);
     }
-            info("%s", "Now what");
 }
