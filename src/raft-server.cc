@@ -64,12 +64,14 @@ int RaftServer::HandleClientCommand(char * command) {
 
     info("Client command: %s", command);
 
-    // TODO: Append to log
-    // TODO: return index number of log entry
-    //
-    // later...
-    // client_server->RespondToClient(response_id, response);
-    return 1;
+    // Append log entry
+    int log_entry_len = strlen(command) + 1;
+    char log_entry_buffer[log_entry_len + sizeof(int)];
+    memcpy(log_entry_buffer, &log_entry_len, sizeof(int));
+    memcpy(log_entry_buffer + sizeof(int), command, log_entry_len);
+    persistent_log.AddLogEntry(log_entry_buffer, log_entry_len + sizeof(int));
+
+    return persistent_log.LastLogIndex();
 }
 
 void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_message_len) {
@@ -165,14 +167,17 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                                 matches += 1;
                             }
                         }
-                        if (matches > (server_infos.size()/2 + 1)) {
+                        int majority_threshold = (server_infos.size() / 2) + 1;
+                        if (matches > majority_threshold) {
                             struct LogEntry ent = persistent_log.
                                 GetLogEntryByIndex(committed_index + 1);
                             int term = *(int *)ent.data;
                             if (term == storage.current_term()) {
+                                char * data = ent.data + sizeof(int);
+                                string response = state_machine.Apply(string(data));
+                                client_server->RespondToClient(committed_index + 1, response);
+                                storage.set_last_applied(committed_index + 1);
                                 committed_index += 1;
-                                // ATTEMPT APPLY SHELL COMMAND
-                                // AFTERWARDS: UPDATE LAST APPLIED
                                 continue;
                             }
                         }
