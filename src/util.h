@@ -70,10 +70,21 @@ class Util {
 
         /**
          * Trim whitespace from the start of a string, passed by reference.
-         * @param str String to left trim ()
+         * @param str String to "left trim"
          */
         static void LeftTrim(string &str);
+
+        /**
+         * Trim whitespace from the end of a string, passed by reference.
+         * @param str String to "right trim"
+         */
         static void RightTrim(string &str);
+
+        /**
+         * Trim whitespace from the start and end of a string, passed by
+         * reference.
+         * @param str String to trim
+         */
         static void Trim(std::string &str);
 
         /*
@@ -85,6 +96,7 @@ class Util {
          * @return bool - whether syscall was successful
          */
         static bool SyscallErrorInfo(bool syscall_success, const char *error_message_prefix);
+
         /*
          * Update filename to have new_contents, overwriting old file contents
          * Will always either completely succeed, or fail.  I.e. filename either
