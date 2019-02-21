@@ -91,6 +91,8 @@ class RaftServer {
 
         void CheckForCommittedEntries();
 
+        void CommitEntries(int commit_index);
+
         /**
          * Sends a protocol buffer formatted message to the specified peer.
          *

@@ -78,6 +78,11 @@ int RaftServer::HandleClientCommand(char * command) {
 
     int last_log_index = persistent_log.LastLogIndex();
     info("Added to log (prev index %d, current index %d)", prev_last_log_index, last_log_index);
+
+    for (Peer* peer: peers) {
+        SendAppendEntriesRequest(peer);
+    }
+
     return last_log_index;
 }
 
@@ -127,11 +132,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 largest_log_index -= 1;
                 // should == largest_log_index = persistent_log.LastLogIndex();
             }
-            if (message.entries_size() == 0) {
-                SendAppendEntriesResponse(peer, true, message.prev_log_index() + 1);
-                election_timer->Reset();
-                return;
-            } else {
+            if (message.entries_size() > 0) {
                 string log_entry = message.entries(0);
                 int log_entry_len = log_entry.length();
                 char log_entry_buffer[log_entry_len + sizeof(int)];
@@ -141,11 +142,13 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
                 memcpy(log_entry_buffer + sizeof(int), log_entry.c_str(), log_entry_len);
                 persistent_log.AddLogEntry(log_entry_buffer,
                     log_entry_len + sizeof(int));
-
-                SendAppendEntriesResponse(peer, true, message.prev_log_index() + 1);
-                election_timer->Reset();
-                return;
             }
+            SendAppendEntriesResponse(peer, true, message.prev_log_index() + 1);
+            election_timer->Reset();
+            if (message.leader_commit() > committed_index) {
+                CommitEntries(message.leader_commit());
+            }
+            return;
         }
 
         case PeerMessage::APPENDENTRIES_RESPONSE: {
@@ -255,18 +258,20 @@ void RaftServer::CheckForCommittedEntries() {
     info("CheckForCommittedEntries 1 (term: %d) (current term: %d)(command: %s)", term, storage.current_term(), ent.data + 4);
     if (term == storage.current_term()) {
         info("%s", "Committing all majority-passing entries");
-        for (int i = committed_index + 1; i <= highest_majority_index; i++) {
-            ent = persistent_log.GetLogEntryByIndex(i);
-            char * data = ent.data + sizeof(int);
-            string response = state_machine.Apply(string(data));
-            client_server->RespondToClient(committed_index + 1, response);
-            committed_index += 1;
-        }
+        CommitEntries(highest_majority_index);
     }
-
-
 }
 
+void RaftServer::CommitEntries(int highest_majority_index) {
+    while (committed_index < highest_majority_index) {
+        committed_index += 1;
+        struct LogEntry ent = persistent_log.GetLogEntryByIndex(committed_index);
+        char * data = ent.data + sizeof(int);
+        string response = state_machine.Apply(string(data));
+        client_server->RespondToClient(committed_index, response);
+        storage.set_last_applied(committed_index);
+    }
+}
 
 void RaftServer::SendMessage(Peer *peer, PeerMessage &message) {
     debug("SEND: %s", Util::ProtoDebugString(message).c_str());
