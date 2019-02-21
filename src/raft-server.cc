@@ -235,33 +235,42 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
 
 void RaftServer::CheckForCommittedEntries() {
     info("%s", "CheckForCommittedEntries");
-    while (true) {
+    int max_log_index = persistent_log.LastLogIndex();
+    int highest_majority_index = committed_index;
+    for(int j = committed_index; j <= max_log_index; j++) {
+
         int matches = 1; // Leader always has the latest log entry
         for (int i = 0; i < peer_match_indexes.size(); i++) {
-            if (peer_match_indexes[i] > committed_index) {
+            if (peer_match_indexes[i] > j) {
                 matches += 1;
             }
         }
         int majority_threshold = (server_infos.size() / 2) + 1;
-        if (matches >= majority_threshold) {
-            struct LogEntry ent = persistent_log.
-                GetLogEntryByIndex(committed_index + 1);
-            int term = *(int *)ent.data;
-            info("CheckForCommittedEntries 1 (term: %d) (command: %s)", term, ent.data + 4);
-            if (term == storage.current_term()) {
-                info("%s", "CheckForCommittedEntries 2");
-                char * data = ent.data + sizeof(int);
-                string response = state_machine.Apply(string(data));
-                client_server->RespondToClient(committed_index + 1, response);
-                storage.set_last_applied(committed_index + 1);
-                committed_index += 1;
-                continue;
-            }
+        info("majority thresh: %d ,", majority_threshold);
+        if (matches < majority_threshold) {
+            break;
+        } else {
+            highest_majority_index = j;
         }
-        warn("%s", "NUMBER 6");
 
-        break;
     }
+    struct LogEntry ent = persistent_log.
+        GetLogEntryByIndex(highest_majority_index);
+    int term = *(int *)ent.data;
+
+    info("CheckForCommittedEntries 1 (term: %d) (current term: %d)(command: %s)", term, storage.current_term(), ent.data + 4);
+    if (term == storage.current_term()) {
+        info("%s", "Committing all majority-passing entries");
+        for (int i = committed_index + 1; i <= highest_majority_index; i++) {
+            ent = persistent_log.GetLogEntryByIndex(i);
+            char * data = ent.data + sizeof(int);
+            string response = state_machine.Apply(string(data));
+            client_server->RespondToClient(committed_index + 1, response);
+            committed_index += 1;
+        }
+    }
+    
+
 }
 
 
