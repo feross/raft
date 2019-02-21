@@ -33,17 +33,17 @@ message PeerMessage {
      * Fields for AppendEntries request
      */
 
-    // CURRENTLY UNUSED: index of log entry immediately preceding new ones
+    // index of log entry immediately preceding new ones
     optional int32 prev_log_index = 4;
 
-    // CURRENTLY UNUSED: term of prev_log_index entry
+    // term of prev_log_index entry
     optional int32 prev_log_term = 5;
 
-    // CURRENTLY UNUSED: log entries to store (empty for heartbeat; may send
+    // log entries to store (empty for heartbeat; may send
     // more than one for efficiency)
     repeated string entries = 6;
 
-    // CURRENTLY UNUSED: leader’s commit_index
+    // leader’s commit_index
     optional int32 leader_commit = 7;
 
     /**
@@ -60,10 +60,10 @@ message PeerMessage {
      * Fields for RequestVote request
      */
 
-    // CURRENTLY UNUSED: index of candidate’s last log entry
+    // index of candidate’s last log entry
     optional int32 last_log_index = 10;
 
-    // CURRENTLY UNUSED: term of candidate’s last log entry
+    // term of candidate’s last log entry
     optional int32 last_log_term = 11;
 
     /**
