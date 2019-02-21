@@ -54,20 +54,22 @@ message PeerMessage {
     // prev_log_term
     optional bool success = 8;
 
+    optional int32 appended_log_index = 9;
+
     /**
      * Fields for RequestVote request
      */
 
     // CURRENTLY UNUSED: index of candidate’s last log entry
-    optional int32 last_log_index = 9;
+    optional int32 last_log_index = 10;
 
     // CURRENTLY UNUSED: term of candidate’s last log entry
-    optional int32 last_log_term = 10;
+    optional int32 last_log_term = 11;
 
     /**
      * Fields for RequestVote response
      */
 
     // true means candidate received vote
-    optional bool vote_granted = 11;
+    optional bool vote_granted = 12;
 }
