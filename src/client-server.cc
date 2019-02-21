@@ -9,7 +9,6 @@ ClientServer::~ClientServer() {
 }
 
 void ClientServer::Listen(unsigned short listen_port) {
-    info("Port: %d", listen_port);
     // Populate server information struct
     struct sockaddr_in server_info;
     memset(&server_info, 0, sizeof(struct sockaddr_in));

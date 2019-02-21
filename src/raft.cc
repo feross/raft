@@ -68,9 +68,7 @@ int main(int argc, char* argv[]) {
 
     RaftServer raft_server(server_id, server_infos, peer_infos);
     try {
-        info("%s", "Before run");
         raft_server.Run();
-        info("%s", "After run");
     } catch (exception& err) {
         error("%s", err.what());
         return EXIT_FAILURE;
