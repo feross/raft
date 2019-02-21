@@ -131,7 +131,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
 
                 info("%s", "NUMBER 2");
                 memcpy(log_entry_buffer, &log_entry_len, sizeof(int));
-                memcpy(log_entry_buffer + 4, log_entry.c_str(), log_entry_len);
+                memcpy(log_entry_buffer + sizeof(int), log_entry.c_str(), log_entry_len);
                 persistent_log.AddLogEntry(log_entry_buffer,
                     log_entry_len + sizeof(int));
                 info("%s", "NUMBER 3");
