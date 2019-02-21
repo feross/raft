@@ -18,9 +18,13 @@ void RaftConfig::parse(int my_server_id) {
             // Ignore empty lines
             continue;
         }
+        if (line[0] == '#') {
+            // Ignore lines that start with '#' (comments)
+            continue;
+        }
         vector<string> line_tokens = Util::StringSplit(line, " ");
 
-        if (line_tokens.size() < 3) {
+        if (line_tokens.size() < 2) {
             throw RaftConfigException("Invalid config line: " + line);
         }
 
