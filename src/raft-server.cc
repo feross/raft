@@ -5,10 +5,13 @@ RaftServer::RaftServer(int server_id, vector<ServerInfo> server_infos,
     server_infos(server_infos), peer_infos(peer_infos),
     storage(to_string(server_id) + STORAGE_NAME_SUFFIX),
     persistent_log((to_string(server_id) + STORAGE_NAME_SUFFIX).c_str()),
-    committed_index(0) {}
+    committed_index() {}
 
 void RaftServer::Run() {
     storage.Load();
+    //at start, say we've only committed what we've already applied
+    committed_index = storage.last_applied();
+
 
     info("TERM: %d", storage.current_term());
     info("STATE: %s", ServerStateStrings[Follower].c_str());
