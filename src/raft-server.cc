@@ -261,7 +261,9 @@ void RaftServer::CommitEntries(int highest_majority_index) {
         struct LogEntry ent = persistent_log.GetLogEntryByIndex(committed_index);
         char * data = ent.data + sizeof(int);
         string response = state_machine.Apply(string(data));
-        client_server->RespondToClient(committed_index, response);
+        if (server_state == Leader) {
+            client_server->RespondToClient(committed_index, response);
+        }
         storage.set_last_applied(committed_index);
     }
 }

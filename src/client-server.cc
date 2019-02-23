@@ -111,10 +111,12 @@ void ClientServer::StartRedirecting(ServerInfo * new_redirect_server_info) {
 
 void ClientServer::HandleClientConnection(int client_socket) {
     server_mutex.lock();
+
     while (server_state == Waiting) {
         info("%s", "Waiting for server to start serving or redirecting");
         server_cv.wait(server_mutex);
     }
+
     if (server_state == Redirecting) {
         info("Redirecting client to %s:%d",
             redirect_server_info->ip_addr.c_str(), redirect_server_info->port);
