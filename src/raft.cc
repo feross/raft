@@ -54,6 +54,7 @@ int main(int argc, char* argv[]) {
         storage.Reset();
         PersistentLog persistent_log((to_string(server_id) + STORAGE_NAME_SUFFIX).c_str());
         persistent_log.ResetLog();
+        return;
     }
 
     RaftConfig raft_config(config_path);
