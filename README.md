@@ -101,9 +101,31 @@ up the cluster:
 ### Sending commands to the cluster
 
 The purpose of Raft is to make a bunch of servers work together to reliably
-update a state machine. So, we'll now discuss how to update the state in the
-state machine as
-to the Raft cluster.
+update a state machine. So, we'll now discuss how to actually update the state
+in the state machine.
+
+**Note:** In this implementation of Raft, we include a sample state machine that
+takes terminal commands and runs them in `bash`, returning the output as a
+string. The bash state machine conforms to the `StateMachine` interface defined
+in `state-machine.h` and you can use it as an example when writing your own
+state machine implementation, if you so desire.
+
+First, start the `./client` program which creates a REPL that sends commands to
+the Raft cluster. The client automatically handles finding the leader server,
+retrying the request with a different server if the leader becomes unavailable,
+and displaying the output from running each command.
+
+Here's what a sample run of the client looks like:
+
+```bash
+$ ./client
+> echo hello
+hello
+> touch myfile.txt
+> ls
+myfile.txt
+> quit
+```
 
 ### A few odds and ends...
 
