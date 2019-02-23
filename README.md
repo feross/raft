@@ -55,6 +55,7 @@ Now start the server like this:
 
 ```bash
 ./raft --id 0 --reset
+./raft --id 0
 ```
 
 The `--reset` option must be included the first time a server is run to
@@ -86,14 +87,17 @@ up the cluster:
 
 ```bash
 ./raft --id 0 --reset
+./raft --id 0
 ```
 
 ```bash
 ./raft --id 1 --reset
+./raft --id 1
 ```
 
 ```bash
 ./raft --id 2 --reset
+./raft --id 2
 ```
 
 ✨ And just like that, you're running a Raft cluster!
@@ -156,7 +160,7 @@ To use a custom configuration file location, use the `--config` string argument.
 To show extremely verbose debug logs, use the `--debug` boolean argument.
 
 ```bash
-./raft --id <server_id> <peer_info> --debug
+./raft --id <server_id> --debug
 ```
 
 #### Quiet mode
@@ -165,7 +169,7 @@ To show only warnings and errors and hide almost every other log message, use
 the `--quiet` boolean argument.
 
 ```bash
-./raft --id <server_id> <peer_info> --quiet
+./raft --id <server_id> --quiet
 ```
 
 ### Command Line Help

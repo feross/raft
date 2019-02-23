@@ -42,7 +42,25 @@ static const string INTRO_TEXT =
 R"(Raft Client
 
 Usage:
-    ./client [options] [peers ...]
+    ./client [options]
+
+    The purpose of Raft is to make a bunch of servers work together to reliably
+    update a state machine. This program allows you to actually update the state
+    in the state machine.
+
+    The `./client` program creates a REPL that sends commands to the Raft
+    cluster. The client automatically handles finding the leader server,
+    retrying the request with a different server if the leader becomes
+    unavailable, and displaying the output from running each command.
+
+    Here's what a sample run of the client looks like:
+        $ ./client
+        > echo hello
+        hello
+        > touch myfile.txt
+        > ls
+        myfile.txt
+        > quit
 )";
 
 /**
