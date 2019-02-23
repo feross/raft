@@ -69,8 +69,6 @@ void ClientServer::RespondToClient(int request_id, string& response) {
         return;
     }
 
-    pending_client_sockets.erase(request_id);
-
     int client_socket = pending_client_sockets[request_id];
     debug("Responding to client (request_id: %d, response: %s)", request_id, response.c_str());
     const char * response_cstr = response.c_str();
@@ -84,6 +82,7 @@ void ClientServer::RespondToClient(int request_id, string& response) {
         shutdown(client_socket, SHUT_WR);
         char buf[1];
         recv(client_socket, buf, 1, 0);
+        pending_client_sockets.erase(request_id);
     }
     Util::SafeClose(client_socket);
 }
