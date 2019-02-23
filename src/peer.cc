@@ -22,7 +22,6 @@ Peer::Peer(unsigned short listening_port, std::string destination_ip_address,
     debug("%s", "creating a new inbound listening thread");
     in_listener = std::thread([this] () {ReceiveListener();});
 
-    // TODO moved StreamParser Variables
     partial_number_bytes = 0;
     current_message_length = 0;
     target_message_length = -1;
@@ -32,15 +31,19 @@ Peer::Peer(unsigned short listening_port, std::string destination_ip_address,
 
 Peer::~Peer() {
     running = false;
-    if (receive_socket != -1) {
-        ErrorCheckSysCall(shutdown(receive_socket, SHUT_RDWR), "shudown peer");
+    if (receive_socket != -1) { //if receive socket is active
+        ErrorCheckSysCall(shutdown(receive_socket, SHUT_RDWR),
+            "shudown recieve socket in peer");
         //not safe to close until called this
         //see: https://stackoverflow.com/a/2489066/6227019
         //closing the socket is handled by the thread now
         in_listener.join();
     }
-    if (connection_reset == true) { //may not have opened a connection to send
-        ErrorCheckSysCall(shutdown(send_socket, SHUT_RDWR), "shutdown peer");
+    // if we still have a thread that hasn't been cleaned up
+    // (may not have opened a connection to send)
+    if (connection_reset == true) {
+        ErrorCheckSysCall(shutdown(send_socket, SHUT_RDWR),
+            "shutdown sending socket in peer");
         //closing the socket is handled by the thread now
         out_listener.join();
     }
@@ -65,7 +68,9 @@ void Peer::SendMessage(const char* message, int message_len) {
         int success = connect(send_socket, (struct sockaddr *)&dest,
             sizeof(struct sockaddr_in));
         if (success == 0) {
-            if (connection_reset) { //TODO comment why this is here
+            if (connection_reset) {
+                // if we had reset the connection, must clean up old thread
+                // before we spawn the new one (immediately below)
                 out_listener.join();
                 connection_reset = false;
                 debug("%s", "Joined old listening-for-close-on-outbound thread");
@@ -76,11 +81,12 @@ void Peer::SendMessage(const char* message, int message_len) {
             send_socket = -1;
             ErrorCheckSysCall(success, "connect failed ");
             warn("%s failed on %d failed",dest_ip_addr.c_str(), dest_port);
+            // if failed, will just lazy-retry on next send request
         }
     }
     if (send_socket > 0) {
         debug("Sending over socket: %d", send_socket);
-        //because each peer is sequential, this is fine
+        // each peer is sequential & uses kernel buffers to send/avoid blocking
         ErrorCheckSysCall(send(send_socket, &message_len,
             sizeof(int), 0), "send int message_len prepend");
         ErrorCheckSysCall(send(send_socket, message,
@@ -147,20 +153,15 @@ void Peer::AcceptConnection(const char* ip_addr, unsigned short listening_port) 
         sizeof(int)), "setsockopt failed to set SO_REUSEADDR for socket/port");
 
     /* bind serv information to mysocket */
-    ErrorCheckSysCall(bind(mysocket, (struct sockaddr *)&serv,
-        sizeof(struct sockaddr)), "bind attempt failed on mysocket");
+    int success = bind(mysocket, (struct sockaddr *)&serv, sizeof(struct sockaddr));
+    ErrorCheckSysCall(success, "bind attempt failed on mysocket");
+    if (success == -1) return; //no chance of success, may lazy retry later
 
     /* start listening, allowing a queue of up to 1 pending connection */
     ErrorCheckSysCall(listen(mysocket, 1), "listen attempt on mysocket failed");
 
-    // TODO: could just have one server here, and use the sockets returned by
-    // this to form peers.
-    // However, this would require peers to identify each other using messages,
-    // and have an enclosing class doing this handoff from "made connection to
-    // someone" to individual peers, and this class would need to be simultaneously
-    // aware of multiple peers and sockets/networking details.
     receive_socket = accept(mysocket, (struct sockaddr *)&dest, &socksize);
-    ErrorCheckSysCall(receive_socket, "accept");
+    ErrorCheckSysCall(receive_socket, "accept attempt on mysocket failed");
 
     if (dest.sin_addr.s_addr != inet_addr(ip_addr)) {
         warn("%s", "Connection from unspecified IP, closing connection");

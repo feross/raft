@@ -11,7 +11,6 @@
 
 #include "log.h"
 
-//TODO maybe template to allow to make specific if desired, but also generic
 
 class Peer {
     public:
@@ -90,15 +89,6 @@ class Peer {
         void CloseListener();
         void RespondToReceivedMessages(int socket);
 
-        // maybe TODO: in theory, we could reduce the number of connections
-        // (currently seperate sockets for inbound & outbound connections),
-        // introduces (solvable) race conditions
-        // maybe TODO: similarly, could change to reuse listening port but would
-        // need a "peer manager" that has knowledge of sockets, layered above
-        // the peer (that hands-off connections to peers when it needs to send
-        //a message to a particular peer, or gets a message & identifies which
-        //peer sent it)
-
         /**
          * Explicitly track both sockets, even though we really only need one,
          * this is useful for debugging.
@@ -119,6 +109,16 @@ class Peer {
         unsigned short my_port;
         unsigned short dest_port;
         std::string dest_ip_addr;
+        // Note: could just have one server external to the peer class, and
+        // use the sockets returned by this to form peers.
+        // However, this would require peers to identify each other using messages,
+        // and have an enclosing class doing this handoff from "made connection to
+        // someone" to individual peers, and this class would need to be simultaneously
+        // aware of multiple peers and sockets/networking details.
+        //
+        // Having a server for each peer simplifies the interface substantially
+        // because you trade a peermanager class + exposed sockets +
+        // passing sockets for a port argument
 
         /**
          * Listening for incoming connection and/or incoming messages if
@@ -146,13 +146,7 @@ class Peer {
 
 
 
-
-
-
-
-
-
-        // TODO: MERGED STREAMPARSER METHODS & VARIABLES (as per Ousterhout's suggestion)
+        // merged StreamParser methods (as per Ousterhout's suggestion)
 
         /**
          * Given a chunk of data from the stream of any size:
@@ -183,7 +177,7 @@ class Peer {
          *      - int : the length of the blob of bytes received
          */
         std::function<void(Peer*, char*, int)> message_received_callback;
-        //TODO: wonder about typedef v.s. more explicit function signature
+        //TODO: feel bad about typedef v.s. more explicit function signature
         // typedef seems to lose information/ require scrolling, especially
         // because we have multiple callbacks throught raft
 
