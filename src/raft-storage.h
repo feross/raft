@@ -60,24 +60,39 @@ class RaftStorage {
 
         /**
          * Returns the candidate id that received a vote in the current term
-         * (or "" if none).
+         * (or -1 if none).
          *
          * @return the candidate id that received a vote
          */
         int voted_for() const;
 
         /**
-         * Sets the candidate id that received a vote in the current term to the
-         * given value, and persists it to stable storage. Set to "" to indicate
-         * that no candidate has been voted for in the current term.
+         * Sets the current term and the candidate id that received a vote to
+         * the given values, and persists them to stable storage. Set the
+         * `voted_for` parameter to -1 to indicate that no candidate has been
+         * voted for in the current term.
+         *
+         * This combined setter is necessary to ensure that the term and
+         * voted_for variables are updated and persisted to stable storage
+         * in an atomic manner.
          *
          * @param current_term the new candidate id that received a vote
          * @param voted_for the candidate id that received a vote
          */
         void set_term_and_voted(int current_term, int voted_for);
 
+        /**
+         * Returns the log index number of the last log entry that has been
+         * applied to the Raft state machine.
+         *
+         * @return log index number of the last log entry
+         */
         int last_applied() const;
 
+        /**
+         * Sets the index number of the last log entry that has been applied to
+         * the Raft state machine. Defaults to 0 initially.
+         */
         void set_last_applied(int value);
 
     private:
