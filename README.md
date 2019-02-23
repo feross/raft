@@ -58,11 +58,11 @@ Now start the server like this:
 ```
 
 The `--reset` option must be included the first time a server is run to
-establish the persistent storage and log files on disk. More information about
-this option can be found below.
+establish the persistent storage and log files on disk. Read more about
+`--reset` and the other command line options below.
 
-🌟 That's it. Now you know all the command line options you need to start a
-proper Raft cluster. We'll do that in the next section.
+🌟 That's it. Now that you know how to start a single Raft server, you're ready
+to start an entire Raft cluster. We'll do that in the next section.
 
 ### Start a three server Raft cluster
 
@@ -98,6 +98,13 @@ up the cluster:
 
 ✨ And just like that, you're running a Raft cluster!
 
+### Sending commands to the cluster
+
+The purpose of Raft is to make a bunch of servers work together to reliably
+update a state machine. So, we'll now discuss how to update the state in the
+state machine as
+to the Raft cluster.
+
 ### A few odds and ends...
 
 #### Reset persistent storage
@@ -108,6 +115,11 @@ This option is required the first time you start the server.
 ```bash
 ./raft --id <server_id> --reset
 ```
+
+**Note:** Do not use `--reset` when a server is rejoining the cluster after a
+crash or shutdown as this will wipe away the persistent state and log which will
+cause consistency issues. Adding/removing servers from the cluster as described
+in the Raft paper is currently not supported in this implementation.
 
 #### Use a custom configuration file location
 
