@@ -64,19 +64,27 @@ void ClientServer::Listen(unsigned short listen_port) {
 void ClientServer::RespondToClient(int request_id, string& response) {
     lock_guard<mutex> lock(server_mutex);
 
+    if (pending_client_sockets.count(request_id) == 0) {
+        warn("Attempting to respond to non-existant request %d", request_id);
+        return;
+    }
+
+    pending_client_sockets.erase(request_id);
+
     int client_socket = pending_client_sockets[request_id];
     debug("Responding to client (request_id: %d, response: %s)", request_id, response.c_str());
     const char * response_cstr = response.c_str();
 
     int len = strlen(response_cstr);
     if (write(client_socket, &len, sizeof(int)) == -1) {
-        error("Could not write to socket %d (%s)", client_socket, strerror(errno));
-    }
-    dprintf(client_socket, "%s", response_cstr);
+        warn("Could not write to socket %d (%s)", client_socket, strerror(errno));
+    } else {
+        dprintf(client_socket, "%s", response_cstr);
 
-    shutdown(client_socket, SHUT_WR);
-    char buf[1];
-    recv(client_socket, buf, 1, 0);
+        shutdown(client_socket, SHUT_WR);
+        char buf[1];
+        recv(client_socket, buf, 1, 0);
+    }
     Util::SafeClose(client_socket);
 }
 
