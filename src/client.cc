@@ -77,12 +77,14 @@ int main(int argc, char* argv[]) {
 
 bool send_command(const char * command) {
     int retries = MAX_CLIENT_RETRIES;
+    bool redirect_to_leader = false;
     send_loop: while (retries > 0) {
         info("Attempting to send command (%d retries left)", retries);
-        if (retries < MAX_CLIENT_RETRIES) {
+        if (retries < MAX_CLIENT_RETRIES && !redirect_to_leader) {
             this_thread::sleep_for(CLIENT_RETRY_DELAY);
             leader_server_info = server_infos[rand() % server_infos.size()];
         }
+        redirect_to_leader = false;
         retries--;
 
         // Populate leader information struct
@@ -141,11 +143,14 @@ bool send_command(const char * command) {
             bytes_read += new_bytes;
         }
 
-        int redirect_to_leader = false;
+        // int redirect_to_leader = false;
         if (message_size == -1) {
+            info("%s", "actually got a negative message size as first byte");
             // Server is redirecting us to the true leader
             redirect_to_leader = true;
             message_size = sizeof(ServerInfo);
+        } else {
+            info("message size was %d", message_size);
         }
 
         char buf[message_size + 1];
