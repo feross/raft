@@ -227,6 +227,7 @@ void RaftServer::HandlePeerMessage(Peer* peer, char* raw_message, int raw_messag
 }
 
 void RaftServer::CheckForCommittedEntries() {
+    info("%s", "CheckForCommittedEntries");
     int max_log_index = persistent_log.LastLogIndex();
     int highest_majority_index = committed_index;
     for(int j = committed_index; j <= max_log_index; j++) {
@@ -238,6 +239,7 @@ void RaftServer::CheckForCommittedEntries() {
             }
         }
         int majority_threshold = (server_infos.size() / 2) + 1;
+        info("majority thresh: %d ,", majority_threshold);
         if (matches < majority_threshold) {
             break;
         } else {
@@ -249,6 +251,7 @@ void RaftServer::CheckForCommittedEntries() {
         GetLogEntryByIndex(highest_majority_index);
     int term = *(int *)ent.data;
 
+    info("CheckForCommittedEntries 1 (term: %d) (current term: %d)(command: %s)", term, storage.current_term(), ent.data + 4);
     if (term == storage.current_term()) {
         info("%s", "Committing all majority-passing entries");
         CommitEntries(highest_majority_index);
