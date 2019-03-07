@@ -14,65 +14,76 @@ int main(int argc, char* argv[]) {
 
     Arguments args(INTRO_TEXT);
     args.RegisterBool("help", "Print help message");
-    args.RegisterString("id", "Server identifier");
+    args.RegisterInt("id", "Server identifier");
+    args.RegisterString("config", "Path to configuration file (default = ./config)");
     args.RegisterBool("reset", "Delete server storage");
-    args.RegisterBool("debug", "Show debug logs");
-    args.RegisterBool("quiet", "Show only warnings and errors");
+    args.RegisterBool("debug", "Show all logs");
+    args.RegisterBool("quiet", "Show only errors");
 
     try {
         args.Parse(argc, argv);
-    } catch (exception& err) {
-        LOG(ERROR) << err.what();
+    } catch (ArgumentsException& err) {
+        error("%s", err.what());
         return EXIT_FAILURE;
     }
 
-    if (args.get_bool("help")) {
-        LOG() << args.get_help_text();
-        return EXIT_SUCCESS;
-    }
-
     if (args.get_bool("quiet")) {
-        LOG_LEVEL = WARN;
+        LOG_LEVEL = ERROR;
     } else if (args.get_bool("debug")) {
         LOG_LEVEL = DEBUG;
     }
 
-    string server_id = args.get_string("id");
-    if (server_id.size() == 0) {
-        LOG(ERROR) << "Server identifier is required (use --id)";
-        return EXIT_FAILURE;
-    }
-
-    if (args.get_bool("reset")) {
-        Storage storage(server_id + STORAGE_NAME_SUFFIX);
-        storage.Reset();
+    if (args.get_bool("help")) {
+        printf("%s\n", args.get_help_text().c_str());
         return EXIT_SUCCESS;
     }
 
-    vector<string> peer_info_strs = args.get_unnamed();
-    if (peer_info_strs.size() == 0) {
-        LOG(ERROR) << "Specify at least one peer to connect to";
+    int server_id = args.get_int("id");
+    if (server_id == -1) {
+        error("%s", "Server identifier is required (use --id)");
         return EXIT_FAILURE;
     }
 
-    vector<struct PeerInfo> peer_infos;
-    for (string peer_info_str: peer_info_strs) {
-        auto parts = Util::StringSplit(peer_info_str, ":");
-        struct PeerInfo peer_info;
-        peer_info.destination_ip_addr = parts[0];
-        peer_info.my_listen_port = stoi(parts[1]);
-        peer_info.destination_port = stoi(parts[2]);
-        peer_infos.push_back(peer_info);
+    string config_path = args.get_string("config");
+    if (config_path == "") {
+        config_path = DEFAULT_CONFIG_PATH;
     }
 
-    RaftServer raft_server(server_id, peer_infos);
+    if (args.get_bool("reset")) {
+        RaftStorage storage(to_string(server_id) + STORAGE_NAME_SUFFIX);
+        storage.Reset();
+        PersistentLog persistent_log((to_string(server_id) + STORAGE_NAME_SUFFIX).c_str());
+        persistent_log.ResetLog();
+        return EXIT_SUCCESS;
+    }
 
-    // Keep the main thread alive until a SIGINT or SIGTERM is received
+    RaftConfig raft_config(config_path);
+
+    try {
+        raft_config.parse(server_id);
+    } catch (RaftConfigException& err) {
+        error("%s", err.what());
+        return EXIT_FAILURE;
+    }
+
+    vector<ServerInfo> server_infos = raft_config.get_server_infos();
+    vector<PeerInfo> peer_infos = raft_config.get_peer_infos();
+
+    RaftServer raft_server(server_id, server_infos, peer_infos);
+    try {
+        raft_server.Run();
+    } catch (exception& err) {
+        error("%s", err.what());
+        return EXIT_FAILURE;
+    }
+
+    // Keep program alive until a SIGINT, SIGTERM, or SIGKILL is received
+    sigset_t mask;
+    sigemptyset(&mask);
     while (true) {
-        this_thread::sleep_for(chrono::seconds(1));
+        sigsuspend(&mask);
     }
 
     google::protobuf::ShutdownProtobufLibrary();
-
     return EXIT_SUCCESS;
 }

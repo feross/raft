@@ -1,3 +1,8 @@
+/**
+ * Peer abstraction that enables sending/receiving messages to/from other
+ * servers with a simple interface.
+ */
+
 #pragma once
 
 #include <thread>
@@ -5,7 +10,7 @@
 #include <arpa/inet.h>
 
 #include "log.h"
-#include "stream_parser.h"
+
 
 class Peer {
     public:
@@ -23,16 +28,17 @@ class Peer {
          * @param destination_port - port the peer machine will be listening for
          *      our connection on. NOTE: Must not be shared on destination machine
          *      because it uniquely identifies our machine to the peer.
-         * @param message_received_callback - callback function to be called
+         * @param peer_message_received_callback - callback function to be called
          *      whenever we receive a message from this peer
          *      callback arguments:
          *          peer - who we received from
          *          char* - pointer to heap-allocated message data (client frees)
+         *                  This is null-terminated for convenience 
          *          int - size of message data
          */
         Peer(unsigned short listening_port, std::string destination_ip_address,
             unsigned short destination_port,
-            std::function<void(Peer*, char*, int)> message_received_callback);
+            std::function<void(Peer*, char*, int)> peer_message_received_callback);
 
         /**
          *  Destroy the Peer Connection & clean up all resources
@@ -45,38 +51,43 @@ class Peer {
          *
          * @param message - blob of data to send to the peer
          * @param message_len - size (in bytes) of message blob to send to peer
+         *
+         * Uses kernel queue to provide nonblocking functionality, however
+         * after filled may block, as we wouldn't be able to make progress
+         * anyway
          */
         void SendMessage(const char* message, int message_len);
 
-    private:
-        void AcceptConnection(const char* ip_addr, unsigned short port_num);
-        void InitiateConnection(const char* ip_addr, unsigned short port_num);
-        /**
-         * Registers a listener that will repeatedly attempt to listen for
-         * incoming connections on my_port coming from dest_ip_addr and updates
-         * associated receiving state when establishing connection. If connection
-         * is established, listens for messages coming in on the currently active
-         * socket.  When messages are received, calls callback for every full
-         * received chunk.
+        /*
+         * Identifier for this peer
          */
-        void RegisterReceiveListener();
+        int id;
+
+    private:
+        /**
+         * Attempts to listen for incoming connections on this port, and create
+         * a reusable socket on success.  On failure, peer is set to be
+         * non-communicating via this port & the user of this function will
+         * need to retry
+         */
+        void AcceptConnection(const char* ip_addr, unsigned short port_num);
+        /**
+         * Will repeatedly attempt to listen for
+         * incoming connections on my_port coming from dest_ip_addr and updates
+         * associated receiving state when establishing connection.
+         * If connection is established, listens for messages coming in on the
+         * currently active socket.  When messages are received, calls callback
+         * for every full received chunk.
+         */
+        void ReceiveListener();
         /**
          * Listens for broken outgoing connection (since we use two different
          * connections for send & receiving to minimize possible race conditions
          * at small cost & maintain implementation simplicity), and updates state
          * associated with outgoing connections on hearing the broken connection.
          */
-        void RegisterCloseListener();
-        void ListenOnSocket(int socket);
-
-        // maybe TODO: in theory, we could reduce the number of connections 
-        // (currently seperate sockets for inbound & outbound connections),
-        // introduces (solvable) race conditions
-        // maybe TODO: similarly, could change to reuse listening port but would
-        // need a "peer manager" that has knowledge of sockets, layered above
-        // the peer (that hands-off connections to peers when it needs to send
-        //a message to a particular peer, or gets a message & identifies which
-        //peer sent it)
+        void CloseListener();
+        void RespondToReceivedMessages(int socket);
 
         /**
          * Explicitly track both sockets, even though we really only need one,
@@ -98,6 +109,16 @@ class Peer {
         unsigned short my_port;
         unsigned short dest_port;
         std::string dest_ip_addr;
+        // Note: could just have one server external to the peer class, and
+        // use the sockets returned by this to form peers.
+        // However, this would require peers to identify each other using messages,
+        // and have an enclosing class doing this handoff from "made connection to
+        // someone" to individual peers, and this class would need to be simultaneously
+        // aware of multiple peers and sockets/networking details.
+        //
+        // Having a server for each peer simplifies the interface substantially
+        // because you trade a peermanager class + exposed sockets +
+        // passing sockets for a port argument
 
         /**
          * Listening for incoming connection and/or incoming messages if
@@ -122,12 +143,70 @@ class Peer {
          */
         bool running;
 
+
+
+
+        // merged StreamParser methods (as per Ousterhout's suggestion)
+
         /**
-         * Class used to manage turning outgoing messages into a format that we
-         * can easily parse on the other end (using this class), even though
-         * we may receive it sliced up in any way.
-         * 
-         * Assumes stream bytes received in-order (though any slicing of bytes)
+         * Given a chunk of data from the stream of any size:
+         *  - parses out any completed messages & calls message_received_callback
+         *      that was passed in the constructor
+         *  - accumulates any partial messages to be completed by future chunks.
+         *
+         * Must be called on bytes coming from stream in order.
+         *
+         * @param buffer - buffer containing received bytes from the stream
+         * @param valid_bytes - number of valid bytes in this buffer from stream
          */
-        StreamParser *stream_parser;
+        void HandleRecievedChunk(char* buffer, int valid_bytes);
+
+        /**
+         * Resets/ throws out any partially accumulated message from the socket,
+         * useful in cases where we know the message can never be completed
+         */
+        void ResetIncomingMessage();
+
+        /**
+         * Callback invoked every time we have accumulated a "complete" message
+         * as defined by "was sent as CreateMessageToSend blob on other end of
+         * stream".
+         *
+         * Callback arguments:
+         *      - char* : the blob of bytes received
+         *      - int : the length of the blob of bytes received
+         */
+        std::function<void(Peer*, char*, int)> message_received_callback;
+        //TODO: feel bad about typedef v.s. more explicit function signature
+        // typedef seems to lose information/ require scrolling, especially
+        // because we have multiple callbacks throught raft
+
+        /*
+         * How many bytes we have currently received as part of the next message
+         * from this peer.
+         */
+        int current_message_length;
+        /*
+         * How many total bytes will be in our next message
+         */
+        int target_message_length;
+        /*
+         * Message under construction is a heap-allocated buffer that tracks
+         * the "current" partially-received message that came over the
+         * socket's stream. It will accumulate only until we have a full message.
+         * This must be freed before you point to a new heap location
+         */
+        char* message_under_construction;
+
+        /**
+         * Because the stream of bytes may be cut even along within the middle
+         * of the 4 bytes identifying the length of the subsequent message blob,
+         * we may need to accumulate a partial integer.  We use this number &
+         * buffer to accumulate bytes until the full number is complete.
+         */
+        /* number of bytes currently written in incomplete_number_buffer */
+        int partial_number_bytes;
+        /* accumulator for the leading integer, that precedes each message
+         * and enables us to provide a message-based interface */
+        char incomplete_number_buffer[sizeof(int)];
 };

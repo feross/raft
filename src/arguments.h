@@ -1,3 +1,27 @@
+/**
+ * This class exposes a friendly interface for parsing a command line
+ * argument string (i.e. char* argv[]) into a more useful structure. The
+ * user must specify expected argument names, argument descriptions, and
+ * expected argument types (bool, int, or string).
+ *
+ * Example:
+ *
+ *      int main(int argc, char* argv[]) {
+ *          Arguments args("Hello World - A hello world CLI program");
+ *          args.RegisterBool("help", "Print help message");
+ *          try {
+ *              args.Parse(argc, argv);
+ *          } catch (exception& err) {
+ *              printf("Error: %s\n", err.what());
+ *              return 1;
+ *          }
+ *          if (args.get_bool("help")) {
+ *              printf("%s\n", args.get_help_text().c_str());
+ *              return 0;
+ *          }
+ *      }
+ */
+
 #pragma once
 
 #include <algorithm>
@@ -10,44 +34,19 @@
 
 using namespace std;
 
-class InvalidArgumentException : public exception {
-    const char* what() const noexcept {
-        return "Invalid argument name";
-    }
-};
-
-class MissingArgumentException : public exception {
-    const char* what() const noexcept {
-        return "Missing required argument value";
-    }
+class ArgumentsException : public exception {
+    public:
+        ArgumentsException(const string& message): message(message) {}
+        ArgumentsException(const char* message): message(message) {}
+        const char* what() const noexcept { return message.c_str(); }
+    private:
+        string message;
 };
 
 class Arguments {
     public:
         /**
-         * Command line argument parser.
-         *
-         * This class exposes a friendly interface for parsing a command line
-         * argument string (i.e. char* argv[]) into a more useful structure. The
-         * user must specify expected argument names, argument descriptions, and
-         * expected argument types (bool, int, or string).
-         *
-         * Example:
-         *
-         *      int main(int argc, char* argv[]) {
-         *          Arguments args("Hello World - A hello world CLI program");
-         *          args.register_bool("help", "Print help message", false);
-         *          try {
-         *              args.parse(argc, argv);
-         *          } catch (exception& err) {
-         *              cerr << "Error: " << err.what() << endl;
-         *              return 1;
-         *          }
-         *          if (args.get_bool("help")) {
-         *              cout << args.get_help_text() << endl;
-         *              return 0;
-         *          }
-         *      }
+         * Construct a command line argument parser.
          *
          * @param intro Help text to describe the purpose of the program
          */
@@ -67,7 +66,7 @@ class Arguments {
 
         /**
          * Register a named integer command line argument with the given name
-         * and description. Dsefaults to 0.
+         * and description. Dsefaults to -1.
          *
          * Integer argument flags must be followed immediately by a space and
          * number (e.g. "--myint 42").
@@ -97,8 +96,7 @@ class Arguments {
          * malformed, or missing a required value (e.g. for a named string or
          * integer argument which requires a value).
          *
-         * @throw MissingArgumentException
-         * @throw InvalidArgumentException
+         * @throw ArgumentsException
          *
          * @param argc Number of command line arguments
          * @param argv Array of command line argument strings
@@ -108,7 +106,7 @@ class Arguments {
         /**
          * Return the value of the boolean argument with the given name.
          *
-         * @throw InvalidArgumentException
+         * @throw ArgumentsException
          *
          * @param  argument name
          * @return argument value
@@ -118,7 +116,7 @@ class Arguments {
         /**
          * Return the value of the integer argument with the given name.
          *
-         * @throw InvalidArgumentException
+         * @throw ArgumentsException
          *
          * @param  argument name
          * @return argument value
@@ -128,7 +126,7 @@ class Arguments {
         /**
          * Return the value of the string argument with the given name.
          *
-         * @throw InvalidArgumentException
+         * @throw ArgumentsException
          *
          * @param  argument name
          * @return argument value
@@ -188,7 +186,8 @@ class Arguments {
         vector<string> unnamed_args;
 
         /**
-         * Help text to describe the purpose of the program
+         * Text to describe the purpose of the program. Used to generate the
+         * program's help text.
          */
         string intro;
 };

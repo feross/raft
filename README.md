@@ -33,59 +33,134 @@ The basic command line format is as follows:
 
 ```bash
 make
-./raft --id <server_id> <ip_address>:<listen_port>:<destination_port>
+./raft --id <server_id>
 ```
 
 The first option `--id <server_id>` gives the server the specified name or
 "server id". This is a friendly name that the server uses to identify itself to
 other servers in the cluster, as well as to name thee persistent storage file.
 
-The second option `<ip_address>:<listen_port>:<destination_port>` tells the
-server that it should connect to the peer with the given *ip_address* and
-*destination_port*, and it should expect to receive communication from this peer
-on the given *listen_port*.
+This command looks for a config file at `./config` and reads in information
+about the Raft cluster from there. Here's what a simple config file for a single
+server cluster looks like:
 
-🌟 That's it. Now you know all the command line options you need to start a
-proper Raft cluster. We'll do that in the next section.
+```
+127.0.0.1 4000
+```
+
+This defines a server that listens for client requests on `127.0.0.1` and port
+`4000`.
+
+Now start the server like this:
+
+```bash
+./raft --id 0 --reset
+./raft --id 0
+```
+
+The `--reset` option must be included the first time a server is run to
+establish the persistent storage and log files on disk. Read more about
+`--reset` and the other command line options below.
+
+🌟 That's it. Now that you know how to start a single Raft server, you're ready
+to start an entire Raft cluster. We'll do that in the next section.
 
 ### Start a three server Raft cluster
 
 To start a real Raft cluster, you need to run three copies of the program in
-parallel and ensure that the "peer information" you provide to each server in
-the cluster matches the information provided to all the other servers.
+parallel and ensure that each command is given a unique server id.
 
-Here are some commands you can copy-paste into three separate terminals:
+Here is a sample config file for a three server cluster:
+
+```
+127.0.0.1 4000 4001 4002
+127.0.0.1 5000 5001 5002
+127.0.0.1 6000 6001 6002
+```
+
+Each line represents a separate server. Since there are three servers in the
+cluster, each server needs to open two additional ports to receive connections
+from the other servers in the cluster.
+
+Here are some commands you can copy-paste into three separate terminals to start
+up the cluster:
 
 ```bash
-./raft --id alice 127.0.0.1:4000:4001 127.0.0.1:8000:8001
+./raft --id 0 --reset
+./raft --id 0
 ```
 
 ```bash
-./raft --id bob 127.0.0.1:4001:4000 127.0.0.1:6000:6001
+./raft --id 1 --reset
+./raft --id 1
 ```
 
 ```bash
-./raft --id carol 127.0.0.1:8001:8000 127.0.0.1:6001:6000
+./raft --id 2 --reset
+./raft --id 2
 ```
 
 ✨ And just like that, you're running a Raft cluster!
+
+### Sending commands to the cluster
+
+The purpose of Raft is to make a bunch of servers work together to reliably
+update a state machine. So, we'll now discuss how to actually update the state
+in the state machine.
+
+**Note:** In this implementation of Raft, we include a sample state machine that
+takes terminal commands and runs them in `bash`, returning the output as a
+string. The bash state machine conforms to the `StateMachine` interface defined
+in `state-machine.h` and you can use it as an example when writing your own
+state machine implementation, if you so desire.
+
+First, start the `./client` program which creates a REPL that sends commands to
+the Raft cluster. The client automatically handles finding the leader server,
+retrying the request with a different server if the leader becomes unavailable,
+and displaying the output from running each command.
+
+Here's what a sample run of the client looks like:
+
+```bash
+$ ./client
+> echo hello
+hello
+> touch myfile.txt
+> ls
+myfile.txt
+> quit
+```
 
 ### A few odds and ends...
 
 #### Reset persistent storage
 
 To reset the persistent storage of a server, use the `--reset` boolean argument.
+This option is required the first time you start the server.
 
 ```bash
 ./raft --id <server_id> --reset
 ```
+
+**Note:** Do not use `--reset` when a server is rejoining the cluster after a
+crash or shutdown as this will wipe away the persistent state and log which will
+cause consistency issues. Adding/removing servers from the cluster as described
+in the Raft paper is currently not supported in this implementation.
+
+#### Use a custom configuration file location
+
+```bash
+./raft --id <server_id> --config ./my_cool_config_file
+```
+
+To use a custom configuration file location, use the `--config` string argument.
 
 #### Show debug logs
 
 To show extremely verbose debug logs, use the `--debug` boolean argument.
 
 ```bash
-./raft --id <server_id> <peer_info> --debug
+./raft --id <server_id> --debug
 ```
 
 #### Quiet mode
@@ -94,7 +169,7 @@ To show only warnings and errors and hide almost every other log message, use
 the `--quiet` boolean argument.
 
 ```bash
-./raft --id <server_id> <peer_info> --quiet
+./raft --id <server_id> --quiet
 ```
 
 ### Command Line Help
@@ -111,27 +186,28 @@ Usage:
 Minimal Example:
     Start a server that connects to one other server.
 
-        ./raft --id <server_id> <ip_address>:<listen_port>:<destination_port>
-
-        Tells this instance of raft to connect to *ip_address* by sending to
-        port *destination_port*, and receiving on *listen_port*. *--id* is
-        required to specify the server's name, which is used to maintain its
-        persistent storage as well as to identify itself to other servers in the
-        cluster.
+        ./raft --id <server_id> --reset
 
 Cluster Example:
     Start a three server Raft cluster.
 
-        ./raft --id alice 127.0.0.1:4000:4010 127.0.0.1:4001:4020
-        ./raft --id bob 127.0.0.1:4010:4000 127.0.0.1:4011:4021
-        ./raft --id carol 127.0.0.1:4020:4001 127.0.0.1:4021:4011
+    Use the config file:
+        127.0.0.1 4000 4001 4002
+        127.0.0.1 5000 5001 5002
+        127.0.0.1 6000 6001 6002
+
+    Run:
+    ./raft --id 0 --reset
+    ./raft --id 1 --reset
+    ./raft --id 2 --reset
 
 Usage:
-    --debug  Show debug logs               [bool]
-    --help   Print help message            [bool]
-    --id     Server identifier             [string]
-    --quiet  Show only warnings and errors [bool]
-    --reset  Delete server storage         [bool]
+    --config  Path to configuration file (default = ./config) [string]
+    --debug   Show all logs                                   [bool]
+    --help    Print help message                              [bool]
+    --id      Server identifier                               [int]
+    --quiet   Show only errors                                [bool]
+    --reset   Delete server storage                           [bool]
 ```
 
 ## Install Dependencies

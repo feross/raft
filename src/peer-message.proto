@@ -1,0 +1,79 @@
+/**
+ * This message format is used for all Raft message types, with certain fields
+ * only applying to certain Raft message types.
+ */
+
+syntax = "proto2";
+
+package proto;
+
+message PeerMessage {
+    /***
+     * Fields for all messages
+     */
+
+    enum Type {
+        APPENDENTRIES_REQUEST = 0;
+        APPENDENTRIES_RESPONSE = 1;
+        REQUESTVOTE_REQUEST = 2;
+        REQUESTVOTE_RESPONSE = 3;
+    }
+
+    // The type of message
+    required Type type = 1;
+
+    // The current term of the sending server
+    required int32 term = 2;
+
+    // The server identifier of the sending server (aka leader_id or
+    // candidate_id)
+    required int32 server_id = 3;
+
+    /**
+     * Fields for AppendEntries request
+     */
+
+    // Index of log entry immediately preceding new ones
+    optional int32 prev_log_index = 4;
+
+    // Term of prev_log_index entry
+    optional int32 prev_log_term = 5;
+
+    // Log entries to store (empty for heartbeat; may send
+    // more than one for efficiency)
+    repeated string entries = 6;
+
+    // Leader’s commit_index
+    optional int32 leader_commit = 7;
+
+    /**
+     * Fields for AppendEntries response
+     */
+
+    // True if follower contained entry matching prev_log_index and
+    // prev_log_term
+    optional bool success = 8;
+
+    // The index of the log entry that was attempted to be appended by the
+    // leader. let's the leader know which request this response goes with.
+    // (This field was not specified in the Raft paper but was added in this
+    // implementation.)
+    optional int32 appended_log_index = 9;
+
+    /**
+     * Fields for RequestVote request
+     */
+
+    // Index of candidate’s last log entry
+    optional int32 last_log_index = 10;
+
+    // Term of candidate’s last log entry
+    optional int32 last_log_term = 11;
+
+    /**
+     * Fields for RequestVote response
+     */
+
+    // True means candidate received vote
+    optional bool vote_granted = 12;
+}

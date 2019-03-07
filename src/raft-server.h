@@ -1,61 +1,61 @@
+/**
+ * A server that implements Raft, an understandable consensus protocol.
+ *
+ * For more information about the operation of Raft, see:
+ * http://web.stanford.edu/~ouster/cgi-bin/papers/raft-extended.pdf
+ */
+
 #pragma once
 
 #include <map>
 #include <vector>
 
+#include "bash-state-machine.h"
+#include "client-server.h"
 #include "log.h"
 #include "peer.h"
-#include "peer.pb.h"
-#include "storage.h"
+#include "peer-message.pb.h"
+#include "raft-config.h"
+#include "raft-storage.h"
 #include "timer.h"
 #include "util.h"
+#include "persistent_log.h"
 
 using namespace proto;
 
 enum ServerState { Follower, Candidate, Leader };
 static const string ServerStateStrings[] = { "Follower", "Candidate", "Leader" };
 
-static const int ELECTION_MIN_TIMEOUT = 5'000;
-static const int ELECTION_MAX_TIMEOUT = 10'000;
-static const int LEADER_HEARTBEAT_INTERVAL = 2'000;
-
-class RaftServerException : public exception {
-    const char* what() const noexcept {
-        return "Unexpected Raft server error";
-    }
-};
-
-/**
- * Peer connection information. Describes a peer that this server should connect
- * to. Peers are specified via destination_ip_addr and destination_port. The
- * port on which this server will listen for a incoming connection from this
- * peer is specified as my_listen_port.
- */
-struct PeerInfo {
-    string destination_ip_addr;
-    unsigned short destination_port;
-    unsigned short my_listen_port;
-};
+static const int ELECTION_MIN_TIMEOUT = 5'000; // milliseconds
+static const int ELECTION_MAX_TIMEOUT = 10'000; // milliseconds
+static const int LEADER_HEARTBEAT_INTERVAL = 2'000; // milliseconds
 
 class RaftServer {
     public:
         /**
-         * Start a server that implements Raft, an understandable consensus
-         * protocol.
+         * Construct a Raft server.
          *
          * The server expects to be given a server id, which is a friendly name
          * that identifies the server to other servers in the cluster, and a
-         * vector of peer connection information which is used to connect to
-         * other servers in the cluster and start listening servers to receive
-         * connections in return from the remote servers.
-         *
-         * For more information about the operation of Raft, see:
-         * http://web.stanford.edu/~ouster/cgi-bin/papers/raft-extended.pdf
+         * vector of server information which defines which servers exist in the
+         * cluster, and peer connection information which is used to establish
+         * which incoming and outgoing ports will be used to communicate with
+         * other servers in the cluster.
          *
          * @param server_id Friendly name to identify the server
+         * @param server_infos Vector of server information
          * @param peer_infos Vector of connection information for peer servers
          */
-        RaftServer(const string& server_id, vector<struct PeerInfo> peer_infos);
+        RaftServer(int server_id, vector<ServerInfo> server_infos,
+            vector<PeerInfo> peer_infos);
+
+        /**
+         * Start running the server. Specifically, start the Raft protocol,
+         * begin contacting peer servers, and accepting requests from clients.
+         *
+         * This method never returns.
+         */
+        void Run();
 
     private:
         /**
@@ -71,9 +71,14 @@ class RaftServer {
         void HandleLeaderTimer();
 
         /**
+         * Callback function inboked when we receive a command from a client,
+         * requesting to be replicated.  Does NOT initiate response to client
+         */
+        int HandleClientCommand(char * command);
+
+        /**
          * Callback function used to process messages we receive from peers.
-         * Called any time we receive a message from any peer, though shouldn't
-         * happen in the normal case excpet when server is the leader.
+         * Called any time we receive a message from any peer.
          *
          * @param peer - the peer connection from which we received the message
          * @param raw_message - pointer to message received from peer
@@ -89,9 +94,28 @@ class RaftServer {
          * The protocol buffer definition of the returned PeerMessage can be
          * found in peer.proto.
          *
+         * @param message_type The raft message type
          * @return a PeerMessage protocol buffer
          */
-        PeerMessage CreateMessage();
+        PeerMessage CreateMessage(PeerMessage_Type message_type);
+
+        /*
+         * Checks our log to see if any entries are now sufficiently
+         * replicated (& on the current term) such that we can apply them
+         * to our state machine.
+         *
+         * Constraint: should only be used by leaders
+         */
+        void CheckForCommittedEntries();
+
+        /*
+         * Called when we know a log is current term & replicated on a majority
+         * of servers.  Will apply & commit all entries between the previous
+         * applied index & current index.
+         *
+         * @param commit_index - entry through which we should commit
+         */
+        void CommitEntries(int commit_index);
 
         /**
          * Sends a protocol buffer formatted message to the specified peer.
@@ -116,7 +140,8 @@ class RaftServer {
          * @param peer - the peer to send the AppendEntries response to
          * @param success - whether we accepted the AppendEntries request
          */
-        void SendAppendEntriesResponse(Peer *peer, bool success);
+        void SendAppendEntriesResponse(Peer *peer, bool success,
+            int appended_log_index);
 
         /**
          * Sends a RequestVote request to the specified peer.
@@ -136,23 +161,72 @@ class RaftServer {
         /**
          * Transitions current term to a new term, sets voted_for to be empty,
          * and resets the votes that we have received in any past elections.
+         * Assumes that the server mutex is held.
          */
         void TransitionCurrentTerm(int term);
 
         /**
          * Transitions the server to a new state (i.e. Follower, Candidate,
-         * Leader)
+         * Leader). Assumes that the server mutex is held.
          *
          * @param new_state the new server state to enter
          */
         void TransitionServerState(ServerState new_state);
 
         /**
-         * Note that a vote was received for us in the current election.
+         * Record that a vote was received for us in the current election.
+         * Assumes that the server mutex is held.
          *
          * @param server_id the server id of the server
          */
-        void ReceiveVote(string server_id);
+        void ReceiveVote(int server_id);
+
+        /**
+         * Friendly name that the server uses to identify itself to other
+         * servers in the cluster, as well as to name thee persistent storage
+         * file.
+         */
+        int server_id;
+
+        vector<ServerInfo> server_infos;
+        vector<PeerInfo> peer_infos;
+        vector<Peer*> peers;
+
+        ServerState server_state = Follower;
+        RaftStorage storage;
+
+        ClientServer *client_server;
+        Timer *election_timer;
+        Timer *leader_timer;
+
+        /**
+         * Log that is always in a consistent state, contains history of
+         * appendentries requests
+         */
+        PersistentLog persistent_log;
+
+        /**
+         * Index of log which we know will never be overwritten
+         */
+        int committed_index;
+
+        /**
+         * Used by leader to track the next entry the leader should attempt
+         * to send to this particular peer
+         */
+        vector<int> peer_next_indexes;
+        /**
+         * Tracks the entries we know have been replicated on other servers
+         * in the cluster.
+         */
+        vector<int> peer_match_indexes;
+
+        /**
+         * Vote record to track which servers have voted for this server in the
+         * current election. Maps server id strings to boolean values which
+         * indicate an affirmative or negative election vote.
+         */
+        set<int> votes;
 
         /**
          * server_mutex prevents multiple handler functions from modifying the
@@ -164,25 +238,5 @@ class RaftServer {
          */
         mutex server_mutex;
 
-        /**
-         * Friendly name that the server uses to identify itself to other
-         * servers in the cluster, as well as to name thee persistent storage
-         * file.
-         */
-        const string& server_id;
-
-        ServerState server_state = Follower;
-        Storage storage;
-
-        Timer *election_timer;
-        Timer *leader_timer;
-
-        vector<Peer*> peers;
-
-        /**
-         * Vote record to track which servers have voted for this server in the
-         * current election. Maps server id strings to boolean values which
-         * indicate an affirmative or negative election vote.
-         */
-        map<string, bool> votes;
+        BashStateMachine state_machine;
 };

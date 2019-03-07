@@ -3,14 +3,17 @@
 #include <chrono>
 #include <ctime>
 #include <exception>
-#include <iostream>
-#include <unistd.h>
+#include <signal.h>
 
 #include "arguments.h"
 #include "log.h"
+#include "raft-config.h"
 #include "raft-server.h"
-#include "storage.h"
+#include "raft-storage.h"
 
+/**
+ * Help text for the ./raft command line program.
+ */
 static const string INTRO_TEXT =
 R"(Raft - An understandable consensus algorithm
 
@@ -20,19 +23,18 @@ Usage:
 Minimal Example:
     Start a server that connects to one other server.
 
-        ./raft --id <server_id> <ip_address>:<listen_port>:<destination_port>
-
-        Tells this instance of raft to connect to *ip_address* by sending to
-        port *destination_port*, and receiving on *listen_port*. *--id* is
-        required to specify the server's name, which is used to maintain its
-        persistent storage as well as to identify itself to other servers in the
-        cluster.
+        ./raft --id <server_id> --reset
 
 Cluster Example:
     Start a three server Raft cluster.
 
-./raft --id alice 127.0.0.1:4000:4001 127.0.0.1:8000:8001
-./raft --id bob   127.0.0.1:4001:4000 127.0.0.1:6000:6001
-./raft --id carol 127.0.0.1:8001:8000 127.0.0.1:6001:6000
+    Use the config file:
+        127.0.0.1 4000 4001 4002
+        127.0.0.1 5000 5001 5002
+        127.0.0.1 6000 6001 6002
 
+    Run:
+    ./raft --id 0 --reset
+    ./raft --id 1 --reset
+    ./raft --id 2 --reset
 )";

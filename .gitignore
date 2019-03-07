@@ -1,11 +1,14 @@
 # Built files
 raft
+client
 
 # Prerequisites
 *.d
 
 # Storage
 *.dat
+*.dat_log
+*.dat_cursor
 
 # OS files
 .DS_Store

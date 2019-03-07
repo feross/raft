@@ -1,0 +1,22 @@
+/**
+ * This message format is used to store the server persistent state to disk.
+ * The fields contained in this message are server variables that must be
+ * serialized to disk for Raft to function according to spec.
+ */
+
+syntax = "proto2";
+
+package proto;
+
+message StorageMessage {
+    // Latest term server has seen (initialized to 0 on first boot, increases
+    // monotonically)
+    required int32 current_term = 1;
+
+    // The server_id that received vote in current term (or -1 if none)
+    required int32 voted_for = 2;
+
+    // Index of highest log entry applied to state machine (initialized to 0,
+    // increases monotonically)
+    required int32 last_applied = 3;
+}
